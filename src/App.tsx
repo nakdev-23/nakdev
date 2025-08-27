@@ -20,6 +20,7 @@ import FAQ from "./pages/FAQ";
 import SignIn from "./pages/auth/SignIn";
 import SignUp from "./pages/auth/SignUp";
 import Checkout from "./pages/Checkout";
+import Cart from "./pages/Cart";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="about" element={<About />} />
             <Route path="faq" element={<FAQ />} />
             <Route path="checkout" element={<Checkout />} />
+            <Route path="cart" element={<Cart />} />
             <Route path="dashboard" element={<Dashboard />} />
           </Route>
           
