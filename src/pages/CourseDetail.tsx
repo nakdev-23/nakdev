@@ -58,6 +58,9 @@ export default function CourseDetail() {
     return acc;
   }, {} as Record<string, typeof lessons>);
 
+  // Get first lesson slug for navigation
+  const firstLesson = lessons.length > 0 ? lessons[0] : null;
+
   return (
     <div className="min-h-screen bg-background">
       {/* Course Header */}
@@ -129,7 +132,7 @@ export default function CourseDetail() {
                   </div>
 
                   <Button className="w-full glow-on-hover mb-4" size="lg" asChild>
-                    <Link to={`/learn/${course.slug}/lesson-1`}>
+                    <Link to={firstLesson ? `/learn/${course.slug}/${firstLesson.slug}` : '#'}>
                       เริ่มเรียนฟรี
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Link>
@@ -294,7 +297,7 @@ export default function CourseDetail() {
                     <div className="text-2xl font-bold text-success">ฟรี!</div>
                   </div>
                   <Button className="w-full glow-on-hover" size="lg" asChild>
-                    <Link to={`/learn/${course.slug}/lesson-1`}>
+                    <Link to={firstLesson ? `/learn/${course.slug}/${firstLesson.slug}` : '#'}>
                       เริ่มเรียนฟรี
                     </Link>
                   </Button>
