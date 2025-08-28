@@ -24,6 +24,10 @@ import Checkout from "./pages/Checkout";
 import Cart from "./pages/Cart";
 import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminCourses from "./pages/admin/AdminCourses";
+import AdminTools from "./pages/admin/AdminTools";
+import AdminEbooks from "./pages/admin/AdminEbooks";
+import AdminUsers from "./pages/admin/AdminUsers";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -68,15 +72,19 @@ const App = () => (
             
             {/* Admin Routes */}
             <Route 
-              path="admin/*" 
+              path="admin" 
               element={
                 <ProtectedRoute requireAdmin={true}>
-                  <Layout>
-                    <AdminDashboard />
-                  </Layout>
+                  <Layout />
                 </ProtectedRoute>
-              } 
-            />
+              }
+            >
+              <Route index element={<AdminDashboard />} />
+              <Route path="courses" element={<AdminCourses />} />
+              <Route path="tools" element={<AdminTools />} />
+              <Route path="ebooks" element={<AdminEbooks />} />
+              <Route path="users" element={<AdminUsers />} />
+            </Route>
             
             {/* Learning pages without main layout */}
             <Route path="learn/:courseSlug/:lessonSlug" element={<Learn />} />

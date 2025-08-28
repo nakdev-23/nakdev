@@ -4,9 +4,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Plus, Users, BookOpen, Wrench, ShoppingBag } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 export default function AdminDashboard() {
   const { profile } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
 
   if (!profile || profile.role !== 'ADMIN') {
@@ -59,123 +61,68 @@ export default function AdminDashboard() {
           </p>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">ภาพรวม</TabsTrigger>
-            <TabsTrigger value="courses">คอร์ส</TabsTrigger>
-            <TabsTrigger value="tools">เครื่องมือ</TabsTrigger>
-            <TabsTrigger value="users">ผู้ใช้</TabsTrigger>
-            <TabsTrigger value="orders">คำสั่งซื้อ</TabsTrigger>
-          </TabsList>
+        <div className="space-y-6">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {stats.map((stat, index) => {
+              const Icon = stat.icon;
+              return (
+                <Card key={index}>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      {stat.title}
+                    </CardTitle>
+                    <Icon className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stat.value}</div>
+                    <p className="text-xs text-muted-foreground">
+                      {stat.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
 
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-              {stats.map((stat, index) => {
-                const Icon = stat.icon;
-                return (
-                  <Card key={index}>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">
-                        {stat.title}
-                      </CardTitle>
-                      <Icon className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{stat.value}</div>
-                      <p className="text-xs text-muted-foreground">
-                        {stat.description}
-                      </p>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>การดำเนินการด่วน</CardTitle>
-              </CardHeader>
-              <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Button className="h-auto p-4 flex flex-col items-center gap-2">
-                  <Plus className="h-6 w-6" />
-                  <span>เพิ่มคอร์สใหม่</span>
-                </Button>
-                <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
-                  <Plus className="h-6 w-6" />
-                  <span>เพิ่มเครื่องมือ</span>
-                </Button>
-                <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
-                  <Users className="h-6 w-6" />
-                  <span>จัดการผู้ใช้</span>
-                </Button>
-                <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
-                  <ShoppingBag className="h-6 w-6" />
-                  <span>ดูคำสั่งซื้อ</span>
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="courses">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>จัดการคอร์ส</CardTitle>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  เพิ่มคอร์สใหม่
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground text-center py-8">
-                  ยังไม่มีคอร์ส - เริ่มต้นด้วยการเพิ่มคอร์สแรก
-                </p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="tools">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>จัดการเครื่องมือ</CardTitle>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  เพิ่มเครื่องมือใหม่
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground text-center py-8">
-                  ยังไม่มีเครื่องมือ - เริ่มต้นด้วยการเพิ่มเครื่องมือแรก
-                </p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="users">
-            <Card>
-              <CardHeader>
-                <CardTitle>จัดการผู้ใช้</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground text-center py-8">
-                  ยังไม่มีผู้ใช้ลงทะเบียน
-                </p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="orders">
-            <Card>
-              <CardHeader>
-                <CardTitle>จัดการคำสั่งซื้อ</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground text-center py-8">
-                  ยังไม่มีคำสั่งซื้อ
-                </p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+          <Card>
+            <CardHeader>
+              <CardTitle>การดำเนินการด่วน</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <Button 
+                className="h-auto p-4 flex flex-col items-center gap-2"
+                onClick={() => navigate('/admin/courses')}
+              >
+                <Plus className="h-6 w-6" />
+                <span>จัดการคอร์ส</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                className="h-auto p-4 flex flex-col items-center gap-2"
+                onClick={() => navigate('/admin/tools')}
+              >
+                <Wrench className="h-6 w-6" />
+                <span>จัดการเครื่องมือ</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                className="h-auto p-4 flex flex-col items-center gap-2"
+                onClick={() => navigate('/admin/ebooks')}
+              >
+                <BookOpen className="h-6 w-6" />
+                <span>จัดการ E-books</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                className="h-auto p-4 flex flex-col items-center gap-2"
+                onClick={() => navigate('/admin/users')}
+              >
+                <Users className="h-6 w-6" />
+                <span>จัดการผู้ใช้</span>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

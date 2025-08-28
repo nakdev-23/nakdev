@@ -1,0 +1,283 @@
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Plus, Pencil, Trash2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+
+interface Course {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  instructor: string;
+  total_lessons: number;
+  created_at: string;
+}
+
+export default function AdminCourses() {
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+  const { toast } = useToast();
+
+  const [formData, setFormData] = useState({
+    title: '',
+    slug: '',
+    description: '',
+    instructor: '',
+    total_lessons: 0
+  });
+
+  useEffect(() => {
+    fetchCourses();
+  }, []);
+
+  const fetchCourses = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('courses')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setCourses(data || []);
+    } catch (error) {
+      console.error('Error fetching courses:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถดึงข้อมูลคอร์สได้",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      if (editingCourse) {
+        const { error } = await supabase
+          .from('courses')
+          .update(formData)
+          .eq('id', editingCourse.id);
+
+        if (error) throw error;
+
+        toast({
+          title: "สำเร็จ",
+          description: "อัปเดตคอร์สเรียบร้อยแล้ว",
+        });
+      } else {
+        const { error } = await supabase
+          .from('courses')
+          .insert([formData]);
+
+        if (error) throw error;
+
+        toast({
+          title: "สำเร็จ",
+          description: "เพิ่มคอร์สใหม่เรียบร้อยแล้ว",
+        });
+      }
+
+      setIsDialogOpen(false);
+      setEditingCourse(null);
+      setFormData({ title: '', slug: '', description: '', instructor: '', total_lessons: 0 });
+      fetchCourses();
+    } catch (error) {
+      console.error('Error saving course:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถบันทึกข้อมูลได้",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEdit = (course: Course) => {
+    setEditingCourse(course);
+    setFormData({
+      title: course.title,
+      slug: course.slug,
+      description: course.description || '',
+      instructor: course.instructor || '',
+      total_lessons: course.total_lessons || 0
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('คุณแน่ใจหรือไม่ที่จะลบคอร์สนี้?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('courses')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "สำเร็จ",
+        description: "ลบคอร์สเรียบร้อยแล้ว",
+      });
+      
+      fetchCourses();
+    } catch (error) {
+      console.error('Error deleting course:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถลบคอร์สได้",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const openAddDialog = () => {
+    setEditingCourse(null);
+    setFormData({ title: '', slug: '', description: '', instructor: '', total_lessons: 0 });
+    setIsDialogOpen(true);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>จัดการคอร์ส</CardTitle>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={openAddDialog}>
+                <Plus className="h-4 w-4 mr-2" />
+                เพิ่มคอร์สใหม่
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>
+                  {editingCourse ? 'แก้ไขคอร์ส' : 'เพิ่มคอร์สใหม่'}
+                </DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="title">ชื่อคอร์ส</Label>
+                    <Input
+                      id="title"
+                      value={formData.title}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="slug">Slug</Label>
+                    <Input
+                      id="slug"
+                      value={formData.slug}
+                      onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                      required
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="description">คำอธิบาย</Label>
+                  <Textarea
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    rows={3}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="instructor">ผู้สอน</Label>
+                    <Input
+                      id="instructor"
+                      value={formData.instructor}
+                      onChange={(e) => setFormData({ ...formData, instructor: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="total_lessons">จำนวนบทเรียน</Label>
+                    <Input
+                      id="total_lessons"
+                      type="number"
+                      value={formData.total_lessons}
+                      onChange={(e) => setFormData({ ...formData, total_lessons: parseInt(e.target.value) || 0 })}
+                    />
+                  </div>
+                </div>
+                <Button type="submit" className="w-full">
+                  {editingCourse ? 'อัปเดต' : 'บันทึก'}
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </CardHeader>
+        <CardContent>
+          {courses.length === 0 ? (
+            <p className="text-muted-foreground text-center py-8">
+              ยังไม่มีคอร์ส - เริ่มต้นด้วยการเพิ่มคอร์สแรก
+            </p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ชื่อคอร์ส</TableHead>
+                  <TableHead>ผู้สอน</TableHead>
+                  <TableHead>บทเรียน</TableHead>
+                  <TableHead>วันที่สร้าง</TableHead>
+                  <TableHead>การจัดการ</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {courses.map((course) => (
+                  <TableRow key={course.id}>
+                    <TableCell className="font-medium">{course.title}</TableCell>
+                    <TableCell>{course.instructor || '-'}</TableCell>
+                    <TableCell>{course.total_lessons}</TableCell>
+                    <TableCell>{new Date(course.created_at).toLocaleDateString('th-TH')}</TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(course)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDelete(course.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
