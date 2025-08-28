@@ -26,7 +26,6 @@ const navigation = [
   { name: "คอร์สเรียน", href: "/courses" },
   { name: "เครื่องมือ", href: "/tools" },
   { name: "eBooks", href: "/ebooks" },
-  { name: "ราคา", href: "/pricing" },
   { name: "เกี่ยวกับเรา", href: "/about" },
 ];
 

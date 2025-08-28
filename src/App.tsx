@@ -16,7 +16,6 @@ import Tools from "./pages/Tools";
 import ToolDetail from "./pages/ToolDetail";
 import Ebooks from "./pages/Ebooks";
 import EbookDetail from "./pages/EbookDetail";
-import Pricing from "./pages/Pricing";
 import About from "./pages/About";
 import FAQ from "./pages/FAQ";
 import SignIn from "./pages/auth/SignIn";
@@ -45,7 +44,6 @@ const App = () => (
               <Route path="tools/:slug" element={<ToolDetail />} />
               <Route path="ebooks" element={<Ebooks />} />
               <Route path="ebooks/:slug" element={<EbookDetail />} />
-              <Route path="pricing" element={<Pricing />} />
               <Route path="about" element={<About />} />
               <Route path="faq" element={<FAQ />} />
               <Route path="checkout" element={<Checkout />} />
