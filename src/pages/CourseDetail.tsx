@@ -183,9 +183,11 @@ export default function CourseDetail() {
                     </div>
                   )}
 
-                  <Button className="w-full glow-on-hover mb-4" size="lg">
-                    {course.price === 0 ? "เริ่มเรียนฟรี" : "ซื้อคอร์สเรียน"}
-                    <ArrowRight className="ml-2 h-5 w-5" />
+                  <Button className="w-full glow-on-hover mb-4" size="lg" asChild>
+                    <Link to={`/learn/${course.id}/lesson-1`}>
+                      {course.price === 0 ? "เริ่มเรียนฟรี" : "ซื้อคอร์สเรียน"}
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Link>
                   </Button>
 
                   <Button variant="outline" className="w-full mb-6">
@@ -352,8 +354,10 @@ export default function CourseDetail() {
                       </div>
                     )}
                   </div>
-                  <Button className="w-full glow-on-hover" size="lg">
-                    {course.price === 0 ? "เริ่มเรียนฟรี" : "ซื้อคอร์สเรียน"}
+                  <Button className="w-full glow-on-hover" size="lg" asChild>
+                    <Link to={`/learn/${course.id}/lesson-1`}>
+                      {course.price === 0 ? "เริ่มเรียนฟรี" : "ซื้อคอร์สเรียน"}
+                    </Link>
                   </Button>
                 </CardContent>
               </Card>
