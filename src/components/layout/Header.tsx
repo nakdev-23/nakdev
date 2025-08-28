@@ -1,9 +1,26 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, ShoppingCart, User } from "lucide-react";
+import { 
+  Menu, 
+  X, 
+  ShoppingCart, 
+  User,
+  ChevronDown,
+  LogOut,
+  Settings,
+  Crown
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/hooks/useAuth";
 
 const navigation = [
   { name: "คอร์สเรียน", href: "/courses" },
@@ -16,6 +33,7 @@ const navigation = [
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const { user, profile, signOut, isAdmin } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 w-full glass-card border-b backdrop-blur-lg">
@@ -67,12 +85,47 @@ export const Header = () => {
 
             {/* Auth Buttons */}
             <div className="hidden md:flex items-center space-x-2">
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/auth/signin">เข้าสู่ระบบ</Link>
-              </Button>
-              <Button size="sm" asChild className="glow-on-hover">
-                <Link to="/auth/signup">สมัครสมาชิก</Link>
-              </Button>
+              {user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="flex items-center space-x-2">
+                      <User className="h-4 w-4" />
+                      <span>{profile?.full_name || user.email}</span>
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuItem asChild>
+                      <Link to="/dashboard">
+                        <Settings className="h-4 w-4 mr-2" />
+                        แดชบอร์ด
+                      </Link>
+                    </DropdownMenuItem>
+                    {isAdmin && (
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin">
+                          <Crown className="h-4 w-4 mr-2" />
+                          ผู้ดูแลระบบ
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={signOut}>
+                      <LogOut className="h-4 w-4 mr-2" />
+                      ออกจากระบบ
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <>
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link to="/auth/signin">เข้าสู่ระบบ</Link>
+                  </Button>
+                  <Button size="sm" asChild className="glow-on-hover">
+                    <Link to="/auth/signup">สมัครสมาชิก</Link>
+                  </Button>
+                </>
+              )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -106,16 +159,49 @@ export const Header = () => {
               </Link>
             ))}
             <div className="pt-4 space-y-2 border-t border-border/50">
-              <Button variant="ghost" size="sm" className="w-full justify-start" asChild>
-                <Link to="/auth/signin" onClick={() => setIsMenuOpen(false)}>
-                  เข้าสู่ระบบ
-                </Link>
-              </Button>
-              <Button size="sm" className="w-full" asChild>
-                <Link to="/auth/signup" onClick={() => setIsMenuOpen(false)}>
-                  สมัครสมาชิก
-                </Link>
-              </Button>
+              {user ? (
+                <>
+                  <Button variant="ghost" size="sm" className="w-full justify-start" asChild>
+                    <Link to="/dashboard" onClick={() => setIsMenuOpen(false)}>
+                      <Settings className="h-4 w-4 mr-2" />
+                      แดชบอร์ด
+                    </Link>
+                  </Button>
+                  {isAdmin && (
+                    <Button variant="ghost" size="sm" className="w-full justify-start" asChild>
+                      <Link to="/admin" onClick={() => setIsMenuOpen(false)}>
+                        <Crown className="h-4 w-4 mr-2" />
+                        ผู้ดูแลระบบ
+                      </Link>
+                    </Button>
+                  )}
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-full justify-start" 
+                    onClick={() => {
+                      signOut();
+                      setIsMenuOpen(false);
+                    }}
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    ออกจากระบบ
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="ghost" size="sm" className="w-full justify-start" asChild>
+                    <Link to="/auth/signin" onClick={() => setIsMenuOpen(false)}>
+                      เข้าสู่ระบบ
+                    </Link>
+                  </Button>
+                  <Button size="sm" className="w-full" asChild>
+                    <Link to="/auth/signup" onClick={() => setIsMenuOpen(false)}>
+                      สมัครสมาชิก
+                    </Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         )}

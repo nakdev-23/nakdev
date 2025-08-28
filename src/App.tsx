@@ -4,6 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
+import { AuthProvider } from "@/hooks/useAuth";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 // Pages
 import Index from "./pages/Index";
@@ -22,6 +24,7 @@ import SignUp from "./pages/auth/SignUp";
 import Checkout from "./pages/Checkout";
 import Cart from "./pages/Cart";
 import Dashboard from "./pages/Dashboard";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,37 +32,62 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Index />} />
-            <Route path="courses" element={<Courses />} />
-            <Route path="courses/:slug" element={<CourseDetail />} />
-            <Route path="tools" element={<Tools />} />
-            <Route path="tools/:slug" element={<ToolDetail />} />
-            <Route path="ebooks" element={<Ebooks />} />
-            <Route path="ebooks/:slug" element={<EbookDetail />} />
-            <Route path="pricing" element={<Pricing />} />
-            <Route path="about" element={<About />} />
-            <Route path="faq" element={<FAQ />} />
-            <Route path="checkout" element={<Checkout />} />
-            <Route path="cart" element={<Cart />} />
-            <Route path="dashboard" element={<Dashboard />} />
-          </Route>
-          
-          {/* Auth pages without layout */}
-          <Route path="auth/signin" element={<SignIn />} />
-          <Route path="auth/signup" element={<SignUp />} />
-          
-          {/* Learning pages without main layout */}
-          <Route path="learn/:courseSlug/:lessonSlug" element={<Learn />} />
-          
-          {/* Catch all 404 */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Index />} />
+              <Route path="courses" element={<Courses />} />
+              <Route path="courses/:slug" element={<CourseDetail />} />
+              <Route path="tools" element={<Tools />} />
+              <Route path="tools/:slug" element={<ToolDetail />} />
+              <Route path="ebooks" element={<Ebooks />} />
+              <Route path="ebooks/:slug" element={<EbookDetail />} />
+              <Route path="pricing" element={<Pricing />} />
+              <Route path="about" element={<About />} />
+              <Route path="faq" element={<FAQ />} />
+              <Route path="checkout" element={<Checkout />} />
+              <Route path="cart" element={<Cart />} />
+            </Route>
+            
+            {/* Auth pages without layout */}
+            <Route path="auth/signin" element={<SignIn />} />
+            <Route path="auth/signup" element={<SignUp />} />
+            
+            {/* Protected Routes */}
+            <Route 
+              path="dashboard" 
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Dashboard />
+                  </Layout>
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Admin Routes */}
+            <Route 
+              path="admin/*" 
+              element={
+                <ProtectedRoute requireAdmin={true}>
+                  <Layout>
+                    <AdminDashboard />
+                  </Layout>
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Learning pages without main layout */}
+            <Route path="learn/:courseSlug/:lessonSlug" element={<Learn />} />
+            
+            {/* Catch all 404 */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

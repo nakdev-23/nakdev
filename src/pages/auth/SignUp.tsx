@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 export default function SignUp() {
   const [formData, setFormData] = useState({
@@ -20,6 +22,7 @@ export default function SignUp() {
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { signUp } = useAuth();
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -27,22 +30,34 @@ export default function SignUp() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (formData.password !== formData.confirmPassword) {
-      alert("รหัสผ่านไม่ตรงกัน");
+      toast.error("รหัสผ่านไม่ตรงกัน");
       return;
     }
+    
     if (!agreeToTerms) {
-      alert("กรุณายอมรับข้อกำหนดการใช้งาน");
+      toast.error("กรุณายอมรับข้อกำหนดการใช้งาน");
       return;
     }
     
     setIsLoading(true);
     
-    // Simulate registration process
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const { error } = await signUp(formData.email, formData.password, formData.name);
+      
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      
+      toast.success("สมัครสมาชิกสำเร็จ! โปรดตรวจสอบอีเมลเพื่อยืนยันบัญชี");
       navigate("/dashboard");
-    }, 1500);
+    } catch (error) {
+      toast.error("เกิดข้อผิดพลาดในการสมัครสมาชิก");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
