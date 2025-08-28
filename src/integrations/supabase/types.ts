@@ -44,6 +44,86 @@ export type Database = {
         }
         Relationships: []
       }
+      video_progress: {
+        Row: {
+          completed: boolean | null
+          created_at: string
+          id: string
+          last_watched_at: string | null
+          updated_at: string
+          user_id: string
+          video_id: string
+          watched_duration: number | null
+        }
+        Insert: {
+          completed?: boolean | null
+          created_at?: string
+          id?: string
+          last_watched_at?: string | null
+          updated_at?: string
+          user_id: string
+          video_id: string
+          watched_duration?: number | null
+        }
+        Update: {
+          completed?: boolean | null
+          created_at?: string
+          id?: string
+          last_watched_at?: string | null
+          updated_at?: string
+          user_id?: string
+          video_id?: string
+          watched_duration?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_progress_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      videos: {
+        Row: {
+          course_id: string | null
+          created_at: string
+          description: string | null
+          duration: number | null
+          file_path: string
+          id: string
+          lesson_id: string | null
+          thumbnail_path: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          course_id?: string | null
+          created_at?: string
+          description?: string | null
+          duration?: number | null
+          file_path: string
+          id?: string
+          lesson_id?: string | null
+          thumbnail_path?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string | null
+          created_at?: string
+          description?: string | null
+          duration?: number | null
+          file_path?: string
+          id?: string
+          lesson_id?: string | null
+          thumbnail_path?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

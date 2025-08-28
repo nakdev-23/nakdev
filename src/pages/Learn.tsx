@@ -1,13 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { 
   ArrowLeft, 
-  Play, 
-  Pause, 
-  SkipForward, 
-  SkipBack, 
-  Volume2, 
-  Maximize, 
   CheckCircle, 
   Lock, 
   Clock,
@@ -26,6 +20,8 @@ import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { SecureVideoPlayer } from "@/components/video/SecureVideoPlayer";
+import { supabase } from "@/integrations/supabase/client";
 
 const courseData = {
   "react-fundamentals": {
@@ -35,10 +31,11 @@ const courseData = {
     completedLessons: 3,
     currentLesson: {
       id: "lesson-1",
+      videoId: "550e8400-e29b-41d4-a716-446655440000", // Mock video ID
+      filePath: "react-fundamentals/lesson-1.mp4", // Path in storage bucket
       title: "ทำความรู้จักกับ React",
       duration: "15:30",
       description: "เรียนรู้พื้นฐาน React และเหตุผลที่ทำให้ React เป็น Library ที่นิยมในการพัฒนา Frontend",
-      videoUrl: "#",
       transcript: `สวัสดีครับ ยินดีต้อนรับสู่คอร์ส React สำหรับผู้เริ่มต้น
 
 ในวิดีโอแรกนี้ เราจะมาทำความรู้จักกับ React กัน React คือ JavaScript Library ที่พัฒนาโดย Facebook สำหรับสร้าง User Interface
@@ -56,27 +53,61 @@ React มีความนิยมสูงเพราะ:
         id: 1,
         title: "บทนำและการเตรียมตัว",
         lessons: [
-          { id: "lesson-1", title: "ทำความรู้จักกับ React", duration: "15:30", completed: true, current: true },
-          { id: "lesson-2", title: "การติดตั้ง Development Environment", duration: "20:45", completed: true },
-          { id: "lesson-3", title: "สร้างโปรเจคแรก", duration: "25:15", completed: true }
+          { 
+            id: "lesson-1", 
+            videoId: "550e8400-e29b-41d4-a716-446655440000",
+            filePath: "react-fundamentals/lesson-1.mp4",
+            title: "ทำความรู้จักกับ React", 
+            duration: "15:30", 
+            completed: true, 
+            current: true 
+          },
+          { 
+            id: "lesson-2", 
+            videoId: "550e8400-e29b-41d4-a716-446655440001",
+            filePath: "react-fundamentals/lesson-2.mp4",
+            title: "การติดตั้ง Development Environment", 
+            duration: "20:45", 
+            completed: true 
+          },
+          { 
+            id: "lesson-3", 
+            videoId: "550e8400-e29b-41d4-a716-446655440002",
+            filePath: "react-fundamentals/lesson-3.mp4",
+            title: "สร้างโปรเจคแรก", 
+            duration: "25:15", 
+            completed: true 
+          }
         ]
       },
       {
         id: 2,
         title: "React Components",
         lessons: [
-          { id: "lesson-4", title: "เข้าใจ Components", duration: "30:00", completed: false },
-          { id: "lesson-5", title: "Props และ State", duration: "35:20", completed: false },
-          { id: "lesson-6", title: "Event Handling", duration: "25:30", completed: false }
-        ]
-      },
-      {
-        id: 3,
-        title: "React Hooks",
-        lessons: [
-          { id: "lesson-7", title: "useState Hook", duration: "40:15", completed: false },
-          { id: "lesson-8", title: "useEffect Hook", duration: "45:30", completed: false },
-          { id: "lesson-9", title: "Custom Hooks", duration: "35:45", completed: false }
+          { 
+            id: "lesson-4", 
+            videoId: "550e8400-e29b-41d4-a716-446655440003",
+            filePath: "react-fundamentals/lesson-4.mp4",
+            title: "เข้าใจ Components", 
+            duration: "30:00", 
+            completed: false 
+          },
+          { 
+            id: "lesson-5", 
+            videoId: "550e8400-e29b-41d4-a716-446655440004",
+            filePath: "react-fundamentals/lesson-5.mp4",
+            title: "Props และ State", 
+            duration: "35:20", 
+            completed: false 
+          },
+          { 
+            id: "lesson-6", 
+            videoId: "550e8400-e29b-41d4-a716-446655440005",
+            filePath: "react-fundamentals/lesson-6.mp4",
+            title: "Event Handling", 
+            duration: "25:30", 
+            completed: false 
+          }
         ]
       }
     ]
@@ -85,21 +116,38 @@ React มีความนิยมสูงเพราะ:
 
 export default function Learn() {
   const { courseSlug, lessonSlug } = useParams();
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(930); // 15:30 in seconds
   const [noteText, setNoteText] = useState("");
   const [openChapters, setOpenChapters] = useState<number[]>([1, 2, 3]);
+  const [user, setUser] = useState(null);
 
   const course = courseData[courseSlug as keyof typeof courseData];
   
-  if (!course) {
+  // Check authentication
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        // Redirect to login if not authenticated
+        window.location.href = '/auth/signin';
+        return;
+      }
+      setUser(session.user);
+    };
+    
+    checkAuth();
+  }, []);
+
+  if (!course || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">ไม่พบคอร์สที่ระบุ</h1>
+          <h1 className="text-2xl font-bold mb-4">
+            {!user ? 'กรุณาเข้าสู่ระบบ' : 'ไม่พบคอร์สที่ระบุ'}
+          </h1>
           <Button asChild>
-            <Link to="/courses">กลับไปดูคอร์ส</Link>
+            <Link to={!user ? "/auth/signin" : "/courses"}>
+              {!user ? 'เข้าสู่ระบบ' : 'กลับไปดูคอร์ส'}
+            </Link>
           </Button>
         </div>
       </div>
@@ -115,7 +163,11 @@ export default function Learn() {
   };
 
   const progress = (course.completedLessons / course.totalLessons) * 100;
-  const videoProgress = (currentTime / duration) * 100;
+
+  const handleVideoProgressUpdate = (duration: number, completed: boolean) => {
+    console.log('Video progress updated:', { duration, completed });
+    // You can add additional logic here if needed
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -151,57 +203,13 @@ export default function Learn() {
       <div className="flex flex-1">
         {/* Main Content */}
         <main className="flex-1 flex flex-col">
-          {/* Video Player */}
-          <div className="bg-black aspect-video relative">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Button 
-                size="lg" 
-                className="rounded-full w-16 h-16"
-                onClick={() => setIsPlaying(!isPlaying)}
-              >
-                {isPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
-              </Button>
-            </div>
-            
-            {/* Video Controls */}
-            <div className="absolute bottom-0 left-0 right-0 bg-black/80 text-white p-4">
-              <div className="flex items-center gap-4">
-                <Button variant="ghost" size="sm" className="text-white hover:text-white">
-                  <SkipBack className="h-4 w-4" />
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-white hover:text-white"
-                  onClick={() => setIsPlaying(!isPlaying)}
-                >
-                  {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                </Button>
-                <Button variant="ghost" size="sm" className="text-white hover:text-white">
-                  <SkipForward className="h-4 w-4" />
-                </Button>
-                
-                <div className="flex-1 mx-4">
-                  <div className="bg-white/30 rounded-full h-1 cursor-pointer">
-                    <div 
-                      className="bg-primary rounded-full h-1 transition-all"
-                      style={{ width: `${videoProgress}%` }}
-                    />
-                  </div>
-                </div>
-                
-                <span className="text-sm">
-                  {Math.floor(currentTime / 60)}:{(currentTime % 60).toString().padStart(2, '0')} / 15:30
-                </span>
-                
-                <Button variant="ghost" size="sm" className="text-white hover:text-white">
-                  <Volume2 className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="sm" className="text-white hover:text-white">
-                  <Maximize className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+          {/* Secure Video Player */}
+          <div className="p-6">
+            <SecureVideoPlayer
+              videoId={course.currentLesson.videoId}
+              filePath={course.currentLesson.filePath}
+              onProgressUpdate={handleVideoProgressUpdate}
+            />
           </div>
 
           {/* Lesson Content */}
@@ -330,7 +338,9 @@ export default function Learn() {
                           {lesson.completed ? (
                             <CheckCircle className="h-4 w-4 text-success" />
                           ) : lesson.current ? (
-                            <Play className="h-4 w-4 text-primary" />
+                            <div className="h-4 w-4 bg-primary rounded-full flex items-center justify-center">
+                              <div className="h-2 w-2 bg-primary-foreground rounded-full" />
+                            </div>
                           ) : (
                             <Lock className="h-4 w-4 text-muted-foreground" />
                           )}
