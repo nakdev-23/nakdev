@@ -1,87 +1,38 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, Tag } from "lucide-react";
+import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, Tag, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-
-const initialCartItems = [
-  {
-    id: "javascript-advanced",
-    type: "course",
-    title: "JavaScript ขั้นสูง",
-    description: "เจาะลึก JavaScript ES6+ และเทคนิคขั้นสูงสำหรับนักพัฒนา",
-    price: 1990,
-    originalPrice: 2490,
-    quantity: 1,
-    image: "/placeholder.svg"
-  },
-  {
-    id: "ui-components",
-    type: "tool",
-    title: "Modern UI Components",
-    description: "ชุด UI Components สำเร็จรูปที่ออกแบบสวยงามและใช้งานง่าย",
-    price: 990,
-    quantity: 1,
-    image: "/placeholder.svg"
-  },
-  {
-    id: "react-patterns",
-    type: "ebook",
-    title: "React Design Patterns",
-    description: "รูปแบบการออกแบบและเทคนิคขั้นสูงสำหรับ React Developers",
-    price: 490,
-    quantity: 1,
-    image: "/placeholder.svg"
-  }
-];
+import { useCart } from "@/hooks/useCart";
+import { useCoupons, type Coupon } from "@/hooks/useCoupons";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Cart() {
-  const [cartItems, setCartItems] = useState(initialCartItems);
+  const { cartItems, loading, updateQuantity, removeItem } = useCart();
+  const { validateCoupon, loading: couponLoading } = useCoupons();
+  const { user } = useAuth();
   const [couponCode, setCouponCode] = useState("");
-  const [appliedCoupon, setAppliedCoupon] = useState("");
-  const [discount, setDiscount] = useState(0);
+  const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
 
-  const updateQuantity = (id: string, newQuantity: number) => {
-    if (newQuantity === 0) {
-      setCartItems(items => items.filter(item => item.id !== id));
-    } else {
-      setCartItems(items =>
-        items.map(item =>
-          item.id === id ? { ...item, quantity: newQuantity } : item
-        )
-      );
-    }
-  };
-
-  const removeItem = (id: string) => {
-    setCartItems(items => items.filter(item => item.id !== id));
-  };
-
-  const applyCoupon = () => {
-    // Mock coupon logic
-    if (couponCode.toLowerCase() === "newbie10") {
-      setAppliedCoupon(couponCode);
-      setDiscount(10); // 10% discount
+  const applyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    
+    const coupon = await validateCoupon(couponCode.trim());
+    if (coupon) {
+      setAppliedCoupon(coupon);
       setCouponCode("");
-    } else if (couponCode.toLowerCase() === "save20") {
-      setAppliedCoupon(couponCode);
-      setDiscount(20); // 20% discount
-      setCouponCode("");
-    } else {
-      alert("รหัสส่วนลดไม่ถูกต้อง");
     }
   };
 
   const removeCoupon = () => {
-    setAppliedCoupon("");
-    setDiscount(0);
+    setAppliedCoupon(null);
   };
 
   const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const discountAmount = (subtotal * discount) / 100;
+  const discountAmount = appliedCoupon ? (subtotal * appliedCoupon.discount_percentage) / 100 : 0;
   const total = subtotal - discountAmount;
 
   const getTypeLabel = (type: string) => {
@@ -101,6 +52,46 @@ export default function Cart() {
       default: return "badge-level";
     }
   };
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background">
+        <section className="py-20">
+          <div className="container mx-auto px-4">
+            <div className="max-w-2xl mx-auto text-center">
+              <div className="w-32 h-32 bg-muted rounded-full flex items-center justify-center mx-auto mb-8">
+                <ShoppingBag className="h-16 w-16 text-muted-foreground" />
+              </div>
+              <h1 className="text-3xl font-bold mb-4">กรุณาเข้าสู่ระบบ</h1>
+              <p className="text-muted-foreground mb-8">
+                คุณต้องเข้าสู่ระบบก่อนใช้งานตะกร้าสินค้า
+              </p>
+              <Button size="lg" asChild>
+                <Link to="/auth/signin">
+                  เข้าสู่ระบบ
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <section className="py-20">
+          <div className="container mx-auto px-4">
+            <div className="max-w-2xl mx-auto text-center">
+              <Loader2 className="h-16 w-16 animate-spin mx-auto mb-8 text-primary" />
+              <h1 className="text-2xl font-bold mb-4">กำลังโหลดตะกร้าสินค้า...</h1>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   if (cartItems.length === 0) {
     return (
@@ -155,9 +146,9 @@ export default function Cart() {
                             <div>
                               <Badge 
                                 variant="outline" 
-                                className={`${getTypeColor(item.type)} text-xs mb-2`}
+                                className={`${getTypeColor(item.item_type)} text-xs mb-2`}
                               >
-                                {getTypeLabel(item.type)}
+                                {getTypeLabel(item.item_type)}
                               </Badge>
                               <h3 className="font-semibold">{item.title}</h3>
                               <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
@@ -176,7 +167,7 @@ export default function Cart() {
                           
                           <div className="flex items-center justify-between mt-4">
                             <div className="flex items-center gap-2">
-                              {item.type !== "ebook" && (
+                              {item.item_type !== "ebook" && (
                                 <div className="flex items-center border rounded-lg">
                                   <Button
                                     variant="ghost"
@@ -202,11 +193,6 @@ export default function Cart() {
                             </div>
                             
                             <div className="text-right">
-                              {item.originalPrice && item.originalPrice > item.price && (
-                                <div className="text-sm text-muted-foreground line-through">
-                                  ฿{item.originalPrice.toLocaleString()}
-                                </div>
-                              )}
                               <div className="font-semibold">
                                 ฿{(item.price * item.quantity).toLocaleString()}
                               </div>
@@ -234,7 +220,7 @@ export default function Cart() {
                           <div className="flex items-center gap-2">
                             <Tag className="h-4 w-4 text-success" />
                             <span className="text-sm font-medium text-success">
-                              {appliedCoupon}
+                              {appliedCoupon.code}
                             </span>
                           </div>
                           <Button
@@ -256,9 +242,9 @@ export default function Cart() {
                           <Button 
                             variant="outline" 
                             onClick={applyCoupon}
-                            disabled={!couponCode}
+                            disabled={!couponCode || couponLoading}
                           >
-                            ใช้
+                            {couponLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "ใช้"}
                           </Button>
                         </div>
                       )}
@@ -276,9 +262,9 @@ export default function Cart() {
                         <span>฿{subtotal.toLocaleString()}</span>
                       </div>
                       
-                      {discount > 0 && (
+                      {appliedCoupon && discountAmount > 0 && (
                         <div className="flex justify-between text-success">
-                          <span>ส่วนลด ({discount}%)</span>
+                          <span>ส่วนลด ({appliedCoupon.discount_percentage}%)</span>
                           <span>-฿{discountAmount.toLocaleString()}</span>
                         </div>
                       )}

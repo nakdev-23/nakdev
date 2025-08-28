@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, BookOpen, Download, Eye, Star, Clock } from "lucide-react";
+import { Search, BookOpen, Download, Eye, Star, Clock, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useEbooks } from "@/hooks/useEbooks";
+import { useCart } from "@/hooks/useCart";
 
 const ebookCategories = [
   { id: "all", name: "ทั้งหมด" },
@@ -24,6 +25,7 @@ export default function Ebooks() {
   const [priceFilter, setPriceFilter] = useState("all");
   
   const { ebooks, isLoading, error } = useEbooks();
+  const { addToCart } = useCart();
 
   const filteredEbooks = ebooks.filter(ebook => {
     const matchesSearch = ebook.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -178,11 +180,22 @@ export default function Ebooks() {
                     {ebook.description}
                   </p>
                   
-                  <Button className="w-full" asChild>
-                    <Link to={`/ebooks/${ebook.slug}`}>
-                      {ebook.price === 0 ? "อ่านฟรี" : "รายละเอียด"}
-                    </Link>
-                  </Button>
+                  {ebook.price === 0 ? (
+                    <Button className="w-full" asChild>
+                      <Link to={`/ebooks/${ebook.slug}`}>
+                        <Download className="mr-2 h-4 w-4" />
+                        อ่านฟรี
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button 
+                      className="w-full" 
+                      onClick={() => addToCart(ebook.id, 'ebook')}
+                    >
+                      <ShoppingCart className="mr-2 h-4 w-4" />
+                      เพิ่มลงตะกร้า ฿{ebook.price}
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             ))}

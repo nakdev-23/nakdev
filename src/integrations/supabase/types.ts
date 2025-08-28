@@ -14,12 +14,70 @@ export type Database = {
   }
   public: {
     Tables: {
+      cart_items: {
+        Row: {
+          created_at: string
+          id: string
+          item_id: string
+          item_type: string
+          quantity: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_id: string
+          item_type: string
+          quantity?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_id?: string
+          item_type?: string
+          quantity?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      coupons: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          discount_percentage: number
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          discount_percentage: number
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          discount_percentage?: number
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       courses: {
         Row: {
           created_at: string
           description: string | null
           id: string
           instructor: string | null
+          price: number | null
           slug: string
           title: string
           total_lessons: number | null
@@ -30,6 +88,7 @@ export type Database = {
           description?: string | null
           id?: string
           instructor?: string | null
+          price?: number | null
           slug: string
           title: string
           total_lessons?: number | null
@@ -40,6 +99,7 @@ export type Database = {
           description?: string | null
           id?: string
           instructor?: string | null
+          price?: number | null
           slug?: string
           title?: string
           total_lessons?: number | null

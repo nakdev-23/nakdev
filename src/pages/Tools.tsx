@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, Filter, Download, ExternalLink, Code2, Palette, Zap, FileText } from "lucide-react";
+import { Search, Filter, Download, ExternalLink, Code2, Palette, Zap, FileText, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTools } from "@/hooks/useTools";
+import { useCart } from "@/hooks/useCart";
 
 const toolCategories = [
   { id: "all", name: "ทั้งหมด", icon: Filter },
@@ -23,6 +24,7 @@ export default function Tools() {
   const [priceFilter, setPriceFilter] = useState("all");
   
   const { tools, isLoading, error } = useTools();
+  const { addToCart } = useCart();
 
   const filteredTools = tools.filter(tool => {
     const matchesSearch = tool.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -140,11 +142,22 @@ export default function Tools() {
                     {tool.description}
                   </p>
                   
-                  <Button className="w-full" asChild>
-                    <Link to={`/tools/${tool.slug}`}>
-                      ดูรายละเอียด
-                    </Link>
-                  </Button>
+                  {tool.price === 0 ? (
+                    <Button className="w-full" asChild>
+                      <Link to={`/tools/${tool.slug}`}>
+                        <Download className="mr-2 h-4 w-4" />
+                        ดาวน์โหลดฟรี
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button 
+                      className="w-full" 
+                      onClick={() => addToCart(tool.id, 'tool')}
+                    >
+                      <ShoppingCart className="mr-2 h-4 w-4" />
+                      เพิ่มลงตะกร้า ฿{tool.price.toLocaleString()}
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             ))}
