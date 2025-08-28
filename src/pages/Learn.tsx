@@ -175,13 +175,27 @@ export default function Learn() {
       <div className="flex flex-1">
         {/* Main Content */}
         <main className="flex-1 flex flex-col">
-          {/* Secure Video Player */}
+          {/* Video Player */}
           <div className="p-6">
-            <SecureVideoPlayer
-              videoId={currentLesson.video_id}
-              filePath={currentLesson.video?.file_path || ''}
-              onProgressUpdate={handleVideoProgressUpdate}
-            />
+            <div className="aspect-video bg-muted rounded-lg overflow-hidden">
+              {currentLesson.youtube_url ? (
+                <iframe
+                  src={currentLesson.youtube_url}
+                  title={currentLesson.title}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
+                  className="w-full h-full"
+                />
+              ) : (
+                <SecureVideoPlayer
+                  videoId={currentLesson.video_id}
+                  filePath={currentLesson.video?.file_path || ''}
+                  onProgressUpdate={handleVideoProgressUpdate}
+                />
+              )}
+            </div>
           </div>
 
           {/* Lesson Content */}

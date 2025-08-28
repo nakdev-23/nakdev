@@ -139,6 +139,7 @@ export type Database = {
           title: string
           updated_at: string
           video_id: string | null
+          youtube_url: string | null
         }
         Insert: {
           chapter_id?: number | null
@@ -154,6 +155,7 @@ export type Database = {
           title: string
           updated_at?: string
           video_id?: string | null
+          youtube_url?: string | null
         }
         Update: {
           chapter_id?: number | null
@@ -169,6 +171,7 @@ export type Database = {
           title?: string
           updated_at?: string
           video_id?: string | null
+          youtube_url?: string | null
         }
         Relationships: [
           {

@@ -20,6 +20,7 @@ interface Lesson {
   chapter_title: string;
   lesson_order: number;
   video_id: string;
+  youtube_url: string | null;
   video: {
     file_path: string;
   };
