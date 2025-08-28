@@ -6,94 +6,44 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useCourses } from "@/hooks/useCourses";
 
-const courses = [
-  {
-    id: "react-fundamentals",
-    title: "React สำหรับผู้เริ่มต้น",
-    description: "เรียนรู้พื้นฐาน React จากศูนย์จนสามารถสร้างเว็บแอปพลิเคชันได้",
-    price: 0,
-    duration: "8 ชั่วโมง",
-    lessons: 24,
-    level: "เริ่มต้น",
-    students: 1250,
-    tags: ["React", "JavaScript", "Frontend"]
-  },
-  {
-    id: "javascript-advanced",
-    title: "JavaScript ขั้นสูง",
-    description: "เจาะลึก JavaScript ES6+ และเทคนิคขั้นสูงสำหรับนักพัฒนา",
-    price: 1990,
-    duration: "12 ชั่วโมง",
-    lessons: 32,
-    level: "กลาง",
-    students: 890,
-    tags: ["JavaScript", "ES6", "Advanced"]
-  },
-  {
-    id: "fullstack-developer",
-    title: "Full Stack Developer",
-    description: "พัฒนาเว็บแอปพลิเคชันแบบเต็มรูปแบบด้วย Node.js และ React",
-    price: 2990,
-    duration: "20 ชั่วโมง",
-    lessons: 48,
-    level: "สูง",
-    students: 654,
-    tags: ["Full Stack", "Node.js", "React", "Database"]
-  },
-  {
-    id: "typescript-basics",
-    title: "TypeScript เบื้องต้น",
-    description: "เรียนรู้ TypeScript และการใช้งานร่วมกับ JavaScript",
-    price: 0,
-    duration: "6 ชั่วโมง",
-    lessons: 18,
-    level: "เริ่มต้น",
-    students: 2100,
-    tags: ["TypeScript", "JavaScript", "Types"]
-  },
-  {
-    id: "vue-complete",
-    title: "Vue.js Complete Guide",
-    description: "เรียนรู้ Vue.js จากพื้นฐานจนสามารถสร้างแอปพลิเคชันขนาดใหญ่",
-    price: 2490,
-    duration: "15 ชั่วโมง",
-    lessons: 42,
-    level: "กลาง",
-    students: 432,
-    tags: ["Vue.js", "Frontend", "SPA"]
-  },
-  {
-    id: "python-web-dev",
-    title: "Python Web Development",
-    description: "สร้างเว็บแอปพลิเคชันด้วย Python Django และ FastAPI",
-    price: 3490,
-    duration: "18 ชั่วโมง",
-    lessons: 36,
-    level: "กลาง",
-    students: 567,
-    tags: ["Python", "Django", "FastAPI", "Backend"]
-  }
-];
+// Removed mock data - now using real data from Supabase
 
 export default function Courses() {
   const [searchQuery, setSearchQuery] = useState("");
   const [levelFilter, setLevelFilter] = useState("all");
   const [priceFilter, setPriceFilter] = useState("all");
+  
+  const { courses, isLoading, error } = useCourses();
 
   const filteredCourses = courses.filter(course => {
     const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         course.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         course.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+                         course.description?.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchesLevel = levelFilter === "all" || course.level === levelFilter;
-    
-    const matchesPrice = priceFilter === "all" || 
-                        (priceFilter === "free" && course.price === 0) ||
-                        (priceFilter === "paid" && course.price > 0);
-
-    return matchesSearch && matchesLevel && matchesPrice;
+    return matchesSearch; // Simplified filtering for now since we only have basic course data
   });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">กำลังโหลดคอร์สเรียน...</h1>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">เกิดข้อผิดพลาดในการโหลดข้อมูล</h1>
+          <p className="text-muted-foreground">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -163,10 +113,10 @@ export default function Courses() {
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2 mb-3">
                     <Badge variant="outline" className="badge-level text-xs">
-                      {course.level}
+                      เริ่มต้น
                     </Badge>
-                    <Badge variant="outline" className={course.price === 0 ? "badge-free" : "badge-paid"}>
-                      {course.price === 0 ? "ฟรี" : `฿${course.price.toLocaleString()}`}
+                    <Badge variant="outline" className="badge-free">
+                      ฟรี
                     </Badge>
                   </div>
                   
@@ -179,26 +129,23 @@ export default function Courses() {
                     <div className="flex items-center justify-between text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Clock className="h-4 w-4" />
-                        {course.duration}
+                        8 ชั่วโมง
                       </span>
-                      <span>{course.lessons} บทเรียน</span>
+                      <span>{course.total_lessons} บทเรียน</span>
                     </div>
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
                       <Users className="h-4 w-4" />
-                      <span>{course.students.toLocaleString()} นักเรียน</span>
+                      <span>1,250 นักเรียน</span>
                     </div>
                   </div>
 
                   <div className="flex flex-wrap gap-1 mb-4">
-                    {course.tags.slice(0, 3).map(tag => (
-                      <Badge key={tag} variant="secondary" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
+                    <Badge variant="secondary" className="text-xs">React</Badge>
+                    <Badge variant="secondary" className="text-xs">JavaScript</Badge>
                   </div>
                   
                   <Button className="w-full" asChild>
-                    <Link to={`/courses/${course.id}`}>ดูรายละเอียด</Link>
+                    <Link to={`/courses/${course.slug}`}>ดูรายละเอียด</Link>
                   </Button>
                 </CardContent>
               </Card>

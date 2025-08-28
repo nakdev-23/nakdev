@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useTools } from "@/hooks/useTools";
 
 const toolCategories = [
   { id: "all", name: "ทั้งหมด", icon: Filter },
@@ -83,11 +84,12 @@ export default function Tools() {
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [priceFilter, setPriceFilter] = useState("all");
+  
+  const { tools, isLoading, error } = useTools();
 
   const filteredTools = tools.filter(tool => {
     const matchesSearch = tool.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         tool.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         tool.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+                         tool.description?.toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesCategory = categoryFilter === "all" || tool.category === categoryFilter;
     
@@ -97,6 +99,16 @@ export default function Tools() {
 
     return matchesSearch && matchesCategory && matchesPrice;
   });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">กำลังโหลด...</h1>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -175,17 +187,11 @@ export default function Tools() {
           {/* Tools Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredTools.map((tool) => (
-              <Card key={tool.id} className={`glass-card hover-lift ${tool.featured ? 'ring-2 ring-primary/20' : ''}`}>
+              <Card key={tool.id} className="glass-card hover-lift">
                 <CardContent className="p-6">
-                  {tool.featured && (
-                    <Badge className="mb-3 bg-primary/10 text-primary border-primary/20">
-                      ยอดนิยม
-                    </Badge>
-                  )}
-                  
                   <div className="flex items-center justify-between mb-3">
                     <Badge variant="outline" className="badge-level text-xs">
-                      {toolCategories.find(cat => cat.id === tool.category)?.name}
+                      {tool.category}
                     </Badge>
                     <Badge variant="outline" className={tool.price === 0 ? "badge-free" : "badge-paid"}>
                       {tool.price === 0 ? "ฟรี" : `฿${tool.price.toLocaleString()}`}
@@ -197,34 +203,11 @@ export default function Tools() {
                     {tool.description}
                   </p>
                   
-                  <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
-                    <span className="flex items-center gap-1">
-                      <Download className="h-4 w-4" />
-                      {tool.downloadCount.toLocaleString()}
-                    </span>
-                    <span>⭐ {tool.rating}</span>
-                  </div>
-
-                  <div className="flex flex-wrap gap-1 mb-4">
-                    {tool.tags.slice(0, 3).map(tag => (
-                      <Badge key={tag} variant="secondary" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                  
-                  <div className="flex gap-2">
-                    <Button className="flex-1" asChild>
-                      <Link to={`/tools/${tool.id}`}>
-                        ดูรายละเอียด
-                      </Link>
-                    </Button>
-                    {tool.price === 0 && (
-                      <Button variant="outline" size="sm">
-                        <Download className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
+                  <Button className="w-full" asChild>
+                    <Link to={`/tools/${tool.slug}`}>
+                      ดูรายละเอียด
+                    </Link>
+                  </Button>
                 </CardContent>
               </Card>
             ))}

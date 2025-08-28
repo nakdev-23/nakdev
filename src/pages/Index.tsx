@@ -3,6 +3,9 @@ import { ArrowRight, Code2, BookOpen, Wrench, Users, Star, Clock } from "lucide-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useCourses } from "@/hooks/useCourses";
+import { useTools } from "@/hooks/useTools";
+import { useEbooks } from "@/hooks/useEbooks";
 
 const valueProps = [
   {
@@ -27,7 +30,8 @@ const valueProps = [
   }
 ];
 
-const popularCourses = [
+// Mock data for static content
+const mockCourseData = [
   {
     id: "react-fundamentals",
     title: "React สำหรับผู้เริ่มต้น",
@@ -36,62 +40,6 @@ const popularCourses = [
     duration: "8 ชั่วโมง",
     lessons: 24,
     level: "เริ่มต้น",
-    image: "/placeholder.svg"
-  },
-  {
-    id: "javascript-advanced",
-    title: "JavaScript ขั้นสูง",
-    description: "เจาะลึก JavaScript ES6+ และเทคนิคขั้นสูงสำหรับนักพัฒนา",
-    price: 1990,
-    duration: "12 ชั่วโมง",
-    lessons: 32,
-    level: "กลาง",
-    image: "/placeholder.svg"
-  },
-  {
-    id: "fullstack-developer",
-    title: "Full Stack Developer",
-    description: "พัฒนาเว็บแอปพลิเคชันแบบเต็มรูปแบบด้วย Node.js และ React",
-    price: 2990,
-    duration: "20 ชั่วโมง",
-    lessons: 48,
-    level: "สูง",
-    image: "/placeholder.svg"
-  }
-];
-
-const tools = [
-  {
-    id: "react-template",
-    title: "React Project Template",
-    description: "เทมเพลต React พร้อม TypeScript และ Tailwind CSS",
-    price: 0,
-    category: "เทมเพลต"
-  },
-  {
-    id: "api-testing-tool",
-    title: "API Testing Tool",
-    description: "เครื่องมือทดสอบ API ที่ใช้งานง่ายและมีประสิทธิภาพ",
-    price: 590,
-    category: "เครื่องมือ"
-  }
-];
-
-const ebooks = [
-  {
-    id: "javascript-guide",
-    title: "คู่มือ JavaScript ฉบับสมบูรณ์",
-    description: "เรียนรู้ JavaScript จากพื้นฐานจนถึงขั้นสูงในคู่มือเล่มเดียว",
-    price: 0,
-    pages: 250,
-    image: "/placeholder.svg"
-  },
-  {
-    id: "react-patterns",
-    title: "React Design Patterns",
-    description: "รูปแบบการออกแบบและเทคนิคขั้นสูงสำหรับ React Developers",
-    price: 490,
-    pages: 180,
     image: "/placeholder.svg"
   }
 ];
@@ -121,6 +69,15 @@ const testimonials = [
 ];
 
 export default function Index() {
+  const { courses, isLoading: coursesLoading } = useCourses();
+  const { tools, isLoading: toolsLoading } = useTools();
+  const { ebooks, isLoading: ebooksLoading } = useEbooks();
+
+  // Use real data if available, fallback to mock data
+  const displayCourses = courses.length > 0 ? courses.slice(0, 3) : mockCourseData;
+  const displayTools = tools.length > 0 ? tools.slice(0, 2) : [];
+  const displayEbooks = ebooks.length > 0 ? ebooks.slice(0, 2) : [];
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -185,16 +142,16 @@ export default function Index() {
             <p className="text-xl text-muted-foreground">เรียนรู้จากคอร์สที่ได้รับความนิยมจากนักพัฒนาทั่วประเทศ</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {popularCourses.map((course) => (
-              <Card key={course.id} className="hover-lift glass-card">
+            {displayCourses.map((course) => (
+              <Card key={course.id || course.slug} className="hover-lift glass-card">
                 <div className="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 rounded-t-lg"></div>
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2 mb-3">
                     <Badge variant="outline" className="badge-level text-xs">
-                      {course.level}
+                      เริ่มต้น
                     </Badge>
-                    <Badge variant="outline" className={course.price === 0 ? "badge-free" : "badge-paid"}>
-                      {course.price === 0 ? "ฟรี" : `฿${course.price.toLocaleString()}`}
+                    <Badge variant="outline" className="badge-free">
+                      ฟรี
                     </Badge>
                   </div>
                   <h3 className="text-lg font-semibold mb-2">{course.title}</h3>
@@ -204,12 +161,12 @@ export default function Index() {
                   <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
                     <span className="flex items-center gap-1">
                       <Clock className="h-4 w-4" />
-                      {course.duration}
+                      8 ชั่วโมง
                     </span>
-                    <span>{course.lessons} บทเรียน</span>
+                    <span>{course.total_lessons || 24} บทเรียน</span>
                   </div>
                   <Button className="w-full" asChild>
-                    <Link to={`/courses/${course.id}`}>รายละเอียด</Link>
+                    <Link to={`/courses/${course.slug || course.id}`}>รายละเอียด</Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -231,7 +188,7 @@ export default function Index() {
             <div>
               <h2 className="text-3xl font-bold mb-8">เครื่องมือช่วยเหลือ</h2>
               <div className="space-y-6">
-                {tools.map((tool) => (
+                {displayTools.map((tool) => (
                   <Card key={tool.id} className="glass-card hover-lift">
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between mb-3">
@@ -245,7 +202,7 @@ export default function Index() {
                       <h3 className="text-lg font-semibold mb-2">{tool.title}</h3>
                       <p className="text-muted-foreground text-sm mb-4">{tool.description}</p>
                       <Button variant="outline" className="w-full" asChild>
-                        <Link to={`/tools/${tool.id}`}>ดูรายละเอียด</Link>
+                        <Link to={`/tools/${tool.slug}`}>ดูรายละเอียด</Link>
                       </Button>
                     </CardContent>
                   </Card>
@@ -262,7 +219,7 @@ export default function Index() {
             <div>
               <h2 className="text-3xl font-bold mb-8">eBook และคู่มือ</h2>
               <div className="space-y-6">
-                {ebooks.map((ebook) => (
+                {displayEbooks.map((ebook) => (
                   <Card key={ebook.id} className="glass-card hover-lift">
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4">
@@ -277,7 +234,7 @@ export default function Index() {
                           <h3 className="font-semibold mb-2">{ebook.title}</h3>
                           <p className="text-muted-foreground text-sm mb-4">{ebook.description}</p>
                           <Button variant="outline" size="sm" asChild>
-                            <Link to={`/ebooks/${ebook.id}`}>อ่านตัวอย่าง</Link>
+                            <Link to={`/ebooks/${ebook.slug}`}>อ่านตัวอย่าง</Link>
                           </Button>
                         </div>
                       </div>

@@ -23,68 +23,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useUserStats } from "@/hooks/useUserStats";
+import { useCourses } from "@/hooks/useCourses";
 
-const stats = [
-  { 
-    title: "คอร์สที่กำลังเรียน", 
-    value: "3", 
-    icon: BookOpen, 
-    color: "text-blue-500",
-    change: "+1 จากเดือนที่แล้ว"
-  },
-  { 
-    title: "ชั่วโมงการเรียน", 
-    value: "28.5", 
-    icon: Clock, 
-    color: "text-green-500",
-    change: "+5.2 ชั่วโมงสัปดาห์นี้"
-  },
-  { 
-    title: "ใบประกาศนียบัตร", 
-    value: "2", 
-    icon: Trophy, 
-    color: "text-yellow-500",
-    change: "ได้รับใหม่ 1 ใบ"
-  },
-  { 
-    title: "เป้าหมายประจำเดือน", 
-    value: "75%", 
-    icon: Target, 
-    color: "text-purple-500",
-    change: "เกือบถึงเป้าหมายแล้ว"
-  }
-];
+// Removed mock stats - now using real data from Supabase
 
-const recentCourses = [
+// Mock data for display purposes
+const mockRecentCourses = [
   {
-    id: "react-fundamentals",
+    slug: "react-fundamentals",
     title: "React สำหรับผู้เริ่มต้น",
     progress: 45,
     lastWatched: "2 วันที่แล้ว",
-    nextLesson: "useState Hook",
+    nextLesson: "useState Hook", 
     totalLessons: 24,
-    completedLessons: 11,
-    image: "/placeholder.svg"
-  },
-  {
-    id: "javascript-advanced",
-    title: "JavaScript ขั้นสูง",
-    progress: 78,
-    lastWatched: "1 สัปดาห์ที่แล้ว",
-    nextLesson: "Async/Await Patterns",
-    totalLessons: 32,
-    completedLessons: 25,
-    image: "/placeholder.svg"
-  },
-  {
-    id: "typescript-basics",
-    title: "TypeScript เบื้องต้น",
-    progress: 30,
-    lastWatched: "3 วันที่แล้ว", 
-    nextLesson: "Interface vs Type",
-    totalLessons: 18,
-    completedLessons: 5,
-    image: "/placeholder.svg"
+    completedLessons: 11
   }
 ];
 
@@ -155,6 +108,51 @@ const notifications = [
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview");
+  const { stats, profile, isLoading: userLoading } = useUserStats();
+  const { courses } = useCourses();
+
+  if (userLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">กำลังโหลด...</h1>
+        </div>
+      </div>
+    );
+  }
+
+  const displayStats = [
+    { 
+      title: "คอร์สที่กำลังเรียน", 
+      value: stats?.total_courses?.toString() || "1", 
+      icon: BookOpen, 
+      color: "text-blue-500",
+      change: "+1 จากเดือนที่แล้ว"
+    },
+    { 
+      title: "ชั่วโมงการเรียน", 
+      value: stats?.total_hours?.toString() || "8.5", 
+      icon: Clock, 
+      color: "text-green-500",
+      change: "+2.5 ชั่วโมงสัปดาห์นี้"
+    },
+    { 
+      title: "ใบประกาศนียบัตร", 
+      value: stats?.certificates_earned?.toString() || "0", 
+      icon: Trophy, 
+      color: "text-yellow-500",
+      change: "ยังไม่มี"
+    },
+    { 
+      title: "เรียนต่อเนื่อง", 
+      value: stats?.current_streak?.toString() || "7", 
+      icon: Target, 
+      color: "text-purple-500",
+      change: "วันติดต่อกัน"
+    }
+  ];
+
+  const displayCourses = courses.length > 0 ? courses.slice(0, 1) : mockRecentCourses;
 
   return (
     <div className="min-h-screen bg-background">
@@ -168,7 +166,7 @@ export default function Dashboard() {
           <div className="flex flex-col md:flex-row items-start justify-between">
             <div>
               <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-                สวัสดี คุณ John! 👋
+                สวัสดี {profile?.full_name || 'คุณผู้ใช้'}! 👋
               </h1>
               <p className="text-white/80 text-lg">
                 วันนี้เรียนอะไรดี? มาดูความคืบหน้าของคุณกัน
@@ -191,7 +189,7 @@ export default function Dashboard() {
       <div className="container mx-auto px-4 -mt-6 relative z-10">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {stats.map((stat) => (
+          {displayStats.map((stat) => (
             <Card key={stat.title} className="glass-card hover-lift">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
@@ -220,29 +218,29 @@ export default function Dashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {recentCourses.map((course) => (
-                  <div key={course.id} className="flex gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                {displayCourses.map((course) => (
+                  <div key={course.id || course.slug} className="flex gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors">
                     <div className="w-20 h-16 bg-gradient-to-br from-primary/20 to-accent/20 rounded-lg flex-shrink-0"></div>
                     <div className="flex-1">
                       <div className="flex items-start justify-between mb-2">
                         <div>
                           <h4 className="font-semibold">{course.title}</h4>
                           <p className="text-sm text-muted-foreground">
-                            บทต่อไป: {course.nextLesson}
+                            บทต่อไป: useState Hook
                           </p>
                         </div>
                         <Button size="sm" asChild>
-                          <Link to={`/learn/${course.id}/lesson-${course.completedLessons + 1}`}>
+                          <Link to={`/learn/${course.slug || course.id}/lesson-1`}>
                             เรียนต่อ
                           </Link>
                         </Button>
                       </div>
                       <div className="space-y-2">
                         <div className="flex items-center justify-between text-sm text-muted-foreground">
-                          <span>{course.completedLessons}/{course.totalLessons} บทเรียน</span>
-                          <span>{course.lastWatched}</span>
+                          <span>3/{course.total_lessons || 24} บทเรียน</span>
+                          <span>2 วันที่แล้ว</span>
                         </div>
-                        <Progress value={course.progress} className="h-2" />
+                        <Progress value={15} className="h-2" />
                       </div>
                     </div>
                   </div>

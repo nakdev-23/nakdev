@@ -47,6 +47,45 @@ export type Database = {
         }
         Relationships: []
       }
+      ebooks: {
+        Row: {
+          created_at: string
+          description: string | null
+          download_url: string | null
+          id: string
+          pages: number | null
+          preview_url: string | null
+          price: number | null
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          download_url?: string | null
+          id?: string
+          pages?: number | null
+          preview_url?: string | null
+          price?: number | null
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          download_url?: string | null
+          id?: string
+          pages?: number | null
+          preview_url?: string | null
+          price?: number | null
+          slug?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       lesson_progress: {
         Row: {
           completed: boolean | null
@@ -173,6 +212,78 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      tools: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          download_url: string | null
+          id: string
+          price: number | null
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          download_url?: string | null
+          id?: string
+          price?: number | null
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          download_url?: string | null
+          id?: string
+          price?: number | null
+          slug?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_stats: {
+        Row: {
+          certificates_earned: number | null
+          completed_courses: number | null
+          created_at: string
+          current_streak: number | null
+          id: string
+          total_courses: number | null
+          total_hours: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          certificates_earned?: number | null
+          completed_courses?: number | null
+          created_at?: string
+          current_streak?: number | null
+          id?: string
+          total_courses?: number | null
+          total_hours?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          certificates_earned?: number | null
+          completed_courses?: number | null
+          created_at?: string
+          current_streak?: number | null
+          id?: string
+          total_courses?: number | null
+          total_hours?: number | null
           updated_at?: string
           user_id?: string
         }

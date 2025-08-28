@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useEbooks } from "@/hooks/useEbooks";
 
 const ebookCategories = [
   { id: "all", name: "ทั้งหมด" },
@@ -98,20 +99,29 @@ export default function Ebooks() {
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [priceFilter, setPriceFilter] = useState("all");
+  
+  const { ebooks, isLoading, error } = useEbooks();
 
   const filteredEbooks = ebooks.filter(ebook => {
     const matchesSearch = ebook.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         ebook.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         ebook.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    const matchesCategory = categoryFilter === "all" || ebook.category === categoryFilter;
+                         ebook.description?.toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesPrice = priceFilter === "all" || 
                         (priceFilter === "free" && ebook.price === 0) ||
                         (priceFilter === "paid" && ebook.price > 0);
 
-    return matchesSearch && matchesCategory && matchesPrice;
+    return matchesSearch && matchesPrice;
   });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">กำลังโหลด...</h1>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -150,7 +160,7 @@ export default function Ebooks() {
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-12">eBook แนะนำ</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {ebooks.filter(ebook => ebook.featured).map((ebook) => (
+            {ebooks.slice(0, 2).map((ebook) => (
               <Card key={ebook.id} className="glass-card hover-lift">
                 <CardContent className="p-6">
                   <div className="flex gap-6">
@@ -170,14 +180,9 @@ export default function Ebooks() {
                       <p className="text-muted-foreground text-sm mb-4">{ebook.description}</p>
                       <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
                         <span>{ebook.pages} หน้า</span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-4 w-4" />
-                          {ebook.readTime}
-                        </span>
-                        <span>⭐ {ebook.rating}</span>
                       </div>
                       <Button className="w-full" asChild>
-                        <Link to={`/ebooks/${ebook.id}`}>
+                        <Link to={`/ebooks/${ebook.slug}`}>
                           {ebook.price === 0 ? "อ่านฟรี" : "ดูรายละเอียด"}
                         </Link>
                       </Button>
@@ -238,17 +243,10 @@ export default function Ebooks() {
                         <Badge variant="outline" className={ebook.price === 0 ? "badge-free" : "badge-paid"}>
                           {ebook.price === 0 ? "ฟรี" : `฿${ebook.price}`}
                         </Badge>
-                        {ebook.originalPrice && ebook.price === 0 && (
-                          <span className="text-xs text-muted-foreground line-through">
-                            ฿{ebook.originalPrice}
-                          </span>
-                        )}
                       </div>
                       <h3 className="font-semibold mb-1 line-clamp-2">{ebook.title}</h3>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <span>{ebook.pages} หน้า</span>
-                        <span>•</span>
-                        <span>⭐ {ebook.rating}</span>
                       </div>
                     </div>
                   </div>
@@ -256,36 +254,12 @@ export default function Ebooks() {
                   <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
                     {ebook.description}
                   </p>
-
-                  <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
-                    <span className="flex items-center gap-1">
-                      <Download className="h-4 w-4" />
-                      {ebook.downloads.toLocaleString()}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-4 w-4" />
-                      {ebook.readTime}
-                    </span>
-                  </div>
-
-                  <div className="flex flex-wrap gap-1 mb-4">
-                    {ebook.tags.slice(0, 2).map(tag => (
-                      <Badge key={tag} variant="secondary" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
                   
-                  <div className="flex gap-2">
-                    <Button className="flex-1" asChild>
-                      <Link to={`/ebooks/${ebook.id}`}>
-                        {ebook.price === 0 ? "อ่านฟรี" : "รายละเอียด"}
-                      </Link>
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <Button className="w-full" asChild>
+                    <Link to={`/ebooks/${ebook.slug}`}>
+                      {ebook.price === 0 ? "อ่านฟรี" : "รายละเอียด"}
+                    </Link>
+                  </Button>
                 </CardContent>
               </Card>
             ))}
