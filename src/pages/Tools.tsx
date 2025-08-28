@@ -16,69 +16,6 @@ const toolCategories = [
   { id: "development", name: "Development", icon: Code2 }
 ];
 
-const tools = [
-  {
-    id: "react-starter",
-    title: "React Starter Template",
-    description: "เทมเพลต React ที่พร้อมใช้งาน มาพร้อม TypeScript, Tailwind CSS, และ ESLint",
-    price: 0,
-    category: "template",
-    downloadCount: 2450,
-    rating: 4.9,
-    tags: ["React", "TypeScript", "Tailwind"],
-    featured: true
-  },
-  {
-    id: "api-client",
-    title: "API Client Generator",
-    description: "เครื่องมือสร้าง API client อัตโนมัติจาก OpenAPI/Swagger specification",
-    price: 590,
-    category: "automation",
-    downloadCount: 1200,
-    rating: 4.7,
-    tags: ["API", "TypeScript", "OpenAPI"]
-  },
-  {
-    id: "ui-components",
-    title: "Modern UI Components",
-    description: "ชุด UI Components สำเร็จรูปที่ออกแบบสวยงามและใช้งานง่าย",
-    price: 990,
-    category: "ui",
-    downloadCount: 890,
-    rating: 4.8,
-    tags: ["UI", "Components", "Design System"]
-  },
-  {
-    id: "code-formatter",
-    title: "Smart Code Formatter",
-    description: "เครื่องมือจัดรูปแบบโค้ดอัตโนมัติที่รองรับหลายภาษา",
-    price: 0,
-    category: "development",
-    downloadCount: 3200,
-    rating: 4.6,
-    tags: ["Formatter", "Code Quality"]
-  },
-  {
-    id: "dashboard-template",
-    title: "Admin Dashboard Template",
-    description: "เทมเพลต Admin Dashboard ที่สมบูรณ์พร้อมใช้งาน",
-    price: 1490,
-    category: "template",
-    downloadCount: 560,
-    rating: 4.5,
-    tags: ["Dashboard", "Admin Panel", "Charts"]
-  },
-  {
-    id: "color-palette",
-    title: "Color Palette Generator",
-    description: "เครื่องมือสร้างชุดสีที่สวยงามสำหรับโปรเจค",
-    price: 0,
-    category: "ui",
-    downloadCount: 1800,
-    rating: 4.4,
-    tags: ["Colors", "Design", "Palette"]
-  }
-];
 
 export default function Tools() {
   const [searchQuery, setSearchQuery] = useState("");

@@ -30,19 +30,6 @@ const valueProps = [
   }
 ];
 
-// Mock data for static content
-const mockCourseData = [
-  {
-    id: "react-fundamentals",
-    title: "React สำหรับผู้เริ่มต้น",
-    description: "เรียนรู้พื้นฐาน React จากศูนย์จนสามารถสร้างเว็บแอปพลิเคชันได้",
-    price: 0,
-    duration: "8 ชั่วโมง",
-    lessons: 24,
-    level: "เริ่มต้น",
-    image: "/placeholder.svg"
-  }
-];
 
 const testimonials = [
   {
@@ -73,10 +60,10 @@ export default function Index() {
   const { tools, isLoading: toolsLoading } = useTools();
   const { ebooks, isLoading: ebooksLoading } = useEbooks();
 
-  // Use real data if available, fallback to mock data
-  const displayCourses = courses.length > 0 ? courses.slice(0, 3) : mockCourseData;
-  const displayTools = tools.length > 0 ? tools.slice(0, 2) : [];
-  const displayEbooks = ebooks.length > 0 ? ebooks.slice(0, 2) : [];
+  // Use real data from Supabase
+  const displayCourses = courses.slice(0, 3);
+  const displayTools = tools.slice(0, 2);
+  const displayEbooks = ebooks.slice(0, 2);
 
   return (
     <div className="min-h-screen">
