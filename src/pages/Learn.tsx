@@ -22,21 +22,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { SecureVideoPlayer } from "@/components/video/SecureVideoPlayer";
 import { supabase } from "@/integrations/supabase/client";
+import { useCourse } from "@/hooks/useCourse";
 
-const courseData = {
-  "react-fundamentals": {
-    title: "React สำหรับผู้เริ่มต้น",
-    instructor: "สมชาย นักพัฒนา",
-    totalLessons: 24,
-    completedLessons: 3,
-    currentLesson: {
-      id: "lesson-1",
-      videoId: "550e8400-e29b-41d4-a716-446655440000", // Mock video ID
-      filePath: "react-fundamentals/lesson-1.mp4", // Path in storage bucket
-      title: "ทำความรู้จักกับ React",
-      duration: "15:30",
-      description: "เรียนรู้พื้นฐาน React และเหตุผลที่ทำให้ React เป็น Library ที่นิยมในการพัฒนา Frontend",
-      transcript: `สวัสดีครับ ยินดีต้อนรับสู่คอร์ส React สำหรับผู้เริ่มต้น
+// Mock transcript data - in a real app, this would come from the database
+const getTranscript = (lessonSlug: string) => {
+  if (lessonSlug === 'lesson-1') {
+    return `สวัสดีครับ ยินดีต้อนรับสู่คอร์ส React สำหรับผู้เริ่มต้น
 
 ในวิดีโอแรกนี้ เราจะมาทำความรู้จักกับ React กัน React คือ JavaScript Library ที่พัฒนาโดย Facebook สำหรับสร้าง User Interface
 
@@ -46,72 +37,9 @@ React มีความนิยมสูงเพราะ:
 3. Community และ Ecosystem ที่แข็งแกร่ง
 4. การ Reusability ของ Component
 
-ในคอร์สนี้เราจะเรียนรู้ตั้งแต่พื้นฐานจนถึงการสร้างแอปพลิเคชันจริง`
-    },
-    chapters: [
-      {
-        id: 1,
-        title: "บทนำและการเตรียมตัว",
-        lessons: [
-          { 
-            id: "lesson-1", 
-            videoId: "550e8400-e29b-41d4-a716-446655440000",
-            filePath: "react-fundamentals/lesson-1.mp4",
-            title: "ทำความรู้จักกับ React", 
-            duration: "15:30", 
-            completed: true, 
-            current: true 
-          },
-          { 
-            id: "lesson-2", 
-            videoId: "550e8400-e29b-41d4-a716-446655440001",
-            filePath: "react-fundamentals/lesson-2.mp4",
-            title: "การติดตั้ง Development Environment", 
-            duration: "20:45", 
-            completed: true 
-          },
-          { 
-            id: "lesson-3", 
-            videoId: "550e8400-e29b-41d4-a716-446655440002",
-            filePath: "react-fundamentals/lesson-3.mp4",
-            title: "สร้างโปรเจคแรก", 
-            duration: "25:15", 
-            completed: true 
-          }
-        ]
-      },
-      {
-        id: 2,
-        title: "React Components",
-        lessons: [
-          { 
-            id: "lesson-4", 
-            videoId: "550e8400-e29b-41d4-a716-446655440003",
-            filePath: "react-fundamentals/lesson-4.mp4",
-            title: "เข้าใจ Components", 
-            duration: "30:00", 
-            completed: false 
-          },
-          { 
-            id: "lesson-5", 
-            videoId: "550e8400-e29b-41d4-a716-446655440004",
-            filePath: "react-fundamentals/lesson-5.mp4",
-            title: "Props และ State", 
-            duration: "35:20", 
-            completed: false 
-          },
-          { 
-            id: "lesson-6", 
-            videoId: "550e8400-e29b-41d4-a716-446655440005",
-            filePath: "react-fundamentals/lesson-6.mp4",
-            title: "Event Handling", 
-            duration: "25:30", 
-            completed: false 
-          }
-        ]
-      }
-    ]
+ในคอร์สนี้เราจะเรียนรู้ตั้งแต่พื้นฐานจนถึงการสร้างแอปพลิเคชันจริง`;
   }
+  return 'ยังไม่มี Transcript สำหรับบทเรียนนี้';
 };
 
 export default function Learn() {
@@ -120,7 +48,10 @@ export default function Learn() {
   const [openChapters, setOpenChapters] = useState<number[]>([1, 2, 3]);
   const [user, setUser] = useState(null);
 
-  const course = courseData[courseSlug as keyof typeof courseData];
+  const { course, chapters, currentLesson, completedLessons, isLoading, error } = useCourse(
+    courseSlug || '', 
+    lessonSlug
+  );
   
   // Check authentication
   useEffect(() => {
@@ -137,17 +68,40 @@ export default function Learn() {
     checkAuth();
   }, []);
 
-  if (!course || !user) {
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">กำลังโหลด...</h1>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !course || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">
-            {!user ? 'กรุณาเข้าสู่ระบบ' : 'ไม่พบคอร์สที่ระบุ'}
+            {error || (!user ? 'กรุณาเข้าสู่ระบบ' : 'ไม่พบคอร์สที่ระบุ')}
           </h1>
           <Button asChild>
             <Link to={!user ? "/auth/signin" : "/courses"}>
               {!user ? 'เข้าสู่ระบบ' : 'กลับไปดูคอร์ส'}
             </Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentLesson) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">ไม่พบบทเรียนที่ระบุ</h1>
+          <Button asChild>
+            <Link to={`/courses/${courseSlug}`}>กลับไปดูคอร์ส</Link>
           </Button>
         </div>
       </div>
@@ -162,7 +116,7 @@ export default function Learn() {
     );
   };
 
-  const progress = (course.completedLessons / course.totalLessons) * 100;
+  const progress = (completedLessons / course.total_lessons) * 100;
 
   const handleVideoProgressUpdate = (duration: number, completed: boolean) => {
     console.log('Video progress updated:', { duration, completed });
@@ -185,13 +139,13 @@ export default function Learn() {
               <div>
                 <h1 className="font-semibold">{course.title}</h1>
                 <p className="text-sm text-muted-foreground">
-                  {course.currentLesson.title}
+                  {currentLesson.title}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-4">
               <div className="text-sm text-muted-foreground">
-                {course.completedLessons}/{course.totalLessons} บทเรียน
+                {completedLessons}/{course.total_lessons} บทเรียน
               </div>
               <Progress value={progress} className="w-32" />
               <span className="text-sm font-medium">{Math.round(progress)}%</span>
@@ -206,8 +160,8 @@ export default function Learn() {
           {/* Secure Video Player */}
           <div className="p-6">
             <SecureVideoPlayer
-              videoId={course.currentLesson.videoId}
-              filePath={course.currentLesson.filePath}
+              videoId={currentLesson.video_id}
+              filePath={currentLesson.video?.file_path || ''}
               onProgressUpdate={handleVideoProgressUpdate}
             />
           </div>
@@ -215,8 +169,8 @@ export default function Learn() {
           {/* Lesson Content */}
           <div className="p-6 border-b">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-2xl font-bold mb-4">{course.currentLesson.title}</h2>
-              <p className="text-muted-foreground mb-6">{course.currentLesson.description}</p>
+              <h2 className="text-2xl font-bold mb-4">{currentLesson.title}</h2>
+              <p className="text-muted-foreground mb-6">{currentLesson.description}</p>
               
               <Tabs defaultValue="transcript" className="w-full">
                 <TabsList>
@@ -230,7 +184,7 @@ export default function Learn() {
                     <CardContent className="p-6">
                       <div className="prose max-w-none">
                         <pre className="whitespace-pre-wrap text-sm leading-relaxed">
-                          {course.currentLesson.transcript}
+                          {getTranscript(currentLesson.slug)}
                         </pre>
                       </div>
                     </CardContent>
@@ -303,12 +257,12 @@ export default function Learn() {
           <div className="p-4 border-b">
             <h3 className="font-semibold mb-2">เนื้อหาคอร์ส</h3>
             <div className="text-sm text-muted-foreground">
-              {course.completedLessons} จาก {course.totalLessons} บทเรียน
+              {completedLessons} จาก {course.total_lessons} บทเรียน
             </div>
           </div>
           
           <div className="p-4 space-y-2">
-            {course.chapters.map((chapter) => (
+            {chapters.map((chapter) => (
               <Collapsible 
                 key={chapter.id}
                 open={openChapters.includes(chapter.id)}
@@ -351,7 +305,7 @@ export default function Learn() {
                           </div>
                           <div className="flex items-center gap-1 text-muted-foreground">
                             <Clock className="h-3 w-3" />
-                            <span>{lesson.duration}</span>
+                            <span>{lesson.duration_text}</span>
                           </div>
                         </div>
                       </div>
