@@ -78,22 +78,24 @@ export const useCourse = (courseSlug: string, lessonSlug?: string) => {
         setLessons(lessonsData || []);
 
         // Fetch user progress if authenticated
+        let progressData: LessonProgress[] = [];
         const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          const { data: progressData, error: progressError } = await supabase
+        if (session && lessonsData && lessonsData.length > 0) {
+          const { data: userProgressData, error: progressError } = await supabase
             .from('lesson_progress')
             .select('lesson_id, completed, completed_at')
             .eq('user_id', session.user.id)
-            .in('lesson_id', (lessonsData || []).map(l => l.id));
+            .in('lesson_id', lessonsData.map(l => l.id));
 
-          if (!progressError && progressData) {
-            setProgress(progressData);
+          if (!progressError && userProgressData) {
+            progressData = userProgressData;
+            setProgress(userProgressData);
           }
         }
 
-        // Group lessons by chapters
+        // Group lessons by chapters using the fresh progress data
         const chaptersMap = new Map<number, Chapter>();
-        const progressMap = new Map(progress.map(p => [p.lesson_id, p]));
+        const progressMap = new Map(progressData.map(p => [p.lesson_id, p]));
 
         (lessonsData || []).forEach((lesson) => {
           const chapterId = lesson.chapter_id;
@@ -135,7 +137,7 @@ export const useCourse = (courseSlug: string, lessonSlug?: string) => {
     };
 
     fetchCourseData();
-  }, [courseSlug, lessonSlug, progress.length]);
+  }, [courseSlug, lessonSlug]);
 
   const completedLessons = progress.filter(p => p.completed).length;
 

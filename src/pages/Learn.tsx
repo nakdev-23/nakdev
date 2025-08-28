@@ -48,7 +48,7 @@ export default function Learn() {
   const [openChapters, setOpenChapters] = useState<number[]>([1, 2, 3]);
   const [user, setUser] = useState(null);
 
-  const { course, chapters, currentLesson, completedLessons, isLoading, error } = useCourse(
+  const { course, lessons, chapters, currentLesson, completedLessons, isLoading, error } = useCourse(
     courseSlug || '', 
     lessonSlug
   );
@@ -117,6 +117,24 @@ export default function Learn() {
   };
 
   const progress = (completedLessons / course.total_lessons) * 100;
+
+  // Navigation helpers
+  const getCurrentLessonIndex = () => {
+    return lessons.findIndex(lesson => lesson.slug === currentLesson?.slug);
+  };
+
+  const getPreviousLesson = () => {
+    const currentIndex = getCurrentLessonIndex();
+    return currentIndex > 0 ? lessons[currentIndex - 1] : null;
+  };
+
+  const getNextLesson = () => {
+    const currentIndex = getCurrentLessonIndex();
+    return currentIndex < lessons.length - 1 ? lessons[currentIndex + 1] : null;
+  };
+
+  const previousLesson = getPreviousLesson();
+  const nextLesson = getNextLesson();
 
   const handleVideoProgressUpdate = (duration: number, completed: boolean) => {
     console.log('Video progress updated:', { duration, completed });
@@ -240,14 +258,33 @@ export default function Learn() {
           {/* Navigation */}
           <div className="p-6">
             <div className="max-w-4xl mx-auto flex items-center justify-between">
-              <Button variant="outline">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                บทก่อนหน้า
-              </Button>
-              <Button>
-                บทต่อไป
-                <ChevronRight className="h-4 w-4 ml-2" />
-              </Button>
+              {previousLesson ? (
+                <Button variant="outline" asChild>
+                  <Link to={`/learn/${courseSlug}/${previousLesson.slug}`}>
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    บทก่อนหน้า
+                  </Link>
+                </Button>
+              ) : (
+                <Button variant="outline" disabled>
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  บทก่อนหน้า
+                </Button>
+              )}
+              
+              {nextLesson ? (
+                <Button asChild>
+                  <Link to={`/learn/${courseSlug}/${nextLesson.slug}`}>
+                    บทต่อไป
+                    <ChevronRight className="h-4 w-4 ml-2" />
+                  </Link>
+                </Button>
+              ) : (
+                <Button disabled>
+                  บทต่อไป
+                  <ChevronRight className="h-4 w-4 ml-2" />
+                </Button>
+              )}
             </div>
           </div>
         </main>
@@ -282,9 +319,10 @@ export default function Learn() {
                 <CollapsibleContent>
                   <div className="space-y-1 mt-2">
                     {chapter.lessons.map((lesson) => (
-                      <div 
+                      <Link 
                         key={lesson.id}
-                        className={`flex items-center gap-3 p-3 rounded-lg text-sm cursor-pointer hover:bg-muted/50 ${
+                        to={`/learn/${courseSlug}/${lesson.slug}`}
+                        className={`flex items-center gap-3 p-3 rounded-lg text-sm cursor-pointer hover:bg-muted/50 transition-colors block ${
                           lesson.current ? 'bg-primary/10 border border-primary/20' : ''
                         }`}
                       >
@@ -308,7 +346,7 @@ export default function Learn() {
                             <span>{lesson.duration_text}</span>
                           </div>
                         </div>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 </CollapsibleContent>
