@@ -1,10 +1,14 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { Database } from '@/integrations/supabase/types';
-
-type Profile = Database['public']['Tables']['profiles']['Row'];
-type UserRole = Database['public']['Enums']['user_role'];
+// Using local types to avoid dependency on generated Supabase types
+type UserRole = 'ADMIN' | 'USER';
+type Profile = {
+  user_id: string;
+  email: string | null;
+  full_name: string | null;
+  role: UserRole | null;
+};
 
 interface AuthContextType {
   user: User | null;
@@ -40,12 +44,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        await fetchProfile(session.user.id);
+        setTimeout(() => {
+          fetchProfile(session.user!.id);
+        }, 0);
       } else {
         setProfile(null);
       }
@@ -57,14 +63,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchProfile = async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
-      setProfile(data);
+      setProfile(data ?? null);
     } catch (error) {
       console.error('Error fetching profile:', error);
       setProfile(null);
@@ -80,24 +86,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signUp = async (email: string, password: string, fullName?: string) => {
+    const redirectUrl = `${window.location.origin}/`;
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: {
-          full_name: fullName,
-        },
+        data: { full_name: fullName },
+        emailRedirectTo: redirectUrl,
       },
     });
 
     if (!error && data.user) {
       // Create profile
-      await supabase
+      await (supabase as any)
         .from('profiles')
         .insert({
           user_id: data.user.id,
           email,
-          full_name: fullName,
+          full_name: fullName ?? null,
           role: 'USER' as UserRole,
         });
     }
