@@ -6,9 +6,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Plus, Pencil, Trash2, BookOpen, Play } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import AdminLayout from "@/components/admin/AdminLayout";
 
 interface Course {
   id: string;
@@ -17,6 +20,7 @@ interface Course {
   description: string;
   instructor: string;
   total_lessons: number;
+  price: number | null;
   created_at: string;
 }
 
@@ -26,13 +30,15 @@ export default function AdminCourses() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
     description: '',
     instructor: '',
-    total_lessons: 0
+    total_lessons: 0,
+    price: 0
   });
 
   useEffect(() => {
@@ -91,7 +97,7 @@ export default function AdminCourses() {
 
       setIsDialogOpen(false);
       setEditingCourse(null);
-      setFormData({ title: '', slug: '', description: '', instructor: '', total_lessons: 0 });
+      setFormData({ title: '', slug: '', description: '', instructor: '', total_lessons: 0, price: 0 });
       fetchCourses();
     } catch (error) {
       console.error('Error saving course:', error);
@@ -110,7 +116,8 @@ export default function AdminCourses() {
       slug: course.slug,
       description: course.description || '',
       instructor: course.instructor || '',
-      total_lessons: course.total_lessons || 0
+      total_lessons: course.total_lessons || 0,
+      price: course.price || 0
     });
     setIsDialogOpen(true);
   };
@@ -144,20 +151,23 @@ export default function AdminCourses() {
 
   const openAddDialog = () => {
     setEditingCourse(null);
-    setFormData({ title: '', slug: '', description: '', instructor: '', total_lessons: 0 });
+    setFormData({ title: '', slug: '', description: '', instructor: '', total_lessons: 0, price: 0 });
     setIsDialogOpen(true);
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
+      <AdminLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <AdminLayout>
+      <div className="space-y-6">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>จัดการคอร์ส</CardTitle>
@@ -204,25 +214,36 @@ export default function AdminCourses() {
                     rows={3}
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="instructor">ผู้สอน</Label>
-                    <Input
-                      id="instructor"
-                      value={formData.instructor}
-                      onChange={(e) => setFormData({ ...formData, instructor: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="total_lessons">จำนวนบทเรียน</Label>
-                    <Input
-                      id="total_lessons"
-                      type="number"
-                      value={formData.total_lessons}
-                      onChange={(e) => setFormData({ ...formData, total_lessons: parseInt(e.target.value) || 0 })}
-                    />
-                  </div>
-                </div>
+                 <div className="grid grid-cols-3 gap-4">
+                   <div>
+                     <Label htmlFor="instructor">ผู้สอน</Label>
+                     <Input
+                       id="instructor"
+                       value={formData.instructor}
+                       onChange={(e) => setFormData({ ...formData, instructor: e.target.value })}
+                     />
+                   </div>
+                   <div>
+                     <Label htmlFor="total_lessons">จำนวนบทเรียน</Label>
+                     <Input
+                       id="total_lessons"
+                       type="number"
+                       value={formData.total_lessons}
+                       onChange={(e) => setFormData({ ...formData, total_lessons: parseInt(e.target.value) || 0 })}
+                     />
+                   </div>
+                   <div>
+                     <Label htmlFor="price">ราคา (บาท)</Label>
+                     <Input
+                       id="price"
+                       type="number"
+                       value={formData.price}
+                       onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
+                       min="0"
+                       step="0.01"
+                     />
+                   </div>
+                 </div>
                 <Button type="submit" className="w-full">
                   {editingCourse ? 'อัปเดต' : 'บันทึก'}
                 </Button>
@@ -237,47 +258,71 @@ export default function AdminCourses() {
             </p>
           ) : (
             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ชื่อคอร์ส</TableHead>
-                  <TableHead>ผู้สอน</TableHead>
-                  <TableHead>บทเรียน</TableHead>
-                  <TableHead>วันที่สร้าง</TableHead>
-                  <TableHead>การจัดการ</TableHead>
-                </TableRow>
-              </TableHeader>
+               <TableHeader>
+                 <TableRow>
+                   <TableHead>ชื่อคอร์ส</TableHead>
+                   <TableHead>ผู้สอน</TableHead>
+                   <TableHead>บทเรียน</TableHead>
+                   <TableHead>ราคา</TableHead>
+                   <TableHead>วันที่สร้าง</TableHead>
+                   <TableHead>การจัดการ</TableHead>
+                 </TableRow>
+               </TableHeader>
               <TableBody>
-                {courses.map((course) => (
-                  <TableRow key={course.id}>
-                    <TableCell className="font-medium">{course.title}</TableCell>
-                    <TableCell>{course.instructor || '-'}</TableCell>
-                    <TableCell>{course.total_lessons}</TableCell>
-                    <TableCell>{new Date(course.created_at).toLocaleDateString('th-TH')}</TableCell>
-                    <TableCell>
-                      <div className="flex space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEdit(course)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDelete(course.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                 {courses.map((course) => (
+                   <TableRow key={course.id}>
+                     <TableCell>
+                       <div>
+                         <div className="font-medium">{course.title}</div>
+                         <div className="text-sm text-muted-foreground">{course.slug}</div>
+                       </div>
+                     </TableCell>
+                     <TableCell>{course.instructor || '-'}</TableCell>
+                     <TableCell>
+                       <Badge variant="secondary">{course.total_lessons} บทเรียน</Badge>
+                     </TableCell>
+                     <TableCell>
+                       <Badge variant={course.price === 0 || course.price === null ? "secondary" : "default"}>
+                         {course.price === 0 || course.price === null ? "ฟรี" : `฿${course.price}`}
+                       </Badge>
+                     </TableCell>
+                     <TableCell>{new Date(course.created_at).toLocaleDateString('th-TH')}</TableCell>
+                     <TableCell>
+                       <div className="flex space-x-2">
+                         <Button
+                           variant="outline"
+                           size="sm"
+                           onClick={() => navigate(`/admin/courses/${course.id}/lessons`)}
+                           title="จัดการบทเรียน"
+                         >
+                           <BookOpen className="h-4 w-4" />
+                         </Button>
+                         <Button
+                           variant="outline"
+                           size="sm"
+                           onClick={() => handleEdit(course)}
+                           title="แก้ไขคอร์ส"
+                         >
+                           <Pencil className="h-4 w-4" />
+                         </Button>
+                         <Button
+                           variant="outline"
+                           size="sm"
+                           onClick={() => handleDelete(course.id)}
+                           title="ลบคอร์ส"
+                         >
+                           <Trash2 className="h-4 w-4" />
+                         </Button>
+                       </div>
+                     </TableCell>
+                   </TableRow>
+                 ))}
               </TableBody>
             </Table>
           )}
         </CardContent>
       </Card>
     </div>
+    </AdminLayout>
   );
 }

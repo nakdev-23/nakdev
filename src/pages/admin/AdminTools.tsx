@@ -6,9 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import AdminLayout from "@/components/admin/AdminLayout";
 
 interface Tool {
   id: string;
@@ -153,14 +155,17 @@ export default function AdminTools() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
+      <AdminLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <AdminLayout>
+      <div className="space-y-6">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>จัดการเครื่องมือ</CardTitle>
@@ -262,8 +267,14 @@ export default function AdminTools() {
                 {tools.map((tool) => (
                   <TableRow key={tool.id}>
                     <TableCell className="font-medium">{tool.title}</TableCell>
-                    <TableCell>{tool.category || '-'}</TableCell>
-                    <TableCell>₿{tool.price}</TableCell>
+                     <TableCell>
+                       <Badge variant="outline">{tool.category || 'ไม่ระบุ'}</Badge>
+                     </TableCell>
+                     <TableCell>
+                       <Badge variant={tool.price === 0 ? "secondary" : "default"}>
+                         {tool.price === 0 ? "ฟรี" : `฿${tool.price}`}
+                       </Badge>
+                     </TableCell>
                     <TableCell>{new Date(tool.created_at).toLocaleDateString('th-TH')}</TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
@@ -291,5 +302,6 @@ export default function AdminTools() {
         </CardContent>
       </Card>
     </div>
+    </AdminLayout>
   );
 }

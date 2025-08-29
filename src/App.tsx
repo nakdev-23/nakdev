@@ -25,6 +25,7 @@ import Cart from "./pages/Cart";
 import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminCourses from "./pages/admin/AdminCourses";
+import AdminLessons from "./pages/admin/AdminLessons";
 import AdminTools from "./pages/admin/AdminTools";
 import AdminEbooks from "./pages/admin/AdminEbooks";
 import AdminUsers from "./pages/admin/AdminUsers";
@@ -70,21 +71,13 @@ const App = () => (
               } 
             />
             
-            {/* Admin Routes */}
-            <Route 
-              path="admin" 
-              element={
-                <ProtectedRoute requireAdmin={true}>
-                  <Layout />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<AdminDashboard />} />
-              <Route path="courses" element={<AdminCourses />} />
-              <Route path="tools" element={<AdminTools />} />
-              <Route path="ebooks" element={<AdminEbooks />} />
-              <Route path="users" element={<AdminUsers />} />
-            </Route>
+            {/* Admin Routes - without nested Layout */}
+            <Route path="admin" element={<AdminDashboard />} />
+            <Route path="admin/courses" element={<AdminCourses />} />
+            <Route path="admin/courses/:courseId/lessons" element={<AdminLessons />} />
+            <Route path="admin/tools" element={<AdminTools />} />
+            <Route path="admin/ebooks" element={<AdminEbooks />} />
+            <Route path="admin/users" element={<AdminUsers />} />
             
             {/* Learning pages without main layout */}
             <Route path="learn/:courseSlug/:lessonSlug" element={<Learn />} />
