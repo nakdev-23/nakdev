@@ -8,49 +8,53 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTools } from "@/hooks/useTools";
 import { useCart } from "@/hooks/useCart";
-
-const toolCategories = [
-  { id: "all", name: "ทั้งหมด", icon: Filter },
-  { id: "template", name: "เทมเพลต", icon: FileText },
-  { id: "ui", name: "UI Components", icon: Palette },
-  { id: "automation", name: "เครื่องมืออัตโนมัติ", icon: Zap },
-  { id: "development", name: "Development", icon: Code2 }
-];
-
-
+const toolCategories = [{
+  id: "all",
+  name: "ทั้งหมด",
+  icon: Filter
+}, {
+  id: "template",
+  name: "เทมเพลต",
+  icon: FileText
+}, {
+  id: "ui",
+  name: "UI Components",
+  icon: Palette
+}, {
+  id: "automation",
+  name: "เครื่องมืออัตโนมัติ",
+  icon: Zap
+}, {
+  id: "development",
+  name: "Development",
+  icon: Code2
+}];
 export default function Tools() {
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [priceFilter, setPriceFilter] = useState("all");
-  
-  const { tools, isLoading, error } = useTools();
-  const { addToCart } = useCart();
-
+  const {
+    tools,
+    isLoading,
+    error
+  } = useTools();
+  const {
+    addToCart
+  } = useCart();
   const filteredTools = tools.filter(tool => {
-    const matchesSearch = tool.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         tool.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    
+    const matchesSearch = tool.title.toLowerCase().includes(searchQuery.toLowerCase()) || tool.description?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = categoryFilter === "all" || tool.category === categoryFilter;
-    
-    const matchesPrice = priceFilter === "all" || 
-                        (priceFilter === "free" && tool.price === 0) ||
-                        (priceFilter === "paid" && tool.price > 0);
-
+    const matchesPrice = priceFilter === "all" || priceFilter === "free" && tool.price === 0 || priceFilter === "paid" && tool.price > 0;
     return matchesSearch && matchesCategory && matchesPrice;
   });
-
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
+    return <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">กำลังโหลด...</h1>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <section className="bg-hero-gradient py-20 relative overflow-hidden">
         <div className="absolute inset-0">
@@ -70,12 +74,7 @@ export default function Tools() {
             {/* Search Bar */}
             <div className="relative max-w-md mx-auto animate-fade-in-delay-2">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 h-5 w-5" />
-              <Input
-                placeholder="ค้นหาเครื่องมือ..."
-                className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/60"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+              <Input placeholder="ค้นหาเครื่องมือ..." className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/60" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
             </div>
           </div>
         </div>
@@ -85,19 +84,10 @@ export default function Tools() {
       <section className="py-8 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="flex flex-wrap justify-center gap-4">
-            {toolCategories.map((category) => (
-              <Button
-                key={category.id}
-                variant={categoryFilter === category.id ? "default" : "outline"}
-                className={`flex items-center gap-2 ${
-                  categoryFilter === category.id ? "glow-on-hover" : ""
-                }`}
-                onClick={() => setCategoryFilter(category.id)}
-              >
+            {toolCategories.map(category => <Button key={category.id} variant={categoryFilter === category.id ? "default" : "outline"} className={`flex items-center gap-2 ${categoryFilter === category.id ? "glow-on-hover" : ""}`} onClick={() => setCategoryFilter(category.id)}>
                 <category.icon className="h-4 w-4" />
                 {category.name}
-              </Button>
-            ))}
+              </Button>)}
           </div>
         </div>
       </section>
@@ -125,8 +115,7 @@ export default function Tools() {
 
           {/* Tools Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredTools.map((tool) => (
-              <Card key={tool.id} className="glass-card hover-lift">
+            {filteredTools.map(tool => <Card key={tool.id} className="glass-card hover-lift">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-3">
                     <Badge variant="outline" className="badge-level text-xs">
@@ -142,29 +131,20 @@ export default function Tools() {
                     {tool.description}
                   </p>
                   
-                  {tool.price === 0 ? (
-                    <Button className="w-full" asChild>
+                  {tool.price === 0 ? <Button className="w-full" asChild>
                       <Link to={`/tools/${tool.slug}`}>
                         <Download className="mr-2 h-4 w-4" />
                         ดาวน์โหลดฟรี
                       </Link>
-                    </Button>
-                  ) : (
-                    <Button 
-                      className="w-full" 
-                      onClick={() => addToCart(tool.id, 'tool')}
-                    >
+                    </Button> : <Button className="w-full" onClick={() => addToCart(tool.id, 'tool')}>
                       <ShoppingCart className="mr-2 h-4 w-4" />
                       เพิ่มลงตะกร้า ฿{tool.price.toLocaleString()}
-                    </Button>
-                  )}
+                    </Button>}
                 </CardContent>
-              </Card>
-            ))}
+              </Card>)}
           </div>
 
-          {filteredTools.length === 0 && (
-            <div className="text-center py-20">
+          {filteredTools.length === 0 && <div className="text-center py-20">
               <div className="w-32 h-32 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
                 <Search className="h-16 w-16 text-muted-foreground" />
               </div>
@@ -173,30 +153,17 @@ export default function Tools() {
                 ลองเปลี่ยนคำค้นหาหรือปรับเงื่อนไขการกรอง
               </p>
               <Button variant="outline" onClick={() => {
-                setSearchQuery("");
-                setCategoryFilter("all");
-                setPriceFilter("all");
-              }}>
+            setSearchQuery("");
+            setCategoryFilter("all");
+            setPriceFilter("all");
+          }}>
                 ล้างตัวกรอง
               </Button>
-            </div>
-          )}
+            </div>}
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-muted/30">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-6">ไม่พบเครื่องมือที่ต้องการ?</h2>
-          <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
-            แจ้งความต้องการของคุณให้เราทราบ เราจะพัฒนาเครื่องมือที่ตรงกับความต้องการของคุณ
-          </p>
-          <Button size="lg" className="glow-on-hover">
-            แจ้งความต้องการ
-            <ExternalLink className="ml-2 h-5 w-5" />
-          </Button>
-        </div>
-      </section>
-    </div>
-  );
+      
+    </div>;
 }
