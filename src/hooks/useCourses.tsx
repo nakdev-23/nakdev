@@ -8,6 +8,7 @@ interface Course {
   description: string;
   instructor: string;
   total_lessons: number;
+  price: number | null;
 }
 
 interface Lesson {

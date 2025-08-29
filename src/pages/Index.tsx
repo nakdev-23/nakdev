@@ -137,8 +137,8 @@ export default function Index() {
                     <Badge variant="outline" className="badge-level text-xs">
                       เริ่มต้น
                     </Badge>
-                    <Badge variant="outline" className="badge-free">
-                      ฟรี
+                    <Badge variant="outline" className={course.price === 0 || course.price === null ? "badge-free" : "badge-paid"}>
+                      {course.price === 0 || course.price === null ? "ฟรี" : `฿${course.price}`}
                     </Badge>
                   </div>
                   <h3 className="text-lg font-semibold mb-2">{course.title}</h3>
