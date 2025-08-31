@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Clock, Users, Star, Play, Lock, CheckCircle, ArrowRight, Share2 } from "lucide-react";
+import { Clock, Users, Star, Play, Lock, CheckCircle, ArrowRight, Share2, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
 import { useCourseWithLessons } from "@/hooks/useCourses";
+import { useCart } from "@/hooks/useCart";
+import { useAuth } from "@/hooks/useAuth";
 
 // Default features if none provided
 const defaultFeatures = [
@@ -24,6 +26,8 @@ export default function CourseDetail() {
   const [couponCode, setCouponCode] = useState("");
   
   const { course, lessons, isLoading, error } = useCourseWithLessons(slug || '');
+  const { addToCart } = useCart();
+  const { user } = useAuth();
 
   if (isLoading) {
     return (
@@ -60,6 +64,12 @@ export default function CourseDetail() {
 
   // Get first lesson slug for navigation
   const firstLesson = lessons.length > 0 ? lessons[0] : null;
+
+  const handleAddToCart = () => {
+    if (course?.id) {
+      addToCart(course.id, 'course');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -149,12 +159,31 @@ export default function CourseDetail() {
                     </div>
                   </div>
 
-                  <Button className="w-full glow-on-hover mb-4" size="lg" asChild>
-                    <Link to={firstLesson ? `/learn/${course.slug}/${firstLesson.slug}` : '#'}>
-                      {course.is_free ? 'เริ่มเรียนฟรี' : 'สมัครเรียน'}
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </Link>
-                  </Button>
+                  {course.is_free ? (
+                    <Button className="w-full glow-on-hover mb-4" size="lg" asChild>
+                      <Link to={firstLesson ? `/learn/${course.slug}/${firstLesson.slug}` : '#'}>
+                        เริ่มเรียนฟรี
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                      </Link>
+                    </Button>
+                  ) : (
+                    <div className="space-y-3 mb-4">
+                      <Button 
+                        className="w-full glow-on-hover" 
+                        size="lg"
+                        onClick={handleAddToCart}
+                        disabled={!user}
+                      >
+                        <ShoppingCart className="mr-2 h-5 w-5" />
+                        {user ? 'เพิ่มลงตะกร้า' : 'เข้าสู่ระบบเพื่อซื้อ'}
+                      </Button>
+                      {!user && (
+                        <Button variant="outline" className="w-full" asChild>
+                          <Link to="/auth">เข้าสู่ระบบ</Link>
+                        </Button>
+                      )}
+                    </div>
+                  )}
 
                   <Button variant="outline" className="w-full mb-6">
                     <Share2 className="mr-2 h-4 w-4" />
@@ -322,11 +351,23 @@ export default function CourseDetail() {
                       <div className="text-2xl font-bold">฿{course.price?.toLocaleString()}</div>
                     )}
                   </div>
-                  <Button className="w-full glow-on-hover" size="lg" asChild>
-                    <Link to={firstLesson ? `/learn/${course.slug}/${firstLesson.slug}` : '#'}>
-                      {course.is_free ? 'เริ่มเรียนฟรี' : 'สมัครเรียน'}
-                    </Link>
-                  </Button>
+                  {course.is_free ? (
+                    <Button className="w-full glow-on-hover" size="lg" asChild>
+                      <Link to={firstLesson ? `/learn/${course.slug}/${firstLesson.slug}` : '#'}>
+                        เริ่มเรียนฟรี
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button 
+                      className="w-full glow-on-hover" 
+                      size="lg"
+                      onClick={handleAddToCart}
+                      disabled={!user}
+                    >
+                      <ShoppingCart className="mr-2 h-5 w-5" />
+                      {user ? 'เพิ่มลงตะกร้า' : 'เข้าสู่ระบบเพื่อซื้อ'}
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             </div>
