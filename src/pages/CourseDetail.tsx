@@ -9,8 +9,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Input } from "@/components/ui/input";
 import { useCourseWithLessons } from "@/hooks/useCourses";
 
-// Mock data for features and additional info
-const courseFeatures = [
+// Default features if none provided
+const defaultFeatures = [
   "วิดีโอ HD คุณภาพสูง",
   "แบบฝึกหัดและโปรเจค", 
   "ใบประกาศนียบัตร",
@@ -71,11 +71,13 @@ export default function CourseDetail() {
             <div className="lg:col-span-2">
               <div className="flex items-center gap-2 mb-4">
                 <Badge variant="outline" className="badge-level">
-                  เริ่มต้น
+                  {course.level}
                 </Badge>
-                <Badge variant="outline" className="badge-free">
-                  ฟรี
-                </Badge>
+                {course.is_free && (
+                  <Badge variant="outline" className="badge-free">
+                    ฟรี
+                  </Badge>
+                )}
               </div>
               
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 animate-fade-up">
@@ -89,25 +91,24 @@ export default function CourseDetail() {
               <div className="flex flex-wrap gap-6 text-white/80 mb-8 animate-fade-in-delay-2">
                 <div className="flex items-center gap-2">
                   <Clock className="h-5 w-5" />
-                  <span>8 ชั่วโมง</span>
+                  <span>{course.duration_hours} ชั่วโมง</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Users className="h-5 w-5" />
-                  <span>1,250 นักเรียน</span>
+                  <span>{course.student_count.toLocaleString()} นักเรียน</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <span>4.8 (89 รีวิว)</span>
+                  <span>{course.rating} ({course.review_count} รีวิว)</span>
                 </div>
               </div>
 
               <div className="flex flex-wrap gap-2 animate-fade-in-delay-3">
-                <Badge variant="secondary" className="bg-white/10 text-white border-white/20">
-                  React
-                </Badge>
-                <Badge variant="secondary" className="bg-white/10 text-white border-white/20">  
-                  JavaScript
-                </Badge>
+                {course.tags?.map((tag, index) => (
+                  <Badge key={index} variant="secondary" className="bg-white/10 text-white border-white/20">
+                    {tag}
+                  </Badge>
+                ))}
               </div>
             </div>
 
@@ -124,16 +125,33 @@ export default function CourseDetail() {
                 <CardContent className="p-6">
                   <div className="text-center mb-6">
                     <div>
-                      <div className="text-3xl font-bold text-success mb-2">ฟรี!</div>
-                      <div className="text-muted-foreground line-through">
-                        ฿1,990
-                      </div>
+                      {course.is_free ? (
+                        <>
+                          <div className="text-3xl font-bold text-success mb-2">ฟรี!</div>
+                          {course.original_price && (
+                            <div className="text-muted-foreground line-through">
+                              ฿{course.original_price.toLocaleString()}
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <div className="text-3xl font-bold mb-2">
+                            ฿{course.price?.toLocaleString()}
+                          </div>
+                          {course.original_price && course.original_price > (course.price || 0) && (
+                            <div className="text-muted-foreground line-through">
+                              ฿{course.original_price.toLocaleString()}
+                            </div>
+                          )}
+                        </>
+                      )}
                     </div>
                   </div>
 
                   <Button className="w-full glow-on-hover mb-4" size="lg" asChild>
                     <Link to={firstLesson ? `/learn/${course.slug}/${firstLesson.slug}` : '#'}>
-                      เริ่มเรียนฟรี
+                      {course.is_free ? 'เริ่มเรียนฟรี' : 'สมัครเรียน'}
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Link>
                   </Button>
@@ -145,7 +163,7 @@ export default function CourseDetail() {
 
                   <div className="space-y-2 text-sm">
                     <h4 className="font-semibold mb-3">สิ่งที่คุณจะได้รับ:</h4>
-                    {courseFeatures.map((feature, index) => (
+                    {(course.features?.length ? course.features : defaultFeatures).map((feature, index) => (
                       <div key={index} className="flex items-center gap-2">
                         <CheckCircle className="h-4 w-4 text-success flex-shrink-0" />
                         <span>{feature}</span>
@@ -173,28 +191,27 @@ export default function CourseDetail() {
                 </TabsList>
 
                 <TabsContent value="overview" className="mt-8">
-                  <Card className="glass-card">
-                    <CardContent className="p-8">
-                      <h3 className="text-2xl font-bold mb-6">เกี่ยวกับคอร์สนี้</h3>
-                      <div className="prose max-w-none">
-                        <p className="text-muted-foreground mb-4">
-                          คอร์ส React สำหรับผู้เริ่มต้นนี้ ออกแบบมาเพื่อให้คุณเรียนรู้ React จากพื้นฐานจนสามารถสร้างเว็บแอปพลิเคชันได้จริง ไม่ว่าคุณจะเป็นมือใหม่หรือมีพื้นฐาน JavaScript อยู่แล้ว
-                        </p>
-                        <p className="text-muted-foreground mb-4">
-                          ด้วยเนื้อหาที่ครอบคลุมและตัวอย่างที่เข้าใจง่าย คุณจะได้เรียนรู้การใช้งาน Components, Props, State, Hooks และอื่นๆ อีกมากมาย
-                        </p>
-                        <h4 className="font-semibold mb-3">สิ่งที่คุณจะได้เรียนรู้:</h4>
-                        <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                          <li>พื้นฐาน React และการทำงาน</li>
-                          <li>การสร้างและใช้งาน Components</li>
-                          <li>การจัดการ State และ Props</li>
-                          <li>React Hooks: useState, useEffect และอื่นๆ</li>
-                          <li>การสร้างแอปพลิเคชันจริง</li>
-                          <li>Best Practices และเทคนิคขั้นสูง</li>
-                        </ul>
-                      </div>
-                    </CardContent>
-                  </Card>
+                    <Card className="glass-card">
+                      <CardContent className="p-8">
+                        <h3 className="text-2xl font-bold mb-6">เกี่ยวกับคอร์สนี้</h3>
+                        <div className="prose max-w-none">
+                          {course.about_course ? (
+                            <div className="text-muted-foreground whitespace-pre-line">
+                              {course.about_course}
+                            </div>
+                          ) : (
+                            <>
+                              <p className="text-muted-foreground mb-4">
+                                {course.description}
+                              </p>
+                              <p className="text-muted-foreground mb-4">
+                                คอร์สนี้ออกแบบมาเพื่อให้คุณเรียนรู้จากพื้นฐานจนสามารถนำไปใช้งานได้จริง
+                              </p>
+                            </>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
                 </TabsContent>
 
                 <TabsContent value="curriculum" className="mt-8">
@@ -203,7 +220,7 @@ export default function CourseDetail() {
                       <div className="flex items-center justify-between mb-6">
                         <h3 className="text-2xl font-bold">หลักสูตร</h3>
                         <div className="text-muted-foreground">
-                          {course.total_lessons} บทเรียน • 8 ชั่วโมง
+                          {course.total_lessons} บทเรียน • {course.duration_hours} ชั่วโมง
                         </div>
                       </div>
 
@@ -271,15 +288,20 @@ export default function CourseDetail() {
                           <div className="w-20 h-20 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full flex-shrink-0"></div>
                           <div>
                             <h4 className="text-xl font-semibold mb-2">{course.instructor}</h4>
-                            <p className="text-muted-foreground mb-2">
-                              Senior Frontend Developer • Tech Corp
-                            </p>
-                            <p className="text-muted-foreground mb-4">
-                              ประสบการณ์ 5+ ปี
-                            </p>
+                            {(course.instructor_title || course.instructor_company) && (
+                              <p className="text-muted-foreground mb-2">
+                                {course.instructor_title}
+                                {course.instructor_title && course.instructor_company && ' • '}
+                                {course.instructor_company}
+                              </p>
+                            )}
+                            {course.instructor_experience && (
+                              <p className="text-muted-foreground mb-4">
+                                {course.instructor_experience}
+                              </p>
+                            )}
                             <p className="text-muted-foreground">
-                              ผู้เชี่ยวชาญด้าน Frontend Development ที่มีประสบการณ์ในการสอนและพัฒนาเว็บแอปพลิเคชันมากกว่า 5 ปี 
-                              เชี่ยวชาญเรื่อง React, JavaScript และเทคโนโลยีสมัยใหม่
+                              {course.instructor_bio || 'ผู้เชี่ยวชาญที่มีประสบการณ์ในการสอนและพัฒนาแอปพลิเคชัน'}
                             </p>
                           </div>
                         </div>
@@ -294,11 +316,15 @@ export default function CourseDetail() {
               <Card className="glass-card">
                 <CardContent className="p-6">
                   <div className="text-center mb-4">
-                    <div className="text-2xl font-bold text-success">ฟรี!</div>
+                    {course.is_free ? (
+                      <div className="text-2xl font-bold text-success">ฟรี!</div>
+                    ) : (
+                      <div className="text-2xl font-bold">฿{course.price?.toLocaleString()}</div>
+                    )}
                   </div>
                   <Button className="w-full glow-on-hover" size="lg" asChild>
                     <Link to={firstLesson ? `/learn/${course.slug}/${firstLesson.slug}` : '#'}>
-                      เริ่มเรียนฟรี
+                      {course.is_free ? 'เริ่มเรียนฟรี' : 'สมัครเรียน'}
                     </Link>
                   </Button>
                 </CardContent>

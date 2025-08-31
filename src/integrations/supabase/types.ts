@@ -73,34 +73,76 @@ export type Database = {
       }
       courses: {
         Row: {
+          about_course: string | null
           created_at: string
           description: string | null
+          duration_hours: number | null
+          features: string[] | null
           id: string
           instructor: string | null
+          instructor_bio: string | null
+          instructor_company: string | null
+          instructor_experience: string | null
+          instructor_title: string | null
+          is_free: boolean | null
+          level: string | null
+          original_price: number | null
           price: number | null
+          rating: number | null
+          review_count: number | null
           slug: string
+          student_count: number | null
+          tags: string[] | null
           title: string
           total_lessons: number | null
           updated_at: string
         }
         Insert: {
+          about_course?: string | null
           created_at?: string
           description?: string | null
+          duration_hours?: number | null
+          features?: string[] | null
           id?: string
           instructor?: string | null
+          instructor_bio?: string | null
+          instructor_company?: string | null
+          instructor_experience?: string | null
+          instructor_title?: string | null
+          is_free?: boolean | null
+          level?: string | null
+          original_price?: number | null
           price?: number | null
+          rating?: number | null
+          review_count?: number | null
           slug: string
+          student_count?: number | null
+          tags?: string[] | null
           title: string
           total_lessons?: number | null
           updated_at?: string
         }
         Update: {
+          about_course?: string | null
           created_at?: string
           description?: string | null
+          duration_hours?: number | null
+          features?: string[] | null
           id?: string
           instructor?: string | null
+          instructor_bio?: string | null
+          instructor_company?: string | null
+          instructor_experience?: string | null
+          instructor_title?: string | null
+          is_free?: boolean | null
+          level?: string | null
+          original_price?: number | null
           price?: number | null
+          rating?: number | null
+          review_count?: number | null
           slug?: string
+          student_count?: number | null
+          tags?: string[] | null
           title?: string
           total_lessons?: number | null
           updated_at?: string

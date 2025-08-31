@@ -9,6 +9,20 @@ interface Course {
   instructor: string;
   total_lessons: number;
   price: number | null;
+  level: string;
+  duration_hours: number;
+  student_count: number;
+  rating: number;
+  review_count: number;
+  features: string[];
+  tags: string[];
+  instructor_title: string | null;
+  instructor_company: string | null;
+  instructor_experience: string | null;
+  instructor_bio: string | null;
+  about_course: string | null;
+  is_free: boolean;
+  original_price: number | null;
 }
 
 interface Lesson {

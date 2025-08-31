@@ -1,0 +1,16 @@
+-- Add missing fields to courses table for comprehensive course details
+ALTER TABLE public.courses 
+ADD COLUMN IF NOT EXISTS level TEXT DEFAULT 'เริ่มต้น',
+ADD COLUMN IF NOT EXISTS duration_hours INTEGER DEFAULT 0,
+ADD COLUMN IF NOT EXISTS student_count INTEGER DEFAULT 0,
+ADD COLUMN IF NOT EXISTS rating DECIMAL(2,1) DEFAULT 0.0,
+ADD COLUMN IF NOT EXISTS review_count INTEGER DEFAULT 0,
+ADD COLUMN IF NOT EXISTS features TEXT[] DEFAULT '{}',
+ADD COLUMN IF NOT EXISTS tags TEXT[] DEFAULT '{}',
+ADD COLUMN IF NOT EXISTS instructor_title TEXT,
+ADD COLUMN IF NOT EXISTS instructor_company TEXT,
+ADD COLUMN IF NOT EXISTS instructor_experience TEXT,
+ADD COLUMN IF NOT EXISTS instructor_bio TEXT,
+ADD COLUMN IF NOT EXISTS about_course TEXT,
+ADD COLUMN IF NOT EXISTS is_free BOOLEAN DEFAULT false,
+ADD COLUMN IF NOT EXISTS original_price NUMERIC;
