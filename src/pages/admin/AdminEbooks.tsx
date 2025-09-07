@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import AdminLayout from "@/components/admin/AdminLayout";
 
 interface Ebook {
   id: string;
@@ -163,146 +164,148 @@ export default function AdminEbooks() {
   }
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>จัดการ E-books</CardTitle>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={openAddDialog}>
-                <Plus className="h-4 w-4 mr-2" />
-                เพิ่ม E-book ใหม่
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>
-                  {editingEbook ? 'แก้ไข E-book' : 'เพิ่ม E-book ใหม่'}
-                </DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="title">ชื่อ E-book</Label>
-                    <Input
-                      id="title"
-                      value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="slug">Slug</Label>
-                    <Input
-                      id="slug"
-                      value={formData.slug}
-                      onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                      required
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="description">คำอธิบาย</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    rows={3}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="price">ราคา (บาท)</Label>
-                    <Input
-                      id="price"
-                      type="number"
-                      value={formData.price}
-                      onChange={(e) => setFormData({ ...formData, price: parseInt(e.target.value) || 0 })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="pages">จำนวนหน้า</Label>
-                    <Input
-                      id="pages"
-                      type="number"
-                      value={formData.pages}
-                      onChange={(e) => setFormData({ ...formData, pages: parseInt(e.target.value) || 0 })}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="download_url">ลิงก์ดาวน์โหลด</Label>
-                  <Input
-                    id="download_url"
-                    type="url"
-                    value={formData.download_url}
-                    onChange={(e) => setFormData({ ...formData, download_url: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="preview_url">ลิงก์ตัวอย่าง</Label>
-                  <Input
-                    id="preview_url"
-                    type="url"
-                    value={formData.preview_url}
-                    onChange={(e) => setFormData({ ...formData, preview_url: e.target.value })}
-                  />
-                </div>
-                <Button type="submit" className="w-full">
-                  {editingEbook ? 'อัปเดต' : 'บันทึก'}
+    <AdminLayout>
+      <div className="space-y-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>จัดการ E-books</CardTitle>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={openAddDialog}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  เพิ่ม E-book ใหม่
                 </Button>
-              </form>
-            </DialogContent>
-          </Dialog>
-        </CardHeader>
-        <CardContent>
-          {ebooks.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">
-              ยังไม่มี E-books - เริ่มต้นด้วยการเพิ่ม E-book แรก
-            </p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ชื่อ E-book</TableHead>
-                  <TableHead>หน้า</TableHead>
-                  <TableHead>ราคา</TableHead>
-                  <TableHead>วันที่สร้าง</TableHead>
-                  <TableHead>การจัดการ</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {ebooks.map((ebook) => (
-                  <TableRow key={ebook.id}>
-                    <TableCell className="font-medium">{ebook.title}</TableCell>
-                    <TableCell>{ebook.pages} หน้า</TableCell>
-                    <TableCell>₿{ebook.price}</TableCell>
-                    <TableCell>{new Date(ebook.created_at).toLocaleDateString('th-TH')}</TableCell>
-                    <TableCell>
-                      <div className="flex space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEdit(ebook)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDelete(ebook.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingEbook ? 'แก้ไข E-book' : 'เพิ่ม E-book ใหม่'}
+                  </DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="title">ชื่อ E-book</Label>
+                      <Input
+                        id="title"
+                        value={formData.title}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="slug">Slug</Label>
+                      <Input
+                        id="slug"
+                        value={formData.slug}
+                        onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="description">คำอธิบาย</Label>
+                    <Textarea
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      rows={3}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="price">ราคา (บาท)</Label>
+                      <Input
+                        id="price"
+                        type="number"
+                        value={formData.price}
+                        onChange={(e) => setFormData({ ...formData, price: parseInt(e.target.value) || 0 })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="pages">จำนวนหน้า</Label>
+                      <Input
+                        id="pages"
+                        type="number"
+                        value={formData.pages}
+                        onChange={(e) => setFormData({ ...formData, pages: parseInt(e.target.value) || 0 })}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="download_url">ลิงก์ดาวน์โหลด</Label>
+                    <Input
+                      id="download_url"
+                      type="url"
+                      value={formData.download_url}
+                      onChange={(e) => setFormData({ ...formData, download_url: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="preview_url">ลิงก์ตัวอย่าง</Label>
+                    <Input
+                      id="preview_url"
+                      type="url"
+                      value={formData.preview_url}
+                      onChange={(e) => setFormData({ ...formData, preview_url: e.target.value })}
+                    />
+                  </div>
+                  <Button type="submit" className="w-full">
+                    {editingEbook ? 'อัปเดต' : 'บันทึก'}
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </CardHeader>
+          <CardContent>
+            {ebooks.length === 0 ? (
+              <p className="text-muted-foreground text-center py-8">
+                ยังไม่มี E-books - เริ่มต้นด้วยการเพิ่ม E-book แรก
+              </p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ชื่อ E-book</TableHead>
+                    <TableHead>หน้า</TableHead>
+                    <TableHead>ราคา</TableHead>
+                    <TableHead>วันที่สร้าง</TableHead>
+                    <TableHead>การจัดการ</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+                </TableHeader>
+                <TableBody>
+                  {ebooks.map((ebook) => (
+                    <TableRow key={ebook.id}>
+                      <TableCell className="font-medium">{ebook.title}</TableCell>
+                      <TableCell>{ebook.pages} หน้า</TableCell>
+                      <TableCell>₿{ebook.price}</TableCell>
+                      <TableCell>{new Date(ebook.created_at).toLocaleDateString('th-TH')}</TableCell>
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEdit(ebook)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDelete(ebook.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </AdminLayout>
   );
 }
