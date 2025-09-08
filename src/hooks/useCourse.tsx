@@ -142,12 +142,70 @@ export const useCourse = (courseSlug: string, lessonSlug?: string) => {
 
   const completedLessons = progress.filter(p => p.completed).length;
 
+  // Function to mark lesson as complete
+  const markLessonComplete = async (lessonId: string) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('User not authenticated');
+
+      const { data, error } = await supabase
+        .from('lesson_progress')
+        .upsert({
+          user_id: session.user.id,
+          lesson_id: lessonId,
+          completed: true,
+          completed_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id,lesson_id'
+        })
+        .select();
+
+      if (error) throw error;
+
+      // Update local progress state
+      setProgress(prev => {
+        const existing = prev.find(p => p.lesson_id === lessonId);
+        if (existing) {
+          return prev.map(p => 
+            p.lesson_id === lessonId 
+              ? { ...p, completed: true, completed_at: new Date().toISOString() }
+              : p
+          );
+        } else {
+          return [...prev, {
+            lesson_id: lessonId,
+            completed: true,
+            completed_at: new Date().toISOString()
+          }];
+        }
+      });
+
+      // Update chapters to reflect completion
+      setChapters(prev => 
+        prev.map(chapter => ({
+          ...chapter,
+          lessons: chapter.lessons.map(lesson =>
+            lesson.id === lessonId
+              ? { ...lesson, completed: true }
+              : lesson
+          )
+        }))
+      );
+
+      return { success: true };
+    } catch (err) {
+      console.error('Error marking lesson as complete:', err);
+      return { success: false, error: err instanceof Error ? err.message : 'Failed to mark lesson as complete' };
+    }
+  };
+
   return {
     course,
     lessons,
     chapters,
     currentLesson,
     completedLessons,
+    markLessonComplete,
     isLoading,
     error
   };

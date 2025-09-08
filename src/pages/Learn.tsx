@@ -23,6 +23,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { SecureVideoPlayer } from "@/components/video/SecureVideoPlayer";
 import { supabase } from "@/integrations/supabase/client";
 import { useCourse } from "@/hooks/useCourse";
+import { useToast } from "@/hooks/use-toast";
 
 // Mock transcript data - in a real app, this would come from the database
 const getTranscript = (lessonSlug: string) => {
@@ -47,8 +48,10 @@ export default function Learn() {
   const [noteText, setNoteText] = useState("");
   const [openChapters, setOpenChapters] = useState<number[]>([1, 2, 3]);
   const [user, setUser] = useState(null);
+  const [isMarkingComplete, setIsMarkingComplete] = useState(false);
+  const { toast } = useToast();
 
-  const { course, lessons, chapters, currentLesson, completedLessons, isLoading, error } = useCourse(
+  const { course, lessons, chapters, currentLesson, completedLessons, markLessonComplete, isLoading, error } = useCourse(
     courseSlug || '', 
     lessonSlug
   );
@@ -141,6 +144,39 @@ export default function Learn() {
     // You can add additional logic here if needed
   };
 
+  const handleMarkComplete = async () => {
+    if (!currentLesson) return;
+
+    setIsMarkingComplete(true);
+    try {
+      const result = await markLessonComplete(currentLesson.id);
+      if (result.success) {
+        toast({
+          title: "เรียนจบแล้ว!",
+          description: "บทเรียนนี้ได้ถูกทำเครื่องหมายว่าเรียนจบแล้ว",
+        });
+      } else {
+        toast({
+          title: "เกิดข้อผิดพลาด",
+          description: result.error || "ไม่สามารถทำเครื่องหมายเรียนจบได้",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถทำเครื่องหมายเรียนจบได้",
+        variant: "destructive",
+      });
+    } finally {
+      setIsMarkingComplete(false);
+    }
+  };
+
+  const isLessonCompleted = chapters
+    .flatMap(c => c.lessons)
+    .find(l => l.id === currentLesson?.id)?.completed || false;
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
@@ -196,6 +232,27 @@ export default function Learn() {
                 />
               )}
             </div>
+            
+            {/* Mark Complete Button for YouTube videos */}
+            {currentLesson.youtube_url && (
+              <div className="mt-4 flex justify-center">
+                {isLessonCompleted ? (
+                  <div className="flex items-center gap-2 text-success">
+                    <CheckCircle className="h-5 w-5" />
+                    <span className="font-medium">เรียนจบแล้ว</span>
+                  </div>
+                ) : (
+                  <Button 
+                    onClick={handleMarkComplete}
+                    disabled={isMarkingComplete}
+                    className="gap-2"
+                  >
+                    <CheckCircle className="h-4 w-4" />
+                    {isMarkingComplete ? "กำลังบันทึก..." : "ยืนยันการเรียนจบ"}
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Lesson Content */}
