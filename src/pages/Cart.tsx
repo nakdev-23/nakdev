@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, Tag, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,13 +9,17 @@ import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/hooks/useCart";
 import { useCoupons, type Coupon } from "@/hooks/useCoupons";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export default function Cart() {
-  const { cartItems, loading, updateQuantity, removeItem } = useCart();
+  const { cartItems, loading, updateQuantity, removeItem, clearCart } = useCart();
   const { validateCoupon, loading: couponLoading } = useCoupons();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
+  const [processingFreeCheckout, setProcessingFreeCheckout] = useState(false);
 
   const applyCoupon = async () => {
     if (!couponCode.trim()) return;
@@ -29,6 +33,38 @@ export default function Cart() {
 
   const removeCoupon = () => {
     setAppliedCoupon(null);
+  };
+
+  const handleFreeCheckout = async () => {
+    if (!user || total > 0) return;
+    
+    setProcessingFreeCheckout(true);
+    try {
+      // Enroll user in all cart items
+      const enrollments = cartItems.map(item => ({
+        user_id: user.id,
+        item_id: item.item_id,
+        item_type: item.item_type,
+        price_paid: 0
+      }));
+
+      const { error } = await supabase
+        .from('enrollments')
+        .upsert(enrollments, { onConflict: 'user_id,item_id,item_type' });
+
+      if (error) throw error;
+
+      // Clear cart
+      await clearCart();
+      
+      toast.success('ลงทะเบียนเรียบร้อยแล้ว! คุณสามารถเข้าถึงคอร์สได้แล้ว');
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Error processing free checkout:', error);
+      toast.error('เกิดข้อผิดพลาดในการลงทะเบียน กรุณาลองใหม่อีกครั้ง');
+    } finally {
+      setProcessingFreeCheckout(false);
+    }
   };
 
   const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -277,12 +313,33 @@ export default function Cart() {
                       </div>
                     </div>
 
-                    <Button className="w-full glow-on-hover" size="lg" asChild>
-                      <Link to="/checkout">
-                        ดำเนินการชำระเงิน
-                        <ArrowRight className="ml-2 h-5 w-5" />
-                      </Link>
-                    </Button>
+                    {total === 0 ? (
+                      <Button 
+                        className="w-full glow-on-hover" 
+                        size="lg" 
+                        onClick={handleFreeCheckout}
+                        disabled={processingFreeCheckout}
+                      >
+                        {processingFreeCheckout ? (
+                          <>
+                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                            กำลังลงทะเบียน...
+                          </>
+                        ) : (
+                          <>
+                            ลงทะเบียนฟรี
+                            <ArrowRight className="ml-2 h-5 w-5" />
+                          </>
+                        )}
+                      </Button>
+                    ) : (
+                      <Button className="w-full glow-on-hover" size="lg" asChild>
+                        <Link to="/checkout">
+                          ดำเนินการชำระเงิน
+                          <ArrowRight className="ml-2 h-5 w-5" />
+                        </Link>
+                      </Button>
+                    )}
 
                     <Button variant="outline" className="w-full" asChild>
                       <Link to="/courses">

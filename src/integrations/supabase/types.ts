@@ -188,6 +188,36 @@ export type Database = {
         }
         Relationships: []
       }
+      enrollments: {
+        Row: {
+          created_at: string
+          enrolled_at: string
+          id: string
+          item_id: string
+          item_type: string
+          price_paid: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          enrolled_at?: string
+          id?: string
+          item_id: string
+          item_type: string
+          price_paid?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          enrolled_at?: string
+          id?: string
+          item_id?: string
+          item_type?: string
+          price_paid?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       lesson_progress: {
         Row: {
           completed: boolean | null
