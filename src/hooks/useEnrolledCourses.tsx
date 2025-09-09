@@ -31,30 +31,35 @@ export const useEnrolledCourses = () => {
           return;
         }
 
-        // Fetch user's enrolled courses
-        const { data: enrollments, error: enrollmentsError } = await supabase
+        // Fetch user's enrolled course IDs first (no FK join)
+        const { data: enrollmentRows, error: enrollmentsError } = await supabase
           .from('enrollments')
-          .select(`
-            *,
-            courses!inner(*)
-          `)
+          .select('item_id, enrolled_at')
           .eq('user_id', session.user.id)
           .eq('item_type', 'course');
 
         if (enrollmentsError) throw enrollmentsError;
 
-        if (!enrollments) {
+        if (!enrollmentRows || enrollmentRows.length === 0) {
           setEnrolledCourses([]);
           setIsLoading(false);
           return;
         }
 
+        const courseIds = enrollmentRows.map((e: any) => e.item_id);
+        const enrollMap = Object.fromEntries(enrollmentRows.map((e: any) => [e.item_id, e.enrolled_at]));
+
+        const { data: courses, error: coursesError } = await supabase
+          .from('courses')
+          .select('id, slug, title, description, instructor, total_lessons, duration_hours')
+          .in('id', courseIds);
+
+        if (coursesError) throw coursesError;
+
         // For each enrolled course, calculate progress
         const coursesWithProgress = await Promise.all(
-          enrollments.map(async (enrollment: any) => {
-            const course = enrollment.courses;
-            
-            // Get lesson progress for this course
+          (courses || []).map(async (course: any) => {
+            // Get lesson ids for this course
             const { data: lessons } = await supabase
               .from('lessons')
               .select('id')
@@ -65,20 +70,34 @@ export const useEnrolledCourses = () => {
               .select('lesson_id')
               .eq('user_id', session.user.id)
               .eq('completed', true)
-              .in('lesson_id', lessons?.map(l => l.id) || []);
+              .in('lesson_id', lessons?.map((l: any) => l.id) || []);
 
             const totalLessons = lessons?.length || 0;
             const completed = completedLessons?.length || 0;
             const progress = totalLessons > 0 ? (completed / totalLessons) * 100 : 0;
 
-            // Get next incomplete lesson
-            const { data: nextLessonData } = await supabase
-              .from('lessons')
-              .select('title, slug')
-              .eq('course_id', course.id)
-              .not('id', 'in', `(${completedLessons?.map(cl => cl.lesson_id).join(',') || 'null'})`)
-              .order('lesson_order')
-              .limit(1);
+            let nextLessonTitle = 'เริ่มต้นเรียน';
+            if (totalLessons > 0) {
+              if (completed > 0) {
+                const completedIds = completedLessons!.map((cl: any) => cl.lesson_id);
+                const { data: nextLessonData } = await supabase
+                  .from('lessons')
+                  .select('title')
+                  .eq('course_id', course.id)
+                  .not('id', 'in', `(${completedIds.join(',')})`)
+                  .order('lesson_order')
+                  .limit(1);
+                nextLessonTitle = nextLessonData?.[0]?.title || nextLessonTitle;
+              } else {
+                const { data: firstLesson } = await supabase
+                  .from('lessons')
+                  .select('title')
+                  .eq('course_id', course.id)
+                  .order('lesson_order')
+                  .limit(1);
+                nextLessonTitle = firstLesson?.[0]?.title || nextLessonTitle;
+              }
+            }
 
             return {
               id: course.id,
@@ -88,10 +107,10 @@ export const useEnrolledCourses = () => {
               instructor: course.instructor,
               total_lessons: course.total_lessons || totalLessons,
               duration_hours: course.duration_hours,
-              enrolled_at: enrollment.enrolled_at,
+              enrolled_at: enrollMap[course.id] || null,
               completedLessons: completed,
               progress: Math.round(progress),
-              nextLesson: nextLessonData?.[0]?.title || 'เริ่มต้นเรียน'
+              nextLesson: nextLessonTitle
             };
           })
         );

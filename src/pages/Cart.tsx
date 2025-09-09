@@ -50,7 +50,7 @@ export default function Cart() {
 
       const { error } = await supabase
         .from('enrollments')
-        .upsert(enrollments, { onConflict: 'user_id,item_id,item_type' });
+        .upsert(enrollments, { onConflict: 'user_id,item_id,item_type', ignoreDuplicates: true });
 
       if (error) throw error;
 
