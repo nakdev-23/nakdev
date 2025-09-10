@@ -14,6 +14,7 @@ interface EnrolledCourse {
   progress: number;
   lastWatchedLesson?: string;
   nextLesson?: string;
+  firstLessonSlug?: string;
 }
 
 export const useEnrolledCourses = () => {
@@ -62,8 +63,9 @@ export const useEnrolledCourses = () => {
             // Get lesson ids for this course
             const { data: lessons } = await supabase
               .from('lessons')
-              .select('id')
-              .eq('course_id', course.id);
+              .select('id, slug')
+              .eq('course_id', course.id)
+              .order('lesson_order');
 
             const { data: completedLessons } = await supabase
               .from('lesson_progress')
@@ -75,6 +77,7 @@ export const useEnrolledCourses = () => {
             const totalLessons = lessons?.length || 0;
             const completed = completedLessons?.length || 0;
             const progress = totalLessons > 0 ? (completed / totalLessons) * 100 : 0;
+            const firstLessonSlug = lessons?.[0]?.slug || null;
 
             let nextLessonTitle = 'เริ่มต้นเรียน';
             if (totalLessons > 0) {
@@ -110,7 +113,8 @@ export const useEnrolledCourses = () => {
               enrolled_at: enrollMap[course.id] || null,
               completedLessons: completed,
               progress: Math.round(progress),
-              nextLesson: nextLessonTitle
+              nextLesson: nextLessonTitle,
+              firstLessonSlug
             };
           })
         );

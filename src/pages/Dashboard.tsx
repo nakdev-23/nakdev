@@ -202,7 +202,7 @@ export default function Dashboard() {
                           <p className="text-xs text-muted-foreground">โดย {course.instructor}</p>
                         </div>
                         <Button size="sm" variant="outline" asChild>
-                          <Link to={`/learn/${course.slug}`}>
+                          <Link to={course.firstLessonSlug ? `/learn/${course.slug}/${course.firstLessonSlug}` : `/courses/${course.slug}`}>
                             เริ่มเรียน
                           </Link>
                         </Button>
