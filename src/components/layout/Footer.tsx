@@ -73,7 +73,9 @@ export const Footer = () => {
           </div>
 
           {/* Links Sections */}
-          {Object.entries(footerSections).map(([key, section]) => <div key={key}>
+          {Object.entries(footerSections)
+            .filter(([key]) => key === 'resources')
+            .map(([key, section]) => <div key={key}>
               <h3 className="font-semibold mb-4">{section.title}</h3>
               <ul className="space-y-3">
                 {section.links.map(link => <li key={link.name}>
