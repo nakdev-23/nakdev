@@ -135,7 +135,7 @@ export default function CourseDetail() {
                 <CardContent className="p-6">
                   <div className="text-center mb-6">
                     <div>
-                      {course.is_free ? (
+                      {course.is_free || !course.price || course.price === 0 ? (
                         <>
                           <div className="text-3xl font-bold text-success mb-2">ฟรี!</div>
                           {course.original_price && (
@@ -345,7 +345,7 @@ export default function CourseDetail() {
               <Card className="glass-card">
                 <CardContent className="p-6">
                   <div className="text-center mb-4">
-                    {course.is_free ? (
+                    {course.is_free || !course.price || course.price === 0 ? (
                       <div className="text-2xl font-bold text-success">ฟรี!</div>
                     ) : (
                       <div className="text-2xl font-bold">฿{course.price?.toLocaleString()}</div>
