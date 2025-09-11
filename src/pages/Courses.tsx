@@ -115,9 +115,15 @@ export default function Courses() {
                     <Badge variant="outline" className="badge-level text-xs">
                       เริ่มต้น
                     </Badge>
-                    <Badge variant="outline" className="badge-free">
-                      ฟรี
-                    </Badge>
+                    {course.is_free || !course.price || course.price === 0 ? (
+                      <Badge variant="outline" className="badge-free">
+                        ฟรี
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="badge-price">
+                        ฿{course.price.toLocaleString()}
+                      </Badge>
+                    )}
                   </div>
                   
                   <h3 className="text-lg font-semibold mb-2">{course.title}</h3>
