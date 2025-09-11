@@ -177,6 +177,25 @@ export default function Learn() {
     .flatMap(c => c.lessons)
     .find(l => l.id === currentLesson?.id)?.completed || false;
 
+  // Helper function to check if a lesson is locked
+  const isLessonLocked = (lesson: any, lessonIndex: number) => {
+    // First lesson is always unlocked
+    if (lessonIndex === 0) return false;
+    
+    // Get all lessons flattened with their global index
+    const allLessons = chapters.flatMap(c => c.lessons);
+    const globalIndex = allLessons.findIndex(l => l.id === lesson.id);
+    
+    // Check if all previous lessons are completed
+    for (let i = 0; i < globalIndex; i++) {
+      if (!allLessons[i].completed) {
+        return true;
+      }
+    }
+    
+    return false;
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
@@ -389,36 +408,59 @@ export default function Learn() {
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <div className="space-y-1 mt-2">
-                    {chapter.lessons.map((lesson) => (
-                      <Link 
-                        key={lesson.id}
-                        to={`/learn/${courseSlug}/${lesson.slug}`}
-                        className={`flex items-center gap-3 p-3 rounded-lg text-sm cursor-pointer hover:bg-muted/50 transition-colors block ${
-                          lesson.current ? 'bg-primary/10 border border-primary/20' : ''
-                        }`}
-                      >
-                        <div className="flex-shrink-0">
-                          {lesson.completed ? (
-                            <CheckCircle className="h-4 w-4 text-success" />
-                          ) : lesson.current ? (
-                            <div className="h-4 w-4 bg-primary rounded-full flex items-center justify-center">
-                              <div className="h-2 w-2 bg-primary-foreground rounded-full" />
-                            </div>
-                          ) : (
+                    {chapter.lessons.map((lesson, lessonIndex) => {
+                      const globalLessonIndex = chapters.slice(0, chapter.id - 1).reduce((acc, ch) => acc + ch.lessons.length, 0) + lessonIndex;
+                      const isLocked = isLessonLocked(lesson, globalLessonIndex);
+                      
+                      return isLocked ? (
+                        <div 
+                          key={lesson.id}
+                          className="flex items-center gap-3 p-3 rounded-lg text-sm cursor-not-allowed opacity-60 bg-muted/20"
+                        >
+                          <div className="flex-shrink-0">
                             <Lock className="h-4 w-4 text-muted-foreground" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className={`font-medium ${lesson.current ? 'text-primary' : ''}`}>
-                            {lesson.title}
                           </div>
-                          <div className="flex items-center gap-1 text-muted-foreground">
-                            <Clock className="h-3 w-3" />
-                            <span>{lesson.duration_text}</span>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-muted-foreground">
+                              {lesson.title}
+                            </div>
+                            <div className="flex items-center gap-1 text-muted-foreground">
+                              <Clock className="h-3 w-3" />
+                              <span>{lesson.duration_text}</span>
+                            </div>
                           </div>
                         </div>
-                      </Link>
-                    ))}
+                      ) : (
+                        <Link 
+                          key={lesson.id}
+                          to={`/learn/${courseSlug}/${lesson.slug}`}
+                          className={`flex items-center gap-3 p-3 rounded-lg text-sm cursor-pointer hover:bg-muted/50 transition-colors block ${
+                            lesson.current ? 'bg-primary/10 border border-primary/20' : ''
+                          }`}
+                        >
+                          <div className="flex-shrink-0">
+                            {lesson.completed ? (
+                              <CheckCircle className="h-4 w-4 text-success" />
+                            ) : lesson.current ? (
+                              <div className="h-4 w-4 bg-primary rounded-full flex items-center justify-center">
+                                <div className="h-2 w-2 bg-primary-foreground rounded-full" />
+                              </div>
+                            ) : (
+                              <div className="h-4 w-4 border-2 border-muted-foreground rounded-full" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className={`font-medium ${lesson.current ? 'text-primary' : ''}`}>
+                              {lesson.title}
+                            </div>
+                            <div className="flex items-center gap-1 text-muted-foreground">
+                              <Clock className="h-3 w-3" />
+                              <span>{lesson.duration_text}</span>
+                            </div>
+                          </div>
+                        </Link>
+                      );
+                    })}
                   </div>
                 </CollapsibleContent>
               </Collapsible>
