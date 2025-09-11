@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { useCourseWithLessons } from "@/hooks/useCourses";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
+import { useEnrolledCourses } from "@/hooks/useEnrolledCourses";
 
 // Default features if none provided
 const defaultFeatures = [
@@ -28,6 +29,10 @@ export default function CourseDetail() {
   const { course, lessons, isLoading, error } = useCourseWithLessons(slug || '');
   const { addToCart } = useCart();
   const { user } = useAuth();
+  const { enrolledCourses } = useEnrolledCourses();
+
+  // Check if user is already enrolled in this course
+  const isEnrolled = enrolledCourses.some(enrolledCourse => enrolledCourse.id === course?.id);
 
   if (isLoading) {
     return (
@@ -168,16 +173,29 @@ export default function CourseDetail() {
                     </Button>
                   ) : (
                     <div className="space-y-3 mb-4">
-                      <Button 
-                        className="w-full glow-on-hover" 
-                        size="lg"
-                        onClick={handleAddToCart}
-                        disabled={!user}
-                      >
-                        <ShoppingCart className="mr-2 h-5 w-5" />
-                        {user ? 'เพิ่มลงตะกร้า' : 'เข้าสู่ระบบเพื่อซื้อ'}
-                      </Button>
-                      {!user && (
+                      {isEnrolled ? (
+                        <Button 
+                          className="w-full glow-on-hover" 
+                          size="lg"
+                          asChild
+                        >
+                          <Link to={firstLesson ? `/learn/${course.slug}/${firstLesson.slug}` : '#'}>
+                            เรียนต่อตอนนี้
+                            <ArrowRight className="ml-2 h-5 w-5" />
+                          </Link>
+                        </Button>
+                      ) : (
+                        <Button 
+                          className="w-full glow-on-hover" 
+                          size="lg"
+                          onClick={handleAddToCart}
+                          disabled={!user}
+                        >
+                          <ShoppingCart className="mr-2 h-5 w-5" />
+                          {user ? 'เพิ่มลงตะกร้า' : 'เข้าสู่ระบบเพื่อซื้อ'}
+                        </Button>
+                      )}
+                      {!user && !isEnrolled && (
                         <Button variant="outline" className="w-full" asChild>
                           <Link to="/auth">เข้าสู่ระบบ</Link>
                         </Button>
@@ -358,15 +376,24 @@ export default function CourseDetail() {
                       </Link>
                     </Button>
                   ) : (
-                    <Button 
-                      className="w-full glow-on-hover" 
-                      size="lg"
-                      onClick={handleAddToCart}
-                      disabled={!user}
-                    >
-                      <ShoppingCart className="mr-2 h-5 w-5" />
-                      {user ? 'เพิ่มลงตะกร้า' : 'เข้าสู่ระบบเพื่อซื้อ'}
-                    </Button>
+                    isEnrolled ? (
+                      <Button className="w-full glow-on-hover" size="lg" asChild>
+                        <Link to={firstLesson ? `/learn/${course.slug}/${firstLesson.slug}` : '#'}>
+                          เรียนต่อตอนนี้
+                          <ArrowRight className="ml-2 h-5 w-5" />
+                        </Link>
+                      </Button>
+                    ) : (
+                      <Button 
+                        className="w-full glow-on-hover" 
+                        size="lg"
+                        onClick={handleAddToCart}
+                        disabled={!user}
+                      >
+                        <ShoppingCart className="mr-2 h-5 w-5" />
+                        {user ? 'เพิ่มลงตะกร้า' : 'เข้าสู่ระบบเพื่อซื้อ'}
+                      </Button>
+                    )
                   )}
                 </CardContent>
               </Card>
