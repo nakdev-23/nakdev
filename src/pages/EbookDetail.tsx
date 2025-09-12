@@ -1,14 +1,18 @@
 import { useParams } from "react-router-dom";
-import { Download, BookOpen, Eye, Clock, ArrowLeft } from "lucide-react";
+import { Download, BookOpen, Eye, Clock, ArrowLeft, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useEbook } from "@/hooks/useEbooks";
+import { useEbookEnrollment } from "@/hooks/useEbookEnrollment";
+import { useCart } from "@/hooks/useCart";
 import { Link } from "react-router-dom";
 
 export default function EbookDetail() {
   const { slug } = useParams<{ slug: string }>();
   const { ebook, isLoading, error } = useEbook(slug || '');
+  const { isEnrolled, isLoading: enrollmentLoading } = useEbookEnrollment(ebook?.id || '');
+  const { addToCart } = useCart();
 
   const handleDownload = () => {
     if (ebook?.download_url) {
@@ -28,7 +32,7 @@ export default function EbookDetail() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || enrollmentLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -105,15 +109,26 @@ export default function EbookDetail() {
                 
                 {/* Action Buttons */}
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <Button 
-                    size="lg" 
-                    className="bg-white text-primary hover:bg-white/90"
-                    onClick={handleDownload}
-                    disabled={!ebook.download_url}
-                  >
-                    <Download className="mr-2 h-5 w-5" />
-                    ดาวน์โหลด PDF
-                  </Button>
+                  {ebook.price === 0 || isEnrolled ? (
+                    <Button 
+                      size="lg" 
+                      className="bg-white text-primary hover:bg-white/90"
+                      onClick={handleDownload}
+                      disabled={!ebook.download_url}
+                    >
+                      <Download className="mr-2 h-5 w-5" />
+                      ดาวน์โหลด PDF
+                    </Button>
+                  ) : (
+                    <Button 
+                      size="lg" 
+                      className="bg-white text-primary hover:bg-white/90"
+                      onClick={() => addToCart(ebook.id, 'ebook')}
+                    >
+                      <ShoppingCart className="mr-2 h-5 w-5" />
+                      เพิ่มลงตะกร้า ฿{ebook.price}
+                    </Button>
+                  )}
                   
                   {ebook.preview_url && (
                     <Button 
@@ -161,7 +176,7 @@ export default function EbookDetail() {
                     </div>
                   </div>
                   
-                  {ebook.price === 0 && (
+                  {(ebook.price === 0 || isEnrolled) && (
                     <div className="mt-6 text-center">
                       <Button 
                         size="lg" 
@@ -170,6 +185,18 @@ export default function EbookDetail() {
                       >
                         <Download className="mr-2 h-5 w-5" />
                         ดาวน์โหลดทันที
+                      </Button>
+                    </div>
+                  )}
+                  
+                  {ebook.price > 0 && !isEnrolled && (
+                    <div className="mt-6 text-center">
+                      <Button 
+                        size="lg" 
+                        onClick={() => addToCart(ebook.id, 'ebook')}
+                      >
+                        <ShoppingCart className="mr-2 h-5 w-5" />
+                        เพิ่มลงตะกร้า ฿{ebook.price}
                       </Button>
                     </div>
                   )}
