@@ -419,51 +419,65 @@ export default function AdminLessons() {
                     <TableHead>ชื่อบทเรียน</TableHead>
                     <TableHead>บท</TableHead>
                     <TableHead>ระยะเวลา</TableHead>
+                    <TableHead>เวลารวม</TableHead>
                     <TableHead>สถานะ</TableHead>
                     <TableHead>การจัดการ</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {lessons.map((lesson) => (
-                    <TableRow key={lesson.id}>
-                      <TableCell className="font-medium">{lesson.lesson_order}</TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{lesson.title}</div>
-                          <div className="text-sm text-muted-foreground">{lesson.slug}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">
-                          {lesson.chapter_id} - {lesson.chapter_title}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{lesson.duration_text || '-'}</TableCell>
-                      <TableCell>
-                        <Badge variant={lesson.youtube_url ? "default" : "secondary"}>
-                          {lesson.youtube_url ? 'มีวิดีโอ' : 'ยังไม่มีวิดีโอ'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEdit(lesson)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDelete(lesson.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {lessons.map((lesson, index) => {
+                    // Calculate cumulative time up to this lesson
+                    const cumulativeSeconds = lessons.slice(0, index + 1)
+                      .reduce((total, l) => total + (l.duration_seconds || 0), 0);
+                    const cumulativeHours = Math.floor(cumulativeSeconds / 3600);
+                    const cumulativeMinutes = Math.floor((cumulativeSeconds % 3600) / 60);
+                    
+                    const cumulativeTime = cumulativeHours > 0 
+                      ? `${cumulativeHours}:${cumulativeMinutes.toString().padStart(2, '0')}` 
+                      : `${cumulativeMinutes} นาที`;
+
+                    return (
+                      <TableRow key={lesson.id}>
+                        <TableCell className="font-medium">{lesson.lesson_order}</TableCell>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">{lesson.title}</div>
+                            <div className="text-sm text-muted-foreground">{lesson.slug}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">
+                            {lesson.chapter_id} - {lesson.chapter_title}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{lesson.duration_text || '-'}</TableCell>
+                        <TableCell className="font-medium text-primary">{cumulativeTime}</TableCell>
+                        <TableCell>
+                          <Badge variant={lesson.youtube_url ? "default" : "secondary"}>
+                            {lesson.youtube_url ? 'มีวิดีโอ' : 'ยังไม่มีวิดีโอ'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEdit(lesson)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDelete(lesson.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             )}
