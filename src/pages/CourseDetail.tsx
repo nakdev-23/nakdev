@@ -197,7 +197,7 @@ export default function CourseDetail() {
                       )}
                       {!user && !isEnrolled && (
                         <Button variant="outline" className="w-full" asChild>
-                          <Link to="/auth">เข้าสู่ระบบ</Link>
+                          <Link to="/auth/signin">เข้าสู่ระบบ</Link>
                         </Button>
                       )}
                     </div>

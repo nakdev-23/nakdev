@@ -20,7 +20,7 @@ export default function Checkout() {
 
   useEffect(() => {
     if (!user) {
-      navigate('/auth');
+      navigate('/auth/signin');
       return;
     }
     
