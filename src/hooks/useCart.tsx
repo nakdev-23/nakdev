@@ -113,13 +113,27 @@ export function useCart() {
     }
 
     try {
+      // Check if item already exists in cart
+      const { data: existingItem } = await supabase
+        .from('cart_items')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('item_id', itemId)
+        .eq('item_type', itemType)
+        .single();
+
+      if (existingItem) {
+        toast.success('สินค้านี้อยู่ในตะกร้าแล้ว');
+        return;
+      }
+
       const { error } = await supabase
         .from('cart_items')
-        .upsert({
+        .insert({
           user_id: user.id,
           item_id: itemId,
           item_type: itemType,
-          quantity
+          quantity: 1
         });
 
       if (error) throw error;
