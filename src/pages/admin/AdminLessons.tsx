@@ -265,7 +265,16 @@ export default function AdminLessons() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {Math.round(lessons.reduce((total, lesson) => total + (lesson.duration_seconds || 0), 0) / 60)} นาที
+                {(() => {
+                  const totalSeconds = lessons.reduce((total, lesson) => total + (lesson.duration_seconds || 0), 0);
+                  const hours = Math.floor(totalSeconds / 3600);
+                  const minutes = Math.floor((totalSeconds % 3600) / 60);
+                  
+                  if (hours > 0) {
+                    return `${hours} ชั่วโมง ${minutes} นาที`;
+                  }
+                  return `${minutes} นาที`;
+                })()}
               </div>
             </CardContent>
           </Card>
