@@ -178,21 +178,22 @@ export default function Learn() {
     .find(l => l.id === currentLesson?.id)?.completed || false;
 
   // Helper function to check if a lesson is locked
-  const isLessonLocked = (lesson: any, lessonIndex: number) => {
-    // First lesson is always unlocked
-    if (lessonIndex === 0) return false;
-    
-    // Get all lessons flattened with their global index
-    const allLessons = chapters.flatMap(c => c.lessons);
-    const globalIndex = allLessons.findIndex(l => l.id === lesson.id);
-    
-    // Check if all previous lessons are completed
-    for (let i = 0; i < globalIndex; i++) {
-      if (!allLessons[i].completed) {
+  const isLessonLocked = (lesson: any) => {
+    // Determine position in the global lessons order
+    const idx = lessons.findIndex(l => l.id === lesson.id);
+    if (idx <= 0) return false; // First lesson is always unlocked
+
+    // Build a set of completed lesson IDs from current chapter state
+    const completedSet = new Set(
+      chapters.flatMap(c => c.lessons.filter(l => l.completed).map(l => l.id))
+    );
+
+    // If any previous lesson (by global order) is not completed, lock it
+    for (let i = 0; i < idx; i++) {
+      if (!completedSet.has(lessons[i].id)) {
         return true;
       }
     }
-    
     return false;
   };
 
@@ -409,8 +410,7 @@ export default function Learn() {
                 <CollapsibleContent>
                   <div className="space-y-1 mt-2">
                     {chapter.lessons.map((lesson, lessonIndex) => {
-                      const globalLessonIndex = chapters.slice(0, chapter.id - 1).reduce((acc, ch) => acc + ch.lessons.length, 0) + lessonIndex;
-                      const isLocked = isLessonLocked(lesson, globalLessonIndex);
+                      const isLocked = isLessonLocked(lesson);
                       
                       return isLocked ? (
                         <div 
