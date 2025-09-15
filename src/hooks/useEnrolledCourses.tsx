@@ -14,6 +14,7 @@ interface EnrolledCourse {
   progress: number;
   lastWatchedLesson?: string;
   nextLesson?: string;
+  nextLessonSlug?: string;
   firstLessonSlug?: string;
 }
 
@@ -80,17 +81,19 @@ export const useEnrolledCourses = () => {
             const firstLessonSlug = lessons?.[0]?.slug || null;
 
             let nextLessonTitle = 'เริ่มต้นเรียน';
+            let nextLessonSlug = firstLessonSlug || undefined;
             if (totalLessons > 0) {
               if (completed > 0) {
                 const completedIds = completedLessons!.map((cl: any) => cl.lesson_id);
                 const { data: nextLessonData } = await supabase
                   .from('lessons')
-                  .select('title')
+                  .select('title, slug')
                   .eq('course_id', course.id)
                   .not('id', 'in', `(${completedIds.join(',')})`)
                   .order('lesson_order')
                   .limit(1);
                 nextLessonTitle = nextLessonData?.[0]?.title || nextLessonTitle;
+                nextLessonSlug = nextLessonData?.[0]?.slug || nextLessonSlug;
               } else {
                 const { data: firstLesson } = await supabase
                   .from('lessons')
@@ -114,6 +117,7 @@ export const useEnrolledCourses = () => {
               completedLessons: completed,
               progress: Math.round(progress),
               nextLesson: nextLessonTitle,
+              nextLessonSlug,
               firstLessonSlug
             };
           })

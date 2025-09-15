@@ -131,9 +131,9 @@ export default function Dashboard() {
                             </p>
                           </div>
                           <Button size="sm" asChild>
-                            <Link to={`/learn/${course.slug}`}>
-                              เรียนต่อ
-                            </Link>
+                              <Link to={course.nextLessonSlug ? `/learn/${course.slug}/${course.nextLessonSlug}` : (course.firstLessonSlug ? `/learn/${course.slug}/${course.firstLessonSlug}` : `/courses/${course.slug}`)}>
+                                เรียนต่อ
+                              </Link>
                           </Button>
                         </div>
                         <div className="space-y-2">
