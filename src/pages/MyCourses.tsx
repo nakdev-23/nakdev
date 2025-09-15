@@ -1,33 +1,21 @@
 import { Link } from "react-router-dom";
-import { 
-  BookOpen, 
-  Clock, 
-  Trophy, 
-  Target, 
-  Play,
-  CheckCircle,
-  Circle,
-  TrendingUp,
-  Award
-} from "lucide-react";
+import { BookOpen, Clock, Trophy, Target, Play, CheckCircle, Circle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { useUserStats } from "@/hooks/useUserStats";
 import { useEnrolledCourses } from "@/hooks/useEnrolledCourses";
 
-export default function Dashboard() {
-  const { stats, profile, isLoading: userLoading } = useUserStats();
+export default function MyCourses() {
   const { 
     enrolledCourses, 
     continuingCourses, 
     completedCourses,
     notStartedCourses,
-    isLoading: coursesLoading 
+    isLoading 
   } = useEnrolledCourses();
 
-  if (userLoading || coursesLoading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -38,11 +26,6 @@ export default function Dashboard() {
     );
   }
 
-  const totalLearningHours = enrolledCourses.reduce((sum, course) => sum + (course.duration_hours || 0), 0);
-  const overallProgress = enrolledCourses.length > 0 
-    ? enrolledCourses.reduce((sum, course) => sum + course.progress, 0) / enrolledCourses.length 
-    : 0;
-
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -52,12 +35,21 @@ export default function Dashboard() {
         </div>
         
         <div className="relative container mx-auto px-4">
+          <div className="flex items-center gap-4 mb-6">
+            <Button variant="ghost" size="sm" asChild className="text-white hover:bg-white/20">
+              <Link to="/dashboard">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                กลับ
+              </Link>
+            </Button>
+          </div>
+          
           <div className="text-center">
             <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-              สวัสดี {profile?.full_name || 'คุณผู้ใช้'}! 👋
+              คอร์สทั้งหมดของฉัน 📚
             </h1>
             <p className="text-white/80 text-lg mb-6">
-              ความคืบหน้าการเรียนของคุณ
+              คอร์สที่คุณลงทะเบียนเรียนแล้ว
             </p>
             
             {/* Quick Stats */}
@@ -75,8 +67,8 @@ export default function Dashboard() {
                 <div className="text-white/80 text-sm">กำลังเรียน</div>
               </div>
               <div className="glass-card p-4 text-center">
-                <div className="text-2xl font-bold text-white mb-1">{Math.round(overallProgress)}%</div>
-                <div className="text-white/80 text-sm">ความคืบหน้า</div>
+                <div className="text-2xl font-bold text-white mb-1">{notStartedCourses.length}</div>
+                <div className="text-white/80 text-sm">ยังไม่เริ่ม</div>
               </div>
             </div>
           </div>
@@ -110,7 +102,7 @@ export default function Dashboard() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Play className="h-5 w-5 text-primary" />
-                    คอร์สที่กำลังเรียน
+                    คอร์สที่กำลังเรียน ({continuingCourses.length})
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -131,9 +123,9 @@ export default function Dashboard() {
                             </p>
                           </div>
                           <Button size="sm" asChild>
-                              <Link to={course.nextLessonSlug ? `/learn/${course.slug}/${course.nextLessonSlug}` : (course.firstLessonSlug ? `/learn/${course.slug}/${course.firstLessonSlug}` : `/courses/${course.slug}`)}>
-                                เรียนต่อ
-                              </Link>
+                            <Link to={course.nextLessonSlug ? `/learn/${course.slug}/${course.nextLessonSlug}` : (course.firstLessonSlug ? `/learn/${course.slug}/${course.firstLessonSlug}` : `/courses/${course.slug}`)}>
+                              เรียนต่อ
+                            </Link>
                           </Button>
                         </div>
                         <div className="space-y-2">
@@ -150,7 +142,7 @@ export default function Dashboard() {
               </Card>
             )}
 
-            {/* All My Courses */}
+            {/* All My Courses Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               
               {/* Completed Courses */}
@@ -163,7 +155,7 @@ export default function Dashboard() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {completedCourses.slice(0, 3).map((course) => (
+                    {completedCourses.map((course) => (
                       <div key={course.id} className="flex items-center gap-3 p-3 border rounded-lg bg-success/5 border-success/20">
                         <Trophy className="h-5 w-5 text-success flex-shrink-0" />
                         <div className="flex-1">
@@ -175,11 +167,6 @@ export default function Dashboard() {
                         </Badge>
                       </div>
                     ))}
-                    {completedCourses.length > 3 && (
-                      <p className="text-sm text-muted-foreground text-center">
-                        และอีก {completedCourses.length - 3} คอร์ส
-                      </p>
-                    )}
                   </CardContent>
                 </Card>
               )}
@@ -194,7 +181,7 @@ export default function Dashboard() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {notStartedCourses.slice(0, 3).map((course) => (
+                    {notStartedCourses.map((course) => (
                       <div key={course.id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
                         <Circle className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                         <div className="flex-1">
@@ -208,78 +195,11 @@ export default function Dashboard() {
                         </Button>
                       </div>
                     ))}
-                    {notStartedCourses.length > 3 && (
-                      <p className="text-sm text-muted-foreground text-center">
-                        และอีก {notStartedCourses.length - 3} คอร์ส
-                      </p>
-                    )}
                   </CardContent>
                 </Card>
               )}
 
             </div>
-
-            {/* Learning Progress Summary */}
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-primary" />
-                  สรุปความคืบหน้า
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-primary mb-2">{Math.round(overallProgress)}%</div>
-                    <p className="text-muted-foreground">ความคืบหน้าโดยรวม</p>
-                    <Progress value={overallProgress} className="mt-2" />
-                  </div>
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-accent mb-2">{totalLearningHours}</div>
-                    <p className="text-muted-foreground">ชั่วโมงเรียนทั้งหมด</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-success mb-2">{stats?.current_streak || 0}</div>
-                    <p className="text-muted-foreground">วันต่อเนื่อง</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Quick Actions */}
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle>การดำเนินการด่วน</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <Button variant="outline" className="h-auto flex-col py-4" asChild>
-                    <Link to="/my-courses">
-                      <BookOpen className="h-6 w-6 mb-2" />
-                      คอร์สทั้งหมดของฉัน
-                    </Link>
-                  </Button>
-                  <Button variant="outline" className="h-auto flex-col py-4" asChild>
-                    <Link to="/my-tools">
-                      <Target className="h-6 w-6 mb-2" />
-                      เครื่องมือทั้งหมดของฉัน
-                    </Link>
-                  </Button>
-                  <Button variant="outline" className="h-auto flex-col py-4" asChild>
-                    <Link to="/my-ebooks">
-                      <BookOpen className="h-6 w-6 mb-2" />
-                      eBook ของฉัน
-                    </Link>
-                  </Button>
-                  <Button variant="outline" className="h-auto flex-col py-4" asChild>
-                    <Link to="/my-certificates">
-                      <Award className="h-6 w-6 mb-2" />
-                      ใบประกาศของฉัน
-                    </Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
 
           </div>
         )}

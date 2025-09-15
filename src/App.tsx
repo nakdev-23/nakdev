@@ -23,6 +23,10 @@ import SignUp from "./pages/auth/SignUp";
 import Checkout from "./pages/Checkout";
 import Cart from "./pages/Cart";
 import Dashboard from "./pages/Dashboard";
+import MyCourses from "./pages/MyCourses";
+import MyTools from "./pages/MyTools";
+import MyEbooks from "./pages/MyEbooks";
+import MyCertificates from "./pages/MyCertificates";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminCourses from "./pages/admin/AdminCourses";
 import AdminLessons from "./pages/admin/AdminLessons";
@@ -66,6 +70,46 @@ const App = () => (
                 <ProtectedRoute>
                   <Layout>
                     <Dashboard />
+                  </Layout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="my-courses" 
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <MyCourses />
+                  </Layout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="my-tools" 
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <MyTools />
+                  </Layout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="my-ebooks" 
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <MyEbooks />
+                  </Layout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="my-certificates" 
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <MyCertificates />
                   </Layout>
                 </ProtectedRoute>
               } 
