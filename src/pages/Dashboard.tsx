@@ -256,24 +256,24 @@ export default function Dashboard() {
                   <Button variant="outline" className="h-auto flex-col py-4" asChild>
                     <Link to="/courses">
                       <BookOpen className="h-6 w-6 mb-2" />
-                      คอร์สใหม่
+                      คอร์สทั้งหมดของฉัน
                     </Link>
                   </Button>
                   <Button variant="outline" className="h-auto flex-col py-4" asChild>
                     <Link to="/tools">
                       <Target className="h-6 w-6 mb-2" />
-                      เครื่องมือ
+                      เครื่องมือทั้งหมดของฉัน
                     </Link>
                   </Button>
                   <Button variant="outline" className="h-auto flex-col py-4" asChild>
                     <Link to="/ebooks">
                       <BookOpen className="h-6 w-6 mb-2" />
-                      eBook
+                      eBook ของฉัน
                     </Link>
                   </Button>
                   <Button variant="outline" className="h-auto flex-col py-4">
                     <Award className="h-6 w-6 mb-2" />
-                    ใบประกาศ
+                    ใบประกาศของฉัน
                   </Button>
                 </div>
               </CardContent>
