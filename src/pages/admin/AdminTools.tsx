@@ -7,7 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Plus, Pencil, Trash2, Upload, Link } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -20,6 +21,8 @@ interface Tool {
   price: number;
   category: string;
   download_url: string;
+  download_type: 'url' | 'file';
+  file_path: string;
   created_at: string;
 }
 
@@ -36,8 +39,13 @@ export default function AdminTools() {
     description: '',
     price: 0,
     category: '',
-    download_url: ''
+    download_url: '',
+    download_type: 'url' as 'url' | 'file',
+    file_path: ''
   });
+
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     fetchTools();
@@ -51,7 +59,10 @@ export default function AdminTools() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setTools(data || []);
+      setTools((data || []).map(tool => ({
+        ...tool,
+        download_type: tool.download_type as 'url' | 'file'
+      })));
     } catch (error) {
       console.error('Error fetching tools:', error);
       toast({
@@ -64,14 +75,58 @@ export default function AdminTools() {
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.name.toLowerCase().endsWith('.zip')) {
+        toast({
+          title: "ไฟล์ไม่ถูกต้อง",
+          description: "กรุณาเลือกไฟล์ .zip เท่านั้น",
+          variant: "destructive",
+        });
+        return;
+      }
+      setSelectedFile(file);
+    }
+  };
+
+  const uploadFile = async (file: File, toolId: string) => {
+    const fileExt = 'zip';
+    const fileName = `${toolId}.${fileExt}`;
+    const filePath = `tools/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('tools')
+      .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+    return filePath;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setUploading(true);
     
     try {
+      let finalFormData = { ...formData };
+
+      if (formData.download_type === 'file' && selectedFile) {
+        // Generate ID for new tools or use existing ID
+        const toolId = editingTool?.id || crypto.randomUUID();
+        
+        // Upload file first
+        const filePath = await uploadFile(selectedFile, toolId);
+        finalFormData.file_path = filePath;
+        finalFormData.download_url = ''; // Clear URL when using file
+      } else if (formData.download_type === 'url') {
+        finalFormData.file_path = ''; // Clear file path when using URL
+      }
+
       if (editingTool) {
         const { error } = await supabase
           .from('tools')
-          .update(formData)
+          .update(finalFormData)
           .eq('id', editingTool.id);
 
         if (error) throw error;
@@ -83,7 +138,7 @@ export default function AdminTools() {
       } else {
         const { error } = await supabase
           .from('tools')
-          .insert([formData]);
+          .insert([finalFormData]);
 
         if (error) throw error;
 
@@ -95,7 +150,8 @@ export default function AdminTools() {
 
       setIsDialogOpen(false);
       setEditingTool(null);
-      setFormData({ title: '', slug: '', description: '', price: 0, category: '', download_url: '' });
+      setFormData({ title: '', slug: '', description: '', price: 0, category: '', download_url: '', download_type: 'url', file_path: '' });
+      setSelectedFile(null);
       fetchTools();
     } catch (error) {
       console.error('Error saving tool:', error);
@@ -104,6 +160,8 @@ export default function AdminTools() {
         description: "ไม่สามารถบันทึกข้อมูลได้",
         variant: "destructive",
       });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -115,8 +173,11 @@ export default function AdminTools() {
       description: tool.description || '',
       price: tool.price || 0,
       category: tool.category || '',
-      download_url: tool.download_url || ''
+      download_url: tool.download_url || '',
+      download_type: tool.download_type || 'url',
+      file_path: tool.file_path || ''
     });
+    setSelectedFile(null);
     setIsDialogOpen(true);
   };
 
@@ -149,7 +210,8 @@ export default function AdminTools() {
 
   const openAddDialog = () => {
     setEditingTool(null);
-    setFormData({ title: '', slug: '', description: '', price: 0, category: '', download_url: '' });
+    setFormData({ title: '', slug: '', description: '', price: 0, category: '', download_url: '', download_type: 'url', file_path: '' });
+    setSelectedFile(null);
     setIsDialogOpen(true);
   };
 
@@ -232,16 +294,59 @@ export default function AdminTools() {
                   </div>
                 </div>
                 <div>
-                  <Label htmlFor="download_url">ลิงก์ดาวน์โหลด</Label>
-                  <Input
-                    id="download_url"
-                    type="url"
-                    value={formData.download_url}
-                    onChange={(e) => setFormData({ ...formData, download_url: e.target.value })}
-                  />
+                  <Label>ประเภทการดาวน์โหลด</Label>
+                  <RadioGroup 
+                    value={formData.download_type} 
+                    onValueChange={(value: 'url' | 'file') => setFormData({ ...formData, download_type: value })}
+                    className="flex flex-row space-x-4"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="url" id="url" />
+                      <Label htmlFor="url" className="flex items-center space-x-1">
+                        <Link className="h-4 w-4" />
+                        <span>ลิงก์</span>
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="file" id="file" />
+                      <Label htmlFor="file" className="flex items-center space-x-1">
+                        <Upload className="h-4 w-4" />
+                        <span>อัพโหลดไฟล์ ZIP</span>
+                      </Label>
+                    </div>
+                  </RadioGroup>
                 </div>
-                <Button type="submit" className="w-full">
-                  {editingTool ? 'อัปเดต' : 'บันทึก'}
+
+                {formData.download_type === 'url' ? (
+                  <div>
+                    <Label htmlFor="download_url">ลิงก์ดาวน์โหลด</Label>
+                    <Input
+                      id="download_url"
+                      type="url"
+                      value={formData.download_url}
+                      onChange={(e) => setFormData({ ...formData, download_url: e.target.value })}
+                      required={formData.download_type === 'url'}
+                    />
+                  </div>
+                ) : (
+                  <div>
+                    <Label htmlFor="tool_file">ไฟล์เครื่องมือ (ZIP)</Label>
+                    <Input
+                      id="tool_file"
+                      type="file"
+                      accept=".zip"
+                      onChange={handleFileChange}
+                      required={formData.download_type === 'file' && !editingTool}
+                    />
+                    {selectedFile && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        ไฟล์ที่เลือก: {selectedFile.name}
+                      </p>
+                    )}
+                  </div>
+                )}
+                <Button type="submit" className="w-full" disabled={uploading}>
+                  {uploading ? 'กำลังอัพโหลด...' : (editingTool ? 'อัปเดต' : 'บันทึก')}
                 </Button>
               </form>
             </DialogContent>
@@ -253,16 +358,17 @@ export default function AdminTools() {
               ยังไม่มีเครื่องมือ - เริ่มต้นด้วยการเพิ่มเครื่องมือแรก
             </p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ชื่อเครื่องมือ</TableHead>
-                  <TableHead>หมวดหมู่</TableHead>
-                  <TableHead>ราคา</TableHead>
-                  <TableHead>วันที่สร้าง</TableHead>
-                  <TableHead>การจัดการ</TableHead>
-                </TableRow>
-              </TableHeader>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ชื่อเครื่องมือ</TableHead>
+                    <TableHead>หมวดหมู่</TableHead>
+                    <TableHead>ราคา</TableHead>
+                    <TableHead>ประเภท</TableHead>
+                    <TableHead>วันที่สร้าง</TableHead>
+                    <TableHead>การจัดการ</TableHead>
+                  </TableRow>
+                </TableHeader>
               <TableBody>
                 {tools.map((tool) => (
                   <TableRow key={tool.id}>
@@ -273,6 +379,15 @@ export default function AdminTools() {
                      <TableCell>
                        <Badge variant={tool.price === 0 ? "secondary" : "default"}>
                          {tool.price === 0 ? "ฟรี" : `฿${tool.price}`}
+                       </Badge>
+                     </TableCell>
+                     <TableCell>
+                       <Badge variant={tool.download_type === 'file' ? "default" : "outline"}>
+                         {tool.download_type === 'file' ? (
+                           <><Upload className="h-3 w-3 mr-1" />ไฟล์</>
+                         ) : (
+                           <><Link className="h-3 w-3 mr-1" />ลิงก์</>
+                         )}
                        </Badge>
                      </TableCell>
                     <TableCell>{new Date(tool.created_at).toLocaleDateString('th-TH')}</TableCell>

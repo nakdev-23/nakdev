@@ -9,6 +9,8 @@ interface Tool {
   price: number;
   category: string;
   download_url?: string;
+  download_type?: 'url' | 'file';
+  file_path?: string;
 }
 
 export const useTools = () => {
@@ -25,7 +27,10 @@ export const useTools = () => {
           .order('created_at', { ascending: false });
 
         if (error) throw error;
-        setTools(data || []);
+        setTools((data || []).map(tool => ({
+          ...tool,
+          download_type: tool.download_type as 'url' | 'file'
+        })));
       } catch (err) {
         console.error('Error fetching tools:', err);
         setError(err instanceof Error ? err.message : 'Failed to fetch tools');
@@ -57,7 +62,10 @@ export const useTool = (slug: string) => {
           .single();
 
         if (error) throw error;
-        setTool(data);
+        setTool({
+          ...data,
+          download_type: data.download_type as 'url' | 'file'
+        });
       } catch (err) {
         console.error('Error fetching tool:', err);
         setError(err instanceof Error ? err.message : 'Failed to fetch tool');

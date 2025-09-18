@@ -10,6 +10,8 @@ interface Ebook {
   pages: number;
   download_url?: string;
   preview_url?: string;
+  download_type?: 'url' | 'file';
+  file_path?: string;
 }
 
 export const useEbooks = () => {
@@ -26,7 +28,10 @@ export const useEbooks = () => {
           .order('created_at', { ascending: false });
 
         if (error) throw error;
-        setEbooks(data || []);
+        setEbooks((data || []).map(ebook => ({
+          ...ebook,
+          download_type: ebook.download_type as 'url' | 'file'
+        })));
       } catch (err) {
         console.error('Error fetching ebooks:', err);
         setError(err instanceof Error ? err.message : 'Failed to fetch ebooks');
@@ -58,7 +63,10 @@ export const useEbook = (slug: string) => {
           .single();
 
         if (error) throw error;
-        setEbook(data);
+        setEbook({
+          ...data,
+          download_type: data.download_type as 'url' | 'file'
+        });
       } catch (err) {
         console.error('Error fetching ebook:', err);
         setError(err instanceof Error ? err.message : 'Failed to fetch ebook');

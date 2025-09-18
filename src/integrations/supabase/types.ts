@@ -153,7 +153,9 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          download_type: string | null
           download_url: string | null
+          file_path: string | null
           id: string
           pages: number | null
           preview_url: string | null
@@ -165,7 +167,9 @@ export type Database = {
         Insert: {
           created_at?: string
           description?: string | null
+          download_type?: string | null
           download_url?: string | null
+          file_path?: string | null
           id?: string
           pages?: number | null
           preview_url?: string | null
@@ -177,7 +181,9 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string | null
+          download_type?: string | null
           download_url?: string | null
+          file_path?: string | null
           id?: string
           pages?: number | null
           preview_url?: string | null
@@ -357,7 +363,9 @@ export type Database = {
           category: string | null
           created_at: string
           description: string | null
+          download_type: string | null
           download_url: string | null
+          file_path: string | null
           id: string
           price: number | null
           slug: string
@@ -368,7 +376,9 @@ export type Database = {
           category?: string | null
           created_at?: string
           description?: string | null
+          download_type?: string | null
           download_url?: string | null
+          file_path?: string | null
           id?: string
           price?: number | null
           slug: string
@@ -379,7 +389,9 @@ export type Database = {
           category?: string | null
           created_at?: string
           description?: string | null
+          download_type?: string | null
           download_url?: string | null
+          file_path?: string | null
           id?: string
           price?: number | null
           slug?: string

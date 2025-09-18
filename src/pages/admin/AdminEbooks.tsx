@@ -6,7 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Plus, Pencil, Trash2, Upload, Link } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -20,6 +22,8 @@ interface Ebook {
   pages: number;
   download_url: string;
   preview_url: string;
+  download_type: 'url' | 'file';
+  file_path: string;
   created_at: string;
 }
 
@@ -37,8 +41,13 @@ export default function AdminEbooks() {
     price: 0,
     pages: 0,
     download_url: '',
-    preview_url: ''
+    preview_url: '',
+    download_type: 'url' as 'url' | 'file',
+    file_path: ''
   });
+
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     fetchEbooks();
@@ -52,7 +61,10 @@ export default function AdminEbooks() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setEbooks(data || []);
+      setEbooks((data || []).map(ebook => ({
+        ...ebook,
+        download_type: ebook.download_type as 'url' | 'file'
+      })));
     } catch (error) {
       console.error('Error fetching ebooks:', error);
       toast({
@@ -65,14 +77,58 @@ export default function AdminEbooks() {
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.name.toLowerCase().endsWith('.pdf')) {
+        toast({
+          title: "ไฟล์ไม่ถูกต้อง",
+          description: "กรุณาเลือกไฟล์ .pdf เท่านั้น",
+          variant: "destructive",
+        });
+        return;
+      }
+      setSelectedFile(file);
+    }
+  };
+
+  const uploadFile = async (file: File, ebookId: string) => {
+    const fileExt = 'pdf';
+    const fileName = `${ebookId}.${fileExt}`;
+    const filePath = `ebooks/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('ebooks')
+      .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+    return filePath;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setUploading(true);
     
     try {
+      let finalFormData = { ...formData };
+
+      if (formData.download_type === 'file' && selectedFile) {
+        // Generate ID for new ebooks or use existing ID
+        const ebookId = editingEbook?.id || crypto.randomUUID();
+        
+        // Upload file first
+        const filePath = await uploadFile(selectedFile, ebookId);
+        finalFormData.file_path = filePath;
+        finalFormData.download_url = ''; // Clear URL when using file
+      } else if (formData.download_type === 'url') {
+        finalFormData.file_path = ''; // Clear file path when using URL
+      }
+
       if (editingEbook) {
         const { error } = await supabase
           .from('ebooks')
-          .update(formData)
+          .update(finalFormData)
           .eq('id', editingEbook.id);
 
         if (error) throw error;
@@ -84,7 +140,7 @@ export default function AdminEbooks() {
       } else {
         const { error } = await supabase
           .from('ebooks')
-          .insert([formData]);
+          .insert([finalFormData]);
 
         if (error) throw error;
 
@@ -96,7 +152,8 @@ export default function AdminEbooks() {
 
       setIsDialogOpen(false);
       setEditingEbook(null);
-      setFormData({ title: '', slug: '', description: '', price: 0, pages: 0, download_url: '', preview_url: '' });
+      setFormData({ title: '', slug: '', description: '', price: 0, pages: 0, download_url: '', preview_url: '', download_type: 'url', file_path: '' });
+      setSelectedFile(null);
       fetchEbooks();
     } catch (error) {
       console.error('Error saving ebook:', error);
@@ -105,6 +162,8 @@ export default function AdminEbooks() {
         description: "ไม่สามารถบันทึกข้อมูลได้",
         variant: "destructive",
       });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -117,8 +176,11 @@ export default function AdminEbooks() {
       price: ebook.price || 0,
       pages: ebook.pages || 0,
       download_url: ebook.download_url || '',
-      preview_url: ebook.preview_url || ''
+      preview_url: ebook.preview_url || '',
+      download_type: ebook.download_type || 'url',
+      file_path: ebook.file_path || ''
     });
+    setSelectedFile(null);
     setIsDialogOpen(true);
   };
 
@@ -151,7 +213,8 @@ export default function AdminEbooks() {
 
   const openAddDialog = () => {
     setEditingEbook(null);
-    setFormData({ title: '', slug: '', description: '', price: 0, pages: 0, download_url: '', preview_url: '' });
+    setFormData({ title: '', slug: '', description: '', price: 0, pages: 0, download_url: '', preview_url: '', download_type: 'url', file_path: '' });
+    setSelectedFile(null);
     setIsDialogOpen(true);
   };
 
@@ -233,14 +296,58 @@ export default function AdminEbooks() {
                     </div>
                   </div>
                   <div>
-                    <Label htmlFor="download_url">ลิงก์ดาวน์โหลด</Label>
-                    <Input
-                      id="download_url"
-                      type="url"
-                      value={formData.download_url}
-                      onChange={(e) => setFormData({ ...formData, download_url: e.target.value })}
-                    />
+                    <Label>ประเภทการดาวน์โหลด</Label>
+                    <RadioGroup 
+                      value={formData.download_type} 
+                      onValueChange={(value: 'url' | 'file') => setFormData({ ...formData, download_type: value })}
+                      className="flex flex-row space-x-4"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="url" id="url" />
+                        <Label htmlFor="url" className="flex items-center space-x-1">
+                          <Link className="h-4 w-4" />
+                          <span>ลิงก์</span>
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="file" id="file" />
+                        <Label htmlFor="file" className="flex items-center space-x-1">
+                          <Upload className="h-4 w-4" />
+                          <span>อัพโหลดไฟล์ PDF</span>
+                        </Label>
+                      </div>
+                    </RadioGroup>
                   </div>
+
+                  {formData.download_type === 'url' ? (
+                    <div>
+                      <Label htmlFor="download_url">ลิงก์ดาวน์โหลด</Label>
+                      <Input
+                        id="download_url"
+                        type="url"
+                        value={formData.download_url}
+                        onChange={(e) => setFormData({ ...formData, download_url: e.target.value })}
+                        required={formData.download_type === 'url'}
+                      />
+                    </div>
+                  ) : (
+                    <div>
+                      <Label htmlFor="ebook_file">ไฟล์ E-book (PDF)</Label>
+                      <Input
+                        id="ebook_file"
+                        type="file"
+                        accept=".pdf"
+                        onChange={handleFileChange}
+                        required={formData.download_type === 'file' && !editingEbook}
+                      />
+                      {selectedFile && (
+                        <p className="text-sm text-muted-foreground mt-1">
+                          ไฟล์ที่เลือก: {selectedFile.name}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
                   <div>
                     <Label htmlFor="preview_url">ลิงก์ตัวอย่าง</Label>
                     <Input
@@ -250,8 +357,8 @@ export default function AdminEbooks() {
                       onChange={(e) => setFormData({ ...formData, preview_url: e.target.value })}
                     />
                   </div>
-                  <Button type="submit" className="w-full">
-                    {editingEbook ? 'อัปเดต' : 'บันทึก'}
+                  <Button type="submit" className="w-full" disabled={uploading}>
+                    {uploading ? 'กำลังอัพโหลด...' : (editingEbook ? 'อัปเดต' : 'บันทึก')}
                   </Button>
                 </form>
               </DialogContent>
@@ -269,6 +376,7 @@ export default function AdminEbooks() {
                     <TableHead>ชื่อ E-book</TableHead>
                     <TableHead>หน้า</TableHead>
                     <TableHead>ราคา</TableHead>
+                    <TableHead>ประเภท</TableHead>
                     <TableHead>วันที่สร้าง</TableHead>
                     <TableHead>การจัดการ</TableHead>
                   </TableRow>
@@ -278,7 +386,20 @@ export default function AdminEbooks() {
                     <TableRow key={ebook.id}>
                       <TableCell className="font-medium">{ebook.title}</TableCell>
                       <TableCell>{ebook.pages} หน้า</TableCell>
-                      <TableCell>₿{ebook.price}</TableCell>
+                      <TableCell>
+                        <Badge variant={ebook.price === 0 ? "secondary" : "default"}>
+                          {ebook.price === 0 ? "ฟรี" : `฿${ebook.price}`}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={ebook.download_type === 'file' ? "default" : "outline"}>
+                          {ebook.download_type === 'file' ? (
+                            <><Upload className="h-3 w-3 mr-1" />ไฟล์</>
+                          ) : (
+                            <><Link className="h-3 w-3 mr-1" />ลิงก์</>
+                          )}
+                        </Badge>
+                      </TableCell>
                       <TableCell>{new Date(ebook.created_at).toLocaleDateString('th-TH')}</TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
