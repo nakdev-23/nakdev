@@ -93,14 +93,24 @@ export default function AdminEbooks() {
     }
   };
 
-  const uploadFile = async (file: File, ebookId: string) => {
+  const uploadFile = async (file: File, ebookId: string, isEdit: boolean = false) => {
     const fileExt = 'pdf';
     const fileName = `${ebookId}.${fileExt}`;
     const filePath = `ebooks/${fileName}`;
 
+    // If editing, remove the existing file first
+    if (isEdit) {
+      await supabase.storage
+        .from('ebooks')
+        .remove([filePath]);
+    }
+
     const { error: uploadError } = await supabase.storage
       .from('ebooks')
-      .upload(filePath, file);
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
 
     if (uploadError) throw uploadError;
     return filePath;
@@ -117,8 +127,8 @@ export default function AdminEbooks() {
         // Generate ID for new ebooks or use existing ID
         const ebookId = editingEbook?.id || crypto.randomUUID();
         
-        // Upload file first
-        const filePath = await uploadFile(selectedFile, ebookId);
+        // Upload file first, pass isEdit flag
+        const filePath = await uploadFile(selectedFile, ebookId, !!editingEbook);
         finalFormData.file_path = filePath;
         finalFormData.download_url = ''; // Clear URL when using file
       } else if (formData.download_type === 'url') {
