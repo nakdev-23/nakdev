@@ -7,6 +7,7 @@ import { useEbook } from "@/hooks/useEbooks";
 import { useEbookEnrollment } from "@/hooks/useEbookEnrollment";
 import { useCart } from "@/hooks/useCart";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function EbookDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -14,15 +15,36 @@ export default function EbookDetail() {
   const { isEnrolled, isLoading: enrollmentLoading } = useEbookEnrollment(ebook?.id || '');
   const { addToCart } = useCart();
 
-  const handleDownload = () => {
-    if (ebook?.download_url) {
-      // Create a temporary link to trigger download
-      const link = document.createElement('a');
-      link.href = ebook.download_url;
-      link.download = `${ebook.title}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+  const handleDownload = async () => {
+    if (!ebook) return;
+
+    try {
+      let downloadUrl = '';
+      
+      if (ebook.download_type === 'file' && ebook.file_path) {
+        // Generate signed URL for file download from Supabase Storage
+        const { data, error } = await supabase.storage
+          .from('ebooks')
+          .createSignedUrl(ebook.file_path, 3600); // URL valid for 1 hour
+        
+        if (error) throw error;
+        downloadUrl = data.signedUrl;
+      } else if (ebook.download_type === 'url' && ebook.download_url) {
+        downloadUrl = ebook.download_url;
+      }
+
+      if (downloadUrl) {
+        // Create a temporary link to trigger download
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = `${ebook.title}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch (error) {
+      console.error('Error downloading file:', error);
+      alert('เกิดข้อผิดพลาดในการดาวน์โหลดไฟล์');
     }
   };
 
@@ -114,7 +136,7 @@ export default function EbookDetail() {
                       size="lg" 
                       className="bg-white text-primary hover:bg-white/90"
                       onClick={handleDownload}
-                      disabled={!ebook.download_url}
+                      disabled={!ebook.download_url && !ebook.file_path}
                     >
                       <Download className="mr-2 h-5 w-5" />
                       ดาวน์โหลด PDF
@@ -181,7 +203,7 @@ export default function EbookDetail() {
                       <Button 
                         size="lg" 
                         onClick={handleDownload}
-                        disabled={!ebook.download_url}
+                        disabled={!ebook.download_url && !ebook.file_path}
                       >
                         <Download className="mr-2 h-5 w-5" />
                         ดาวน์โหลดทันที
