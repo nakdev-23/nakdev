@@ -74,13 +74,8 @@ export default function ToolDetail() {
       }
 
       if (downloadUrl) {
-        // Create a temporary link to trigger download
-        const link = document.createElement('a');
-        link.href = downloadUrl;
-        link.download = tool.title;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // Open in new tab to avoid Chrome blocking
+        window.open(downloadUrl, '_blank');
       }
     } catch (error) {
       console.error('Error downloading file:', error);
