@@ -22,7 +22,8 @@ import {
   Wrench,
   FileText,
   BarChart3,
-  Bell
+  Bell,
+  CreditCard
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -34,6 +35,7 @@ const navigation = [
   { name: 'จัดการผู้ใช้', href: '/admin/users', icon: Users },
   { name: 'จัดการเครื่องมือ', href: '/admin/tools', icon: Wrench },
   { name: 'จัดการ E-books', href: '/admin/ebooks', icon: FileText },
+  { name: 'ข้อมูลการชำระเงิน', href: '/admin/payment-methods', icon: CreditCard },
   { name: 'รายงาน', href: '/admin/reports', icon: BarChart3 },
 ];
 
