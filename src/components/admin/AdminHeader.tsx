@@ -36,6 +36,7 @@ const navigation = [
   { name: 'จัดการเครื่องมือ', href: '/admin/tools', icon: Wrench },
   { name: 'จัดการ E-books', href: '/admin/ebooks', icon: FileText },
   { name: 'ข้อมูลการชำระเงิน', href: '/admin/payment-methods', icon: CreditCard },
+  { name: 'คำสั่งซื้อ', href: '/admin/orders', icon: Bell },
   { name: 'รายงาน', href: '/admin/reports', icon: BarChart3 },
 ];
 

@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
 import { usePaymentMethods } from "@/hooks/usePaymentMethods";
+import { useCreateOrder } from "@/hooks/useOrders";
 import { toast } from "sonner";
 
 export default function Checkout() {
@@ -17,6 +18,7 @@ export default function Checkout() {
   const { cartItems, loading, clearCart } = useCart();
   const { user } = useAuth();
   const { data: paymentMethods = [], isLoading: paymentMethodsLoading } = usePaymentMethods();
+  const createOrderMutation = useCreateOrder();
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('');
   const [processingPayment, setProcessingPayment] = useState(false);
 
@@ -47,30 +49,34 @@ export default function Checkout() {
   const selectedMethod = paymentMethods.find(method => method.id === selectedPaymentMethod);
 
   const handlePayment = async () => {
-    if (!selectedMethod) {
-      toast.error('กรุณาเลือกวิธีการชำระเงิน');
+    if (!selectedMethod || !user) {
+      toast.error('กรุณาเลือกวิธีการชำระเงินและเข้าสู่ระบบ');
       return;
     }
 
     setProcessingPayment(true);
     
     try {
-      if (selectedMethod.method_type === 'stripe') {
-        // Handle Stripe payment
-        toast.info('กำลังเชื่อมต่อไปยัง Stripe...');
-        // TODO: Implement Stripe checkout
-      } else if (selectedMethod.method_type === 'promptpay') {
-        // Show PromptPay QR code
-        toast.success('กรุณาสแกน QR Code เพื่อชำระเงิน');
-      } else if (selectedMethod.method_type === 'bank_transfer') {
-        // Show bank transfer details
-        toast.success('กรุณาโอนเงินตามรายละเอียดที่แสดง');
-      } else if (selectedMethod.method_type === 'qr_code') {
-        // Show QR code
-        toast.success('กรุณาสแกน QR Code เพื่อชำระเงิน');
-      }
+      // Create order
+      const orderItems = cartItems.map(item => ({
+        item_id: item.item_id,
+        item_type: item.item_type,
+        quantity: item.quantity,
+        price: item.price
+      }));
+
+      await createOrderMutation.mutateAsync({
+        user_id: user.id,
+        payment_method_id: selectedMethod.id,
+        total_amount: totalAmount,
+        items: orderItems
+      });
+      
+      // Clear cart after successful order creation
+      clearCart();
+      navigate('/dashboard');
     } catch (error) {
-      toast.error('เกิดข้อผิดพลาดในการชำระเงิน');
+      toast.error('เกิดข้อผิดพลาดในการสร้างคำสั่งซื้อ');
     } finally {
       setProcessingPayment(false);
     }
