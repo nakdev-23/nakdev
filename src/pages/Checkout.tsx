@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { CreditCard, Building2, QrCode, ArrowLeft, CheckCircle } from "lucide-react";
+import { CreditCard, Building2, QrCode, ArrowLeft, CheckCircle, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,13 +9,15 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
+import { usePaymentMethods } from "@/hooks/usePaymentMethods";
 import { toast } from "sonner";
 
 export default function Checkout() {
   const navigate = useNavigate();
   const { cartItems, loading, clearCart } = useCart();
   const { user } = useAuth();
-  const [paymentMethod, setPaymentMethod] = useState<'bank' | 'promptpay' | 'stripe'>('promptpay');
+  const { data: paymentMethods = [], isLoading: paymentMethodsLoading } = usePaymentMethods();
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('');
   const [processingPayment, setProcessingPayment] = useState(false);
 
   useEffect(() => {
@@ -30,22 +32,42 @@ export default function Checkout() {
     }
   }, [user, cartItems, loading, navigate]);
 
+  useEffect(() => {
+    if (paymentMethods.length > 0 && !selectedPaymentMethod) {
+      // Auto-select first active payment method
+      const firstActive = paymentMethods.find(method => method.is_active);
+      if (firstActive) {
+        setSelectedPaymentMethod(firstActive.id);
+      }
+    }
+  }, [paymentMethods, selectedPaymentMethod]);
+
   const totalAmount = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
 
+  const selectedMethod = paymentMethods.find(method => method.id === selectedPaymentMethod);
+
   const handlePayment = async () => {
+    if (!selectedMethod) {
+      toast.error('กรุณาเลือกวิธีการชำระเงิน');
+      return;
+    }
+
     setProcessingPayment(true);
     
     try {
-      if (paymentMethod === 'stripe') {
+      if (selectedMethod.method_type === 'stripe') {
         // Handle Stripe payment
         toast.info('กำลังเชื่อมต่อไปยัง Stripe...');
         // TODO: Implement Stripe checkout
-      } else if (paymentMethod === 'promptpay') {
+      } else if (selectedMethod.method_type === 'promptpay') {
         // Show PromptPay QR code
         toast.success('กรุณาสแกน QR Code เพื่อชำระเงิน');
-      } else if (paymentMethod === 'bank') {
+      } else if (selectedMethod.method_type === 'bank_transfer') {
         // Show bank transfer details
         toast.success('กรุณาโอนเงินตามรายละเอียดที่แสดง');
+      } else if (selectedMethod.method_type === 'qr_code') {
+        // Show QR code
+        toast.success('กรุณาสแกน QR Code เพื่อชำระเงิน');
       }
     } catch (error) {
       toast.error('เกิดข้อผิดพลาดในการชำระเงิน');
@@ -54,7 +76,7 @@ export default function Checkout() {
     }
   };
 
-  if (loading) {
+  if (loading || paymentMethodsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -120,102 +142,127 @@ export default function Checkout() {
                 <CardTitle>เลือกวิธีการชำระเงิน</CardTitle>
               </CardHeader>
               <CardContent>
-                <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as any)}>
-                  <div className="space-y-4">
-                    {/* PromptPay */}
-                    <div className="flex items-center space-x-2 p-4 border rounded-lg cursor-pointer hover:bg-muted/50">
-                      <RadioGroupItem value="promptpay" id="promptpay" />
-                      <Label htmlFor="promptpay" className="flex items-center gap-3 cursor-pointer flex-1">
-                        <QrCode className="h-6 w-6 text-primary" />
-                        <div>
-                          <div className="font-medium">PromptPay QR Code</div>
-                          <div className="text-sm text-muted-foreground">สแกน QR Code เพื่อชำระเงินผ่าน PromptPay</div>
-                        </div>
-                      </Label>
-                    </div>
-
-                    {/* Bank Transfer */}
-                    <div className="flex items-center space-x-2 p-4 border rounded-lg cursor-pointer hover:bg-muted/50">
-                      <RadioGroupItem value="bank" id="bank" />
-                      <Label htmlFor="bank" className="flex items-center gap-3 cursor-pointer flex-1">
-                        <Building2 className="h-6 w-6 text-primary" />
-                        <div>
-                          <div className="font-medium">โอนผ่านธนาคาร</div>
-                          <div className="text-sm text-muted-foreground">โอนเงินผ่านหมายเลขบัญชีธนาคาร</div>
-                        </div>
-                      </Label>
-                    </div>
-
-                    {/* Stripe */}
-                    <div className="flex items-center space-x-2 p-4 border rounded-lg cursor-pointer hover:bg-muted/50">
-                      <RadioGroupItem value="stripe" id="stripe" />
-                      <Label htmlFor="stripe" className="flex items-center gap-3 cursor-pointer flex-1">
-                        <CreditCard className="h-6 w-6 text-primary" />
-                        <div>
-                          <div className="font-medium">บัตรเครดิต/เดบิต</div>
-                          <div className="text-sm text-muted-foreground">ชำระด้วยบัตรเครดิตหรือเดบิตผ่าน Stripe</div>
-                        </div>
-                      </Label>
-                    </div>
+                {paymentMethods.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>ไม่มีวิธีการชำระเงินที่ใช้งานได้</p>
+                    <p className="text-sm mt-2">กรุณาติดต่อผู้ดูแลระบบ</p>
                   </div>
-                </RadioGroup>
+                ) : (
+                  <RadioGroup value={selectedPaymentMethod} onValueChange={setSelectedPaymentMethod}>
+                    <div className="space-y-4">
+                      {paymentMethods
+                        .filter(method => method.is_active)
+                        .sort((a, b) => a.sort_order - b.sort_order)
+                        .map((method) => {
+                          const getMethodIcon = () => {
+                            switch (method.method_type) {
+                              case 'promptpay':
+                                return <Smartphone className="h-6 w-6 text-primary" />;
+                              case 'bank_transfer':
+                                return <Building2 className="h-6 w-6 text-primary" />;
+                              case 'qr_code':
+                                return <QrCode className="h-6 w-6 text-primary" />;
+                              default:
+                                return <CreditCard className="h-6 w-6 text-primary" />;
+                            }
+                          };
+
+                          const getMethodDescription = () => {
+                            switch (method.method_type) {
+                              case 'promptpay':
+                                return 'สแกน QR Code เพื่อชำระเงินผ่าน PromptPay';
+                              case 'bank_transfer':
+                                return 'โอนเงินผ่านหมายเลขบัญชีธนาคาร';
+                              case 'qr_code':
+                                return 'สแกน QR Code เพื่อชำระเงิน';
+                              default:
+                                return 'ชำระด้วยบัตรเครดิตหรือเดบิต';
+                            }
+                          };
+
+                          return (
+                            <div key={method.id} className="flex items-center space-x-2 p-4 border rounded-lg cursor-pointer hover:bg-muted/50">
+                              <RadioGroupItem value={method.id} id={method.id} />
+                              <Label htmlFor={method.id} className="flex items-center gap-3 cursor-pointer flex-1">
+                                {getMethodIcon()}
+                                <div>
+                                  <div className="font-medium">{method.display_name}</div>
+                                  <div className="text-sm text-muted-foreground">{getMethodDescription()}</div>
+                                </div>
+                              </Label>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  </RadioGroup>
+                )}
 
                 {/* Payment Details */}
-                {paymentMethod === 'promptpay' && (
-                  <Card className="mt-6 bg-muted/30">
-                    <CardContent className="p-6 text-center">
-                      <QrCode className="h-32 w-32 mx-auto mb-4 text-muted-foreground" />
-                      <h3 className="font-medium mb-2">สแกน QR Code นี้เพื่อชำระเงิน</h3>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        จำนวนเงิน: ฿{totalAmount.toLocaleString()}
-                      </p>
-                      <Badge variant="outline">PromptPay: 0XX-XXX-XXXX</Badge>
-                    </CardContent>
-                  </Card>
-                )}
+                {selectedMethod && (
+                  <>
+                    {(selectedMethod.method_type === 'promptpay' || selectedMethod.method_type === 'qr_code') && (
+                      <Card className="mt-6 bg-muted/30">
+                        <CardContent className="p-6 text-center">
+                          {selectedMethod.qr_code_url ? (
+                            <img 
+                              src={selectedMethod.qr_code_url} 
+                              alt="QR Code for payment" 
+                              className="h-48 w-48 mx-auto mb-4 object-contain border rounded"
+                            />
+                          ) : (
+                            <QrCode className="h-32 w-32 mx-auto mb-4 text-muted-foreground" />
+                          )}
+                          <h3 className="font-medium mb-2">สแกน QR Code นี้เพื่อชำระเงิน</h3>
+                          <p className="text-sm text-muted-foreground mb-4">
+                            จำนวนเงิน: ฿{totalAmount.toLocaleString()}
+                          </p>
+                          {selectedMethod.account_number && (
+                            <Badge variant="outline">
+                              {selectedMethod.method_type === 'promptpay' ? 'PromptPay' : 'QR Code'}: {selectedMethod.account_number}
+                            </Badge>
+                          )}
+                        </CardContent>
+                      </Card>
+                    )}
 
-                {paymentMethod === 'bank' && (
-                  <Card className="mt-6 bg-muted/30">
-                    <CardContent className="p-6">
-                      <h3 className="font-medium mb-4">รายละเอียดการโอนเงิน</h3>
-                      <div className="space-y-3 text-sm">
-                        <div className="flex justify-between">
-                          <span>ธนาคาร:</span>
-                          <span className="font-medium">ธนาคารกรุงเทพ</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>เลขที่บัญชี:</span>
-                          <span className="font-medium">XXX-X-XXXXX-X</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>ชื่อบัญชี:</span>
-                          <span className="font-medium">บริษัท เทค เอ็ดดูเคชั่น จำกัด</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>จำนวนเงิน:</span>
-                          <span className="font-medium text-primary">฿{totalAmount.toLocaleString()}</span>
-                        </div>
-                      </div>
-                      <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-                        <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                          <CheckCircle className="h-4 w-4 inline mr-2" />
-                          กรุณาเก็บหลักฐานการโอนเงินไว้เป็นหลักฐาน
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {paymentMethod === 'stripe' && (
-                  <Card className="mt-6 bg-muted/30">
-                    <CardContent className="p-6 text-center">
-                      <CreditCard className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                      <h3 className="font-medium mb-2">ชำระด้วยบัตรเครดิต/เดบิต</h3>
-                      <p className="text-sm text-muted-foreground">
-                        คุณจะถูกนำไปยังหน้าชำระเงินของ Stripe เพื่อกรอกข้อมูลบัตร
-                      </p>
-                    </CardContent>
-                  </Card>
+                    {selectedMethod.method_type === 'bank_transfer' && (
+                      <Card className="mt-6 bg-muted/30">
+                        <CardContent className="p-6">
+                          <h3 className="font-medium mb-4">รายละเอียดการโอนเงิน</h3>
+                          <div className="space-y-3 text-sm">
+                            {selectedMethod.bank_name && (
+                              <div className="flex justify-between">
+                                <span>ธนาคาร:</span>
+                                <span className="font-medium">{selectedMethod.bank_name}</span>
+                              </div>
+                            )}
+                            {selectedMethod.account_number && (
+                              <div className="flex justify-between">
+                                <span>เลขที่บัญชี:</span>
+                                <span className="font-medium">{selectedMethod.account_number}</span>
+                              </div>
+                            )}
+                            {selectedMethod.account_name && (
+                              <div className="flex justify-between">
+                                <span>ชื่อบัญชี:</span>
+                                <span className="font-medium">{selectedMethod.account_name}</span>
+                              </div>
+                            )}
+                            <div className="flex justify-between">
+                              <span>จำนวนเงิน:</span>
+                              <span className="font-medium text-primary">฿{totalAmount.toLocaleString()}</span>
+                            </div>
+                          </div>
+                          <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                            <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                              <CheckCircle className="h-4 w-4 inline mr-2" />
+                              กรุณาเก็บหลักฐานการโอนเงินไว้เป็นหลักฐาน
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </>
                 )}
 
                 {/* Payment Button */}
@@ -223,12 +270,13 @@ export default function Checkout() {
                   className="w-full mt-6 glow-on-hover" 
                   size="lg"
                   onClick={handlePayment}
-                  disabled={processingPayment}
+                  disabled={processingPayment || !selectedMethod}
                 >
                   {processingPayment ? 'กำลังดำเนินการ...' : 
-                   paymentMethod === 'stripe' ? 'ไปยังหน้าชำระเงิน' : 
-                   paymentMethod === 'promptpay' ? 'ยืนยันการชำระเงิน' :
-                   'ยืนยันการโอนเงิน'}
+                   !selectedMethod ? 'เลือกวิธีการชำระเงิน' :
+                   selectedMethod.method_type === 'stripe' ? 'ไปยังหน้าชำระเงิน' : 
+                   selectedMethod.method_type === 'bank_transfer' ? 'ยืนยันการโอนเงิน' :
+                   'ยืนยันการชำระเงิน'}
                 </Button>
               </CardContent>
             </Card>
