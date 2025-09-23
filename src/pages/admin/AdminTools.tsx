@@ -23,6 +23,8 @@ interface Tool {
   download_url: string;
   download_type: 'url' | 'file';
   file_path: string;
+  cover_image_url?: string;
+  cover_image_path?: string;
   created_at: string;
 }
 

@@ -11,6 +11,8 @@ interface Tool {
   download_url?: string;
   download_type?: 'url' | 'file';
   file_path?: string;
+  cover_image_url?: string;
+  cover_image_path?: string;
 }
 
 export const useTools = () => {
@@ -29,7 +31,9 @@ export const useTools = () => {
         if (error) throw error;
         setTools((data || []).map(tool => ({
           ...tool,
-          download_type: tool.download_type as 'url' | 'file'
+          download_type: tool.download_type as 'url' | 'file',
+          cover_image_url: tool.cover_image_url || '',
+          cover_image_path: tool.cover_image_path || ''
         })));
       } catch (err) {
         console.error('Error fetching tools:', err);
@@ -64,7 +68,9 @@ export const useTool = (slug: string) => {
         if (error) throw error;
         setTool({
           ...data,
-          download_type: data.download_type as 'url' | 'file'
+          download_type: data.download_type as 'url' | 'file',
+          cover_image_url: data.cover_image_url || '',
+          cover_image_path: data.cover_image_path || ''
         });
       } catch (err) {
         console.error('Error fetching tool:', err);
