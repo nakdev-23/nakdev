@@ -74,6 +74,8 @@ export type Database = {
       courses: {
         Row: {
           about_course: string | null
+          cover_image_path: string | null
+          cover_image_url: string | null
           created_at: string
           description: string | null
           duration_hours: number | null
@@ -99,6 +101,8 @@ export type Database = {
         }
         Insert: {
           about_course?: string | null
+          cover_image_path?: string | null
+          cover_image_url?: string | null
           created_at?: string
           description?: string | null
           duration_hours?: number | null
@@ -124,6 +128,8 @@ export type Database = {
         }
         Update: {
           about_course?: string | null
+          cover_image_path?: string | null
+          cover_image_url?: string | null
           created_at?: string
           description?: string | null
           duration_hours?: number | null
@@ -151,6 +157,8 @@ export type Database = {
       }
       ebooks: {
         Row: {
+          cover_image_path: string | null
+          cover_image_url: string | null
           created_at: string
           description: string | null
           download_type: string | null
@@ -165,6 +173,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          cover_image_path?: string | null
+          cover_image_url?: string | null
           created_at?: string
           description?: string | null
           download_type?: string | null
@@ -179,6 +189,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          cover_image_path?: string | null
+          cover_image_url?: string | null
           created_at?: string
           description?: string | null
           download_type?: string | null
@@ -494,6 +506,8 @@ export type Database = {
       tools: {
         Row: {
           category: string | null
+          cover_image_path: string | null
+          cover_image_url: string | null
           created_at: string
           description: string | null
           download_type: string | null
@@ -507,6 +521,8 @@ export type Database = {
         }
         Insert: {
           category?: string | null
+          cover_image_path?: string | null
+          cover_image_url?: string | null
           created_at?: string
           description?: string | null
           download_type?: string | null
@@ -520,6 +536,8 @@ export type Database = {
         }
         Update: {
           category?: string | null
+          cover_image_path?: string | null
+          cover_image_url?: string | null
           created_at?: string
           description?: string | null
           download_type?: string | null

@@ -24,6 +24,8 @@ interface Ebook {
   preview_url: string;
   download_type: 'url' | 'file';
   file_path: string;
+  cover_image_url?: string;
+  cover_image_path?: string;
   created_at: string;
 }
 
@@ -43,10 +45,12 @@ export default function AdminEbooks() {
     download_url: '',
     preview_url: '',
     download_type: 'url' as 'url' | 'file',
-    file_path: ''
+    file_path: '',
+    cover_image_url: '',
+    cover_image_path: ''
   });
-
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedCoverFile, setSelectedCoverFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
@@ -77,7 +81,48 @@ export default function AdminEbooks() {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const uploadCoverImage = async (file: File): Promise<{ url: string; path: string } | null> => {
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${Date.now()}.${fileExt}`
+      const filePath = `ebooks/${fileName}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('product-covers')
+        .upload(filePath, file)
+
+      if (uploadError) throw uploadError
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-covers')
+        .getPublicUrl(filePath)
+
+      return { url: publicUrl, path: filePath }
+    } catch (error) {
+      console.error('Error uploading cover image:', error)
+      toast({ 
+        title: "เกิดข้อผิดพลาด", 
+        description: "ไม่สามารถอัปโหลดรูปปกได้",
+        variant: "destructive" 
+      })
+      return null
+    }
+  }
+
+  const handleCoverImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file && file.type.startsWith('image/')) {
+      setSelectedCoverFile(file)
+    } else {
+      toast({ 
+        title: "ไฟล์ไม่ถูกต้อง", 
+        description: "กรุณาเลือกไฟล์รูปภาพ",
+        variant: "destructive" 
+      })
+    }
+  }
+
+  const handlePdfFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       // Validate file type
@@ -123,6 +168,15 @@ export default function AdminEbooks() {
     try {
       let finalFormData = { ...formData };
 
+      // Upload cover image if selected
+      if (selectedCoverFile) {
+        const uploadResult = await uploadCoverImage(selectedCoverFile)
+        if (uploadResult) {
+          finalFormData.cover_image_url = uploadResult.url
+          finalFormData.cover_image_path = uploadResult.path
+        }
+      }
+
       if (formData.download_type === 'file' && selectedFile) {
         // Generate ID for new ebooks or use existing ID
         const ebookId = editingEbook?.id || crypto.randomUUID();
@@ -162,8 +216,9 @@ export default function AdminEbooks() {
 
       setIsDialogOpen(false);
       setEditingEbook(null);
-      setFormData({ title: '', slug: '', description: '', price: 0, pages: 0, download_url: '', preview_url: '', download_type: 'url', file_path: '' });
+      setFormData({ title: '', slug: '', description: '', price: 0, pages: 0, download_url: '', preview_url: '', download_type: 'url', file_path: '', cover_image_url: '', cover_image_path: '' });
       setSelectedFile(null);
+      setSelectedCoverFile(null);
       fetchEbooks();
     } catch (error) {
       console.error('Error saving ebook:', error);
@@ -188,9 +243,12 @@ export default function AdminEbooks() {
       download_url: ebook.download_url || '',
       preview_url: ebook.preview_url || '',
       download_type: ebook.download_type || 'url',
-      file_path: ebook.file_path || ''
+      file_path: ebook.file_path || '',
+      cover_image_url: ebook.cover_image_url || '',
+      cover_image_path: ebook.cover_image_path || ''
     });
     setSelectedFile(null);
+    setSelectedCoverFile(null);
     setIsDialogOpen(true);
   };
 
@@ -223,8 +281,9 @@ export default function AdminEbooks() {
 
   const openAddDialog = () => {
     setEditingEbook(null);
-    setFormData({ title: '', slug: '', description: '', price: 0, pages: 0, download_url: '', preview_url: '', download_type: 'url', file_path: '' });
+    setFormData({ title: '', slug: '', description: '', price: 0, pages: 0, download_url: '', preview_url: '', download_type: 'url', file_path: '', cover_image_url: '', cover_image_path: '' });
     setSelectedFile(null);
+    setSelectedCoverFile(null);
     setIsDialogOpen(true);
   };
 
@@ -276,35 +335,55 @@ export default function AdminEbooks() {
                       />
                     </div>
                   </div>
-                  <div>
-                    <Label htmlFor="description">คำอธิบาย</Label>
-                    <Textarea
-                      id="description"
-                      value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      rows={3}
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="price">ราคา (บาท)</Label>
-                      <Input
-                        id="price"
-                        type="number"
-                        value={formData.price}
-                        onChange={(e) => setFormData({ ...formData, price: parseInt(e.target.value) || 0 })}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="pages">จำนวนหน้า</Label>
-                      <Input
-                        id="pages"
-                        type="number"
-                        value={formData.pages}
-                        onChange={(e) => setFormData({ ...formData, pages: parseInt(e.target.value) || 0 })}
-                      />
-                    </div>
-                  </div>
+                   <div>
+                     <Label htmlFor="description">คำอธิบาย</Label>
+                     <Textarea
+                       id="description"
+                       value={formData.description}
+                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                       rows={3}
+                     />
+                   </div>
+
+                   <div>
+                     <Label htmlFor="cover_image">รูปปก E-book</Label>
+                     <Input
+                       id="cover_image"
+                       type="file"
+                       accept="image/*"
+                       onChange={handleCoverImageChange}
+                     />
+                     {formData.cover_image_url && (
+                       <div className="mt-2">
+                         <img 
+                           src={formData.cover_image_url} 
+                           alt="Cover preview" 
+                           className="w-32 h-20 object-cover rounded-md"
+                         />
+                       </div>
+                     )}
+                   </div>
+
+                   <div className="grid grid-cols-2 gap-4">
+                     <div>
+                       <Label htmlFor="price">ราคา (บาท)</Label>
+                       <Input
+                         id="price"
+                         type="number"
+                         value={formData.price}
+                         onChange={(e) => setFormData({ ...formData, price: parseInt(e.target.value) || 0 })}
+                       />
+                     </div>
+                     <div>
+                       <Label htmlFor="pages">จำนวนหน้า</Label>
+                       <Input
+                         id="pages"
+                         type="number"
+                         value={formData.pages}
+                         onChange={(e) => setFormData({ ...formData, pages: parseInt(e.target.value) || 0 })}
+                       />
+                     </div>
+                   </div>
                   <div>
                     <Label>ประเภทการดาวน์โหลด</Label>
                     <RadioGroup 
@@ -341,21 +420,21 @@ export default function AdminEbooks() {
                       />
                     </div>
                   ) : (
-                    <div>
-                      <Label htmlFor="ebook_file">ไฟล์ E-book (PDF)</Label>
-                      <Input
-                        id="ebook_file"
-                        type="file"
-                        accept=".pdf"
-                        onChange={handleFileChange}
-                        required={formData.download_type === 'file' && !editingEbook}
-                      />
-                      {selectedFile && (
-                        <p className="text-sm text-muted-foreground mt-1">
-                          ไฟล์ที่เลือก: {selectedFile.name}
-                        </p>
-                      )}
-                    </div>
+                     <div>
+                       <Label htmlFor="ebook_file">ไฟล์ E-book (PDF)</Label>
+                       <Input
+                         id="ebook_file"
+                         type="file"
+                         accept=".pdf"
+                         onChange={handlePdfFileChange}
+                         required={formData.download_type === 'file' && !editingEbook}
+                       />
+                       {selectedFile && (
+                         <p className="text-sm text-muted-foreground mt-1">
+                           ไฟล์ที่เลือก: {selectedFile.name}
+                         </p>
+                       )}
+                     </div>
                   )}
 
                   <div>
@@ -383,6 +462,7 @@ export default function AdminEbooks() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>รูปปก</TableHead>
                     <TableHead>ชื่อ E-book</TableHead>
                     <TableHead>หน้า</TableHead>
                     <TableHead>ราคา</TableHead>
@@ -394,6 +474,19 @@ export default function AdminEbooks() {
                 <TableBody>
                   {ebooks.map((ebook) => (
                     <TableRow key={ebook.id}>
+                      <TableCell>
+                        {ebook.cover_image_url ? (
+                          <img 
+                            src={ebook.cover_image_url} 
+                            alt={ebook.title}
+                            className="w-16 h-12 object-cover rounded-md"
+                          />
+                        ) : (
+                          <div className="w-16 h-12 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground">
+                            ไม่มีรูป
+                          </div>
+                        )}
+                      </TableCell>
                       <TableCell className="font-medium">{ebook.title}</TableCell>
                       <TableCell>{ebook.pages} หน้า</TableCell>
                       <TableCell>

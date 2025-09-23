@@ -41,10 +41,13 @@ export default function AdminTools() {
     category: '',
     download_url: '',
     download_type: 'url' as 'url' | 'file',
-    file_path: ''
+    file_path: '',
+    cover_image_url: '',
+    cover_image_path: ''
   });
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedCoverFile, setSelectedCoverFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
@@ -150,7 +153,18 @@ export default function AdminTools() {
 
       setIsDialogOpen(false);
       setEditingTool(null);
-      setFormData({ title: '', slug: '', description: '', price: 0, category: '', download_url: '', download_type: 'url', file_path: '' });
+      setFormData({ 
+        title: '', 
+        slug: '', 
+        description: '', 
+        price: 0, 
+        category: '', 
+        download_url: '', 
+        download_type: 'url', 
+        file_path: '',
+        cover_image_url: '',
+        cover_image_path: ''
+      });
       setSelectedFile(null);
       fetchTools();
     } catch (error) {
@@ -175,7 +189,9 @@ export default function AdminTools() {
       category: tool.category || '',
       download_url: tool.download_url || '',
       download_type: tool.download_type || 'url',
-      file_path: tool.file_path || ''
+      file_path: tool.file_path || '',
+      cover_image_url: tool.cover_image_url || '',
+      cover_image_path: tool.cover_image_path || ''
     });
     setSelectedFile(null);
     setIsDialogOpen(true);
@@ -210,7 +226,18 @@ export default function AdminTools() {
 
   const openAddDialog = () => {
     setEditingTool(null);
-    setFormData({ title: '', slug: '', description: '', price: 0, category: '', download_url: '', download_type: 'url', file_path: '' });
+    setFormData({ 
+      title: '', 
+      slug: '', 
+      description: '', 
+      price: 0, 
+      category: '', 
+      download_url: '', 
+      download_type: 'url', 
+      file_path: '',
+      cover_image_url: '',
+      cover_image_path: ''
+    });
     setSelectedFile(null);
     setIsDialogOpen(true);
   };

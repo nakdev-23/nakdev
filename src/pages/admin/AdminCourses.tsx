@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, BookOpen, Play } from "lucide-react";
+import { Plus, Pencil, Trash2, BookOpen } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -21,6 +21,8 @@ interface Course {
   instructor: string;
   total_lessons: number;
   price: number | null;
+  cover_image_url?: string;
+  cover_image_path?: string;
   created_at: string;
 }
 
@@ -38,8 +40,11 @@ export default function AdminCourses() {
     description: '',
     instructor: '',
     total_lessons: 0,
-    price: 0
+    price: 0,
+    cover_image_url: '',
+    cover_image_path: ''
   });
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   useEffect(() => {
     fetchCourses();
@@ -66,14 +71,66 @@ export default function AdminCourses() {
     }
   };
 
+  const uploadCoverImage = async (file: File): Promise<{ url: string; path: string } | null> => {
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${Date.now()}.${fileExt}`
+      const filePath = `courses/${fileName}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('product-covers')
+        .upload(filePath, file)
+
+      if (uploadError) throw uploadError
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-covers')
+        .getPublicUrl(filePath)
+
+      return { url: publicUrl, path: filePath }
+    } catch (error) {
+      console.error('Error uploading image:', error)
+      toast({ 
+        title: "เกิดข้อผิดพลาด", 
+        description: "ไม่สามารถอัปโหลดรูปภาพได้",
+        variant: "destructive" 
+      })
+      return null
+    }
+  }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file && file.type.startsWith('image/')) {
+      setSelectedFile(file)
+    } else {
+      toast({ 
+        title: "ไฟล์ไม่ถูกต้อง", 
+        description: "กรุณาเลือกไฟล์รูปภาพ",
+        variant: "destructive" 
+      })
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
+      let courseData = { ...formData }
+
+      // Upload new cover image if selected
+      if (selectedFile) {
+        const uploadResult = await uploadCoverImage(selectedFile)
+        if (uploadResult) {
+          courseData.cover_image_url = uploadResult.url
+          courseData.cover_image_path = uploadResult.path
+        }
+      }
+
       if (editingCourse) {
         const { error } = await supabase
           .from('courses')
-          .update(formData)
+          .update(courseData)
           .eq('id', editingCourse.id);
 
         if (error) throw error;
@@ -85,7 +142,7 @@ export default function AdminCourses() {
       } else {
         const { error } = await supabase
           .from('courses')
-          .insert([formData]);
+          .insert([courseData]);
 
         if (error) throw error;
 
@@ -97,7 +154,8 @@ export default function AdminCourses() {
 
       setIsDialogOpen(false);
       setEditingCourse(null);
-      setFormData({ title: '', slug: '', description: '', instructor: '', total_lessons: 0, price: 0 });
+      setFormData({ title: '', slug: '', description: '', instructor: '', total_lessons: 0, price: 0, cover_image_url: '', cover_image_path: '' });
+      setSelectedFile(null);
       fetchCourses();
     } catch (error) {
       console.error('Error saving course:', error);
@@ -117,8 +175,11 @@ export default function AdminCourses() {
       description: course.description || '',
       instructor: course.instructor || '',
       total_lessons: course.total_lessons || 0,
-      price: course.price || 0
+      price: course.price || 0,
+      cover_image_url: course.cover_image_url || '',
+      cover_image_path: course.cover_image_path || ''
     });
+    setSelectedFile(null);
     setIsDialogOpen(true);
   };
 
@@ -151,7 +212,8 @@ export default function AdminCourses() {
 
   const openAddDialog = () => {
     setEditingCourse(null);
-    setFormData({ title: '', slug: '', description: '', instructor: '', total_lessons: 0, price: 0 });
+    setFormData({ title: '', slug: '', description: '', instructor: '', total_lessons: 0, price: 0, cover_image_url: '', cover_image_path: '' });
+    setSelectedFile(null);
     setIsDialogOpen(true);
   };
 
@@ -205,6 +267,7 @@ export default function AdminCourses() {
                     />
                   </div>
                 </div>
+
                 <div>
                   <Label htmlFor="description">คำอธิบาย</Label>
                   <Textarea
@@ -214,6 +277,26 @@ export default function AdminCourses() {
                     rows={3}
                   />
                 </div>
+
+                <div>
+                  <Label htmlFor="cover_image">รูปปกคอร์ส</Label>
+                  <Input
+                    id="cover_image"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                  />
+                  {formData.cover_image_url && (
+                    <div className="mt-2">
+                      <img 
+                        src={formData.cover_image_url} 
+                        alt="Cover preview" 
+                        className="w-32 h-20 object-cover rounded-md"
+                      />
+                    </div>
+                  )}
+                </div>
+
                  <div className="grid grid-cols-3 gap-4">
                    <div>
                      <Label htmlFor="instructor">ผู้สอน</Label>
@@ -260,6 +343,7 @@ export default function AdminCourses() {
             <Table>
                <TableHeader>
                  <TableRow>
+                   <TableHead>รูปปก</TableHead>
                    <TableHead>ชื่อคอร์ส</TableHead>
                    <TableHead>ผู้สอน</TableHead>
                    <TableHead>บทเรียน</TableHead>
@@ -271,6 +355,19 @@ export default function AdminCourses() {
               <TableBody>
                  {courses.map((course) => (
                    <TableRow key={course.id}>
+                     <TableCell>
+                       {course.cover_image_url ? (
+                         <img 
+                           src={course.cover_image_url} 
+                           alt={course.title}
+                           className="w-16 h-12 object-cover rounded-md"
+                         />
+                       ) : (
+                         <div className="w-16 h-12 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground">
+                           ไม่มีรูป
+                         </div>
+                       )}
+                     </TableCell>
                      <TableCell>
                        <div>
                          <div className="font-medium">{course.title}</div>
