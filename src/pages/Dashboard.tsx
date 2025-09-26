@@ -1,17 +1,5 @@
 import { Link } from "react-router-dom";
-import { 
-  BookOpen, 
-  Clock, 
-  Trophy, 
-  Target, 
-  Play,
-  CheckCircle,
-  Circle,
-  TrendingUp,
-  Award,
-  AlertCircle,
-  CreditCard
-} from "lucide-react";
+import { BookOpen, Clock, Trophy, Target, Play, CheckCircle, Circle, TrendingUp, Award, AlertCircle, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -20,39 +8,37 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useUserStats } from "@/hooks/useUserStats";
 import { useEnrolledCourses } from "@/hooks/useEnrolledCourses";
 import { useOrders } from "@/hooks/useOrders";
-
 export default function Dashboard() {
-  const { stats, profile, isLoading: userLoading } = useUserStats();
-  const { 
-    enrolledCourses, 
-    continuingCourses, 
+  const {
+    stats,
+    profile,
+    isLoading: userLoading
+  } = useUserStats();
+  const {
+    enrolledCourses,
+    continuingCourses,
     completedCourses,
     notStartedCourses,
-    isLoading: coursesLoading 
+    isLoading: coursesLoading
   } = useEnrolledCourses();
-  const { data: orders, isLoading: ordersLoading } = useOrders();
-
+  const {
+    data: orders,
+    isLoading: ordersLoading
+  } = useOrders();
   if (userLoading || coursesLoading || ordersLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
+    return <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto mb-4"></div>
           <h1 className="text-2xl font-bold">กำลังโหลด...</h1>
         </div>
-      </div>
-    );
+      </div>;
   }
-
   const totalLearningHours = enrolledCourses.reduce((sum, course) => sum + (course.duration_hours || 0), 0);
-  const overallProgress = enrolledCourses.length > 0 
-    ? enrolledCourses.reduce((sum, course) => sum + course.progress, 0) / enrolledCourses.length 
-    : 0;
+  const overallProgress = enrolledCourses.length > 0 ? enrolledCourses.reduce((sum, course) => sum + course.progress, 0) / enrolledCourses.length : 0;
 
   // Check for pending orders
   const pendingOrders = orders?.filter(order => order.status === 'pending') || [];
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       {/* Header */}
       <section className="bg-hero-gradient py-12 relative overflow-hidden">
         <div className="absolute inset-0">
@@ -94,8 +80,7 @@ export default function Dashboard() {
       <div className="container mx-auto px-4 -mt-6 relative z-10">
         
         {/* Pending Orders Alert */}
-        {pendingOrders.length > 0 && (
-          <Alert className="mb-6 border-warning bg-warning/10">
+        {pendingOrders.length > 0 && <Alert className="mb-6 border-warning bg-warning/10 my-[35px]">
             <AlertCircle className="h-4 w-4 text-warning" />
             <AlertDescription className="text-warning-foreground">
               <div className="flex items-center justify-between">
@@ -110,11 +95,9 @@ export default function Dashboard() {
                 </Button>
               </div>
             </AlertDescription>
-          </Alert>
-        )}
+          </Alert>}
         
-        {enrolledCourses.length === 0 ? (
-          <Card className="glass-card text-center py-12">
+        {enrolledCourses.length === 0 ? <Card className="glass-card text-center py-12">
             <CardContent>
               <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
               <h2 className="text-2xl font-bold mb-2">ยังไม่มีคอร์สในระบบ</h2>
@@ -128,13 +111,10 @@ export default function Dashboard() {
                 </Link>
               </Button>
             </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-8">
+          </Card> : <div className="space-y-8">
             
             {/* Continue Learning */}
-            {continuingCourses.length > 0 && (
-              <Card className="glass-card">
+            {continuingCourses.length > 0 && <Card className="glass-card">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Play className="h-5 w-5 text-primary" />
@@ -142,8 +122,7 @@ export default function Dashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {continuingCourses.map((course) => (
-                    <div key={course.id} className="flex gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                  {continuingCourses.map(course => <div key={course.id} className="flex gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors">
                       <div className="w-20 h-16 bg-gradient-to-br from-primary/20 to-accent/20 rounded-lg flex-shrink-0 flex items-center justify-center">
                         <BookOpen className="h-8 w-8 text-primary" />
                       </div>
@@ -159,7 +138,7 @@ export default function Dashboard() {
                             </p>
                           </div>
                           <Button size="sm" asChild>
-                              <Link to={course.nextLessonSlug ? `/learn/${course.slug}/${course.nextLessonSlug}` : (course.firstLessonSlug ? `/learn/${course.slug}/${course.firstLessonSlug}` : `/courses/${course.slug}`)}>
+                              <Link to={course.nextLessonSlug ? `/learn/${course.slug}/${course.nextLessonSlug}` : course.firstLessonSlug ? `/learn/${course.slug}/${course.firstLessonSlug}` : `/courses/${course.slug}`}>
                                 เรียนต่อ
                               </Link>
                           </Button>
@@ -172,18 +151,15 @@ export default function Dashboard() {
                           <Progress value={course.progress} className="h-2" />
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    </div>)}
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
 
             {/* All My Courses */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               
               {/* Completed Courses */}
-              {completedCourses.length > 0 && (
-                <Card className="glass-card">
+              {completedCourses.length > 0 && <Card className="glass-card">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <CheckCircle className="h-5 w-5 text-success" />
@@ -191,8 +167,7 @@ export default function Dashboard() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {completedCourses.slice(0, 3).map((course) => (
-                      <div key={course.id} className="flex items-center gap-3 p-3 border rounded-lg bg-success/5 border-success/20">
+                    {completedCourses.slice(0, 3).map(course => <div key={course.id} className="flex items-center gap-3 p-3 border rounded-lg bg-success/5 border-success/20">
                         <Trophy className="h-5 w-5 text-success flex-shrink-0" />
                         <div className="flex-1">
                           <h5 className="font-medium text-sm">{course.title}</h5>
@@ -201,20 +176,15 @@ export default function Dashboard() {
                         <Badge className="bg-success/10 text-success border-success/20">
                           100%
                         </Badge>
-                      </div>
-                    ))}
-                    {completedCourses.length > 3 && (
-                      <p className="text-sm text-muted-foreground text-center">
+                      </div>)}
+                    {completedCourses.length > 3 && <p className="text-sm text-muted-foreground text-center">
                         และอีก {completedCourses.length - 3} คอร์ส
-                      </p>
-                    )}
+                      </p>}
                   </CardContent>
-                </Card>
-              )}
+                </Card>}
 
               {/* Not Started Courses */}
-              {notStartedCourses.length > 0 && (
-                <Card className="glass-card">
+              {notStartedCourses.length > 0 && <Card className="glass-card">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Circle className="h-5 w-5 text-muted-foreground" />
@@ -222,8 +192,7 @@ export default function Dashboard() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {notStartedCourses.slice(0, 3).map((course) => (
-                      <div key={course.id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                    {notStartedCourses.slice(0, 3).map(course => <div key={course.id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
                         <Circle className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                         <div className="flex-1">
                           <h5 className="font-medium text-sm">{course.title}</h5>
@@ -234,16 +203,12 @@ export default function Dashboard() {
                             เริ่มเรียน
                           </Link>
                         </Button>
-                      </div>
-                    ))}
-                    {notStartedCourses.length > 3 && (
-                      <p className="text-sm text-muted-foreground text-center">
+                      </div>)}
+                    {notStartedCourses.length > 3 && <p className="text-sm text-muted-foreground text-center">
                         และอีก {notStartedCourses.length - 3} คอร์ส
-                      </p>
-                    )}
+                      </p>}
                   </CardContent>
-                </Card>
-              )}
+                </Card>}
 
             </div>
 
@@ -309,9 +274,7 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-          </div>
-        )}
+          </div>}
       </div>
-    </div>
-  );
+    </div>;
 }
