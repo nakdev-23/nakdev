@@ -1,10 +1,12 @@
 import { Link } from "react-router-dom";
-import { BookOpen, Clock, Trophy, Target, Play, CheckCircle, Circle, ArrowLeft } from "lucide-react";
+import { BookOpen, Clock, Trophy, Target, Play, CheckCircle, Circle, ArrowLeft, AlertCircle, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useEnrolledCourses } from "@/hooks/useEnrolledCourses";
+import { useOrders } from "@/hooks/useOrders";
 
 export default function MyCourses() {
   const { 
@@ -14,8 +16,9 @@ export default function MyCourses() {
     notStartedCourses,
     isLoading 
   } = useEnrolledCourses();
+  const { data: orders, isLoading: ordersLoading } = useOrders();
 
-  if (isLoading) {
+  if (isLoading || ordersLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -25,6 +28,9 @@ export default function MyCourses() {
       </div>
     );
   }
+
+  // Check for pending orders
+  const pendingOrders = orders?.filter(order => order.status === 'pending') || [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -76,6 +82,59 @@ export default function MyCourses() {
       </section>
 
       <div className="container mx-auto px-4 -mt-6 relative z-10">
+        
+        {/* Pending Orders Section */}
+        {pendingOrders.length > 0 && (
+          <Card className="glass-card mb-6 border-warning bg-warning/5">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-warning">
+                <AlertCircle className="h-5 w-5" />
+                คำสั่งซื้อรอการยืนยัน ({pendingOrders.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-warning text-sm mb-4">
+                คำสั่งซื้อของคุณกำลังรอการยืนยันจากแอดมิน หลังจากได้รับการยืนยันแล้ว คุณจะสามารถเข้าเรียนได้ทันที
+              </p>
+              {pendingOrders.map((order) => (
+                <div key={order.id} className="p-4 border border-warning/20 rounded-lg bg-warning/5">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h4 className="font-semibold text-warning">คำสั่งซื้อ #{order.id.slice(0, 8)}</h4>
+                      <p className="text-sm text-muted-foreground">
+                        วันที่สั่งซื้อ: {new Date(order.created_at).toLocaleDateString('th-TH')}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        ช่องทางการชำระ: {order.payment_methods?.display_name}
+                      </p>
+                    </div>
+                    <Badge variant="outline" className="border-warning text-warning">
+                      รอการยืนยัน
+                    </Badge>
+                  </div>
+                  <div className="text-lg font-semibold text-warning">
+                    ยอดรวม: ฿{order.total_amount?.toLocaleString()}
+                  </div>
+                  {order.order_items && order.order_items.length > 0 && (
+                    <div className="mt-3">
+                      <p className="text-sm font-medium mb-2">รายการที่สั่งซื้อ:</p>
+                      <div className="space-y-1">
+                        {order.order_items.map((item) => (
+                          <div key={item.id} className="text-sm text-muted-foreground flex justify-between">
+                            <span>
+                              {item.courses?.title || item.ebooks?.title || item.tools?.title || 'รายการสินค้า'}
+                            </span>
+                            <span>฿{item.price?.toLocaleString()}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
         
         {enrolledCourses.length === 0 ? (
           <Card className="glass-card text-center py-12">
