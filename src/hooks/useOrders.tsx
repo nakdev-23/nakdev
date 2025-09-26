@@ -47,6 +47,7 @@ export const useOrders = () => {
   return useQuery({
     queryKey: ['orders'],
     queryFn: async () => {
+      // First get orders with payment methods
       const { data, error } = await supabase
         .from('orders')
         .select(`
@@ -54,10 +55,6 @@ export const useOrders = () => {
           payment_methods (
             display_name,
             method_type
-          ),
-          profiles (
-            full_name,
-            email
           )
         `)
         .order('created_at', { ascending: false });
@@ -66,6 +63,24 @@ export const useOrders = () => {
         toast.error('เกิดข้อผิดพลาดในการโหลดข้อมูลคำสั่งซื้อ');
         throw error;
       }
+
+      // Get profiles separately
+      const userIds = [...new Set(data.map(order => order.user_id))];
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, email')
+        .in('user_id', userIds);
+
+      if (profilesError) {
+        toast.error('เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ใช้');
+        throw profilesError;
+      }
+
+      // Create profile lookup map
+      const profileMap = profiles.reduce((acc, profile) => {
+        acc[profile.user_id] = profile;
+        return acc;
+      }, {} as Record<string, any>);
 
       // Get order items separately
       const orderIds = data.map(order => order.id);
@@ -93,6 +108,7 @@ export const useOrders = () => {
       // Combine data
       const ordersWithItems = data.map(order => ({
         ...order,
+        profiles: profileMap[order.user_id] || null,
         order_items: orderItems.filter(item => item.order_id === order.id).map(item => {
           const itemData = { ...item } as any;
           if (item.item_type === 'course') {
@@ -118,6 +134,7 @@ export const useOrder = (orderId: string) => {
   return useQuery({
     queryKey: ['order', orderId],
     queryFn: async () => {
+      // First get order with payment methods
       const { data, error } = await supabase
         .from('orders')
         .select(`
@@ -125,10 +142,6 @@ export const useOrder = (orderId: string) => {
           payment_methods (
             display_name,
             method_type
-          ),
-          profiles (
-            full_name,
-            email
           )
         `)
         .eq('id', orderId)
@@ -137,6 +150,17 @@ export const useOrder = (orderId: string) => {
       if (error) {
         toast.error('เกิดข้อผิดพลาดในการโหลดข้อมูลคำสั่งซื้อ');
         throw error;
+      }
+
+      // Get profile separately
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, email')
+        .eq('user_id', data.user_id)
+        .single();
+
+      if (profileError) {
+        console.warn('Could not load profile data:', profileError);
       }
 
       // Get order items separately
@@ -164,6 +188,7 @@ export const useOrder = (orderId: string) => {
       // Combine data
       const orderWithItems = {
         ...data,
+        profiles: profile || null,
         order_items: orderItems.map(item => {
           const itemData = { ...item } as any;
           if (item.item_type === 'course') {
