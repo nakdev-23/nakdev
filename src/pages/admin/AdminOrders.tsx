@@ -30,7 +30,8 @@ import {
   User,
   CreditCard,
   Package,
-  FileText
+  FileText,
+  Image
 } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import {
@@ -283,6 +284,26 @@ export default function AdminOrders() {
                         </p>
                       </div>
                     </div>
+                    
+                    {/* Payment Slip Display */}
+                    {selectedOrder.payment_proof_url && (
+                      <div className="mt-6">
+                        <Label className="flex items-center gap-2 mb-3">
+                          <Image className="w-4 h-4" />
+                          สลิปการโอนเงิน
+                        </Label>
+                        <div className="border rounded-lg p-4 bg-muted/50">
+                          <img 
+                            src={selectedOrder.payment_proof_url} 
+                            alt="Payment slip" 
+                            className="max-w-full max-h-96 mx-auto object-contain rounded-lg"
+                            onError={(e) => {
+                              e.currentTarget.src = '/placeholder.svg';
+                            }}
+                          />
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
