@@ -7,33 +7,30 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useEnrolledCourses } from "@/hooks/useEnrolledCourses";
 import { useOrders } from "@/hooks/useOrders";
-
 export default function MyCourses() {
-  const { 
-    enrolledCourses, 
-    continuingCourses, 
+  const {
+    enrolledCourses,
+    continuingCourses,
     completedCourses,
     notStartedCourses,
-    isLoading 
+    isLoading
   } = useEnrolledCourses();
-  const { data: orders, isLoading: ordersLoading } = useOrders();
-
+  const {
+    data: orders,
+    isLoading: ordersLoading
+  } = useOrders();
   if (isLoading || ordersLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
+    return <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto mb-4"></div>
           <h1 className="text-2xl font-bold">กำลังโหลด...</h1>
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // Check for pending orders
   const pendingOrders = orders?.filter(order => order.status === 'pending') || [];
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       {/* Header */}
       <section className="bg-hero-gradient py-12 relative overflow-hidden">
         <div className="absolute inset-0">
@@ -84,8 +81,7 @@ export default function MyCourses() {
       <div className="container mx-auto px-4 -mt-6 relative z-10">
         
         {/* Pending Orders Section */}
-        {pendingOrders.length > 0 && (
-          <Card className="glass-card mb-6 border-warning bg-warning/5">
+        {pendingOrders.length > 0 && <Card className="glass-card mb-6 border-warning bg-warning/5 px-0 mx-0 my-[35px]">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-warning">
                 <AlertCircle className="h-5 w-5" />
@@ -96,8 +92,7 @@ export default function MyCourses() {
               <p className="text-warning text-sm mb-4">
                 คำสั่งซื้อของคุณกำลังรอการยืนยันจากแอดมิน หลังจากได้รับการยืนยันแล้ว คุณจะสามารถเข้าเรียนได้ทันที
               </p>
-              {pendingOrders.map((order) => (
-                <div key={order.id} className="p-4 border border-warning/20 rounded-lg bg-warning/5">
+              {pendingOrders.map(order => <div key={order.id} className="p-4 border border-warning/20 rounded-lg bg-warning/5">
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       <h4 className="font-semibold text-warning">คำสั่งซื้อ #{order.id.slice(0, 8)}</h4>
@@ -115,29 +110,22 @@ export default function MyCourses() {
                   <div className="text-lg font-semibold text-warning">
                     ยอดรวม: ฿{order.total_amount?.toLocaleString()}
                   </div>
-                  {order.order_items && order.order_items.length > 0 && (
-                    <div className="mt-3">
+                  {order.order_items && order.order_items.length > 0 && <div className="mt-3">
                       <p className="text-sm font-medium mb-2">รายการที่สั่งซื้อ:</p>
                       <div className="space-y-1">
-                        {order.order_items.map((item) => (
-                          <div key={item.id} className="text-sm text-muted-foreground flex justify-between">
+                        {order.order_items.map(item => <div key={item.id} className="text-sm text-muted-foreground flex justify-between">
                             <span>
                               {item.courses?.title || item.ebooks?.title || item.tools?.title || 'รายการสินค้า'}
                             </span>
                             <span>฿{item.price?.toLocaleString()}</span>
-                          </div>
-                        ))}
+                          </div>)}
                       </div>
-                    </div>
-                  )}
-                </div>
-              ))}
+                    </div>}
+                </div>)}
             </CardContent>
-          </Card>
-        )}
+          </Card>}
         
-        {enrolledCourses.length === 0 ? (
-          <Card className="glass-card text-center py-12">
+        {enrolledCourses.length === 0 ? <Card className="glass-card text-center py-12">
             <CardContent>
               <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
               <h2 className="text-2xl font-bold mb-2">ยังไม่มีคอร์สในระบบ</h2>
@@ -151,13 +139,10 @@ export default function MyCourses() {
                 </Link>
               </Button>
             </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-8">
+          </Card> : <div className="space-y-8">
             
             {/* Continue Learning */}
-            {continuingCourses.length > 0 && (
-              <Card className="glass-card">
+            {continuingCourses.length > 0 && <Card className="glass-card">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Play className="h-5 w-5 text-primary" />
@@ -165,8 +150,7 @@ export default function MyCourses() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {continuingCourses.map((course) => (
-                    <div key={course.id} className="flex gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                  {continuingCourses.map(course => <div key={course.id} className="flex gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors">
                       <div className="w-20 h-16 bg-gradient-to-br from-primary/20 to-accent/20 rounded-lg flex-shrink-0 flex items-center justify-center">
                         <BookOpen className="h-8 w-8 text-primary" />
                       </div>
@@ -182,7 +166,7 @@ export default function MyCourses() {
                             </p>
                           </div>
                           <Button size="sm" asChild>
-                            <Link to={course.nextLessonSlug ? `/learn/${course.slug}/${course.nextLessonSlug}` : (course.firstLessonSlug ? `/learn/${course.slug}/${course.firstLessonSlug}` : `/courses/${course.slug}`)}>
+                            <Link to={course.nextLessonSlug ? `/learn/${course.slug}/${course.nextLessonSlug}` : course.firstLessonSlug ? `/learn/${course.slug}/${course.firstLessonSlug}` : `/courses/${course.slug}`}>
                               เรียนต่อ
                             </Link>
                           </Button>
@@ -195,18 +179,15 @@ export default function MyCourses() {
                           <Progress value={course.progress} className="h-2" />
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    </div>)}
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
 
             {/* All My Courses Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               
               {/* Completed Courses */}
-              {completedCourses.length > 0 && (
-                <Card className="glass-card">
+              {completedCourses.length > 0 && <Card className="glass-card">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <CheckCircle className="h-5 w-5 text-success" />
@@ -214,8 +195,7 @@ export default function MyCourses() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {completedCourses.map((course) => (
-                      <div key={course.id} className="flex items-center gap-3 p-3 border rounded-lg bg-success/5 border-success/20">
+                    {completedCourses.map(course => <div key={course.id} className="flex items-center gap-3 p-3 border rounded-lg bg-success/5 border-success/20">
                         <Trophy className="h-5 w-5 text-success flex-shrink-0" />
                         <div className="flex-1">
                           <h5 className="font-medium text-sm">{course.title}</h5>
@@ -224,15 +204,12 @@ export default function MyCourses() {
                         <Badge className="bg-success/10 text-success border-success/20">
                           100%
                         </Badge>
-                      </div>
-                    ))}
+                      </div>)}
                   </CardContent>
-                </Card>
-              )}
+                </Card>}
 
               {/* Not Started Courses */}
-              {notStartedCourses.length > 0 && (
-                <Card className="glass-card">
+              {notStartedCourses.length > 0 && <Card className="glass-card">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Circle className="h-5 w-5 text-muted-foreground" />
@@ -240,8 +217,7 @@ export default function MyCourses() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {notStartedCourses.map((course) => (
-                      <div key={course.id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                    {notStartedCourses.map(course => <div key={course.id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
                         <Circle className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                         <div className="flex-1">
                           <h5 className="font-medium text-sm">{course.title}</h5>
@@ -252,17 +228,13 @@ export default function MyCourses() {
                             เริ่มเรียน
                           </Link>
                         </Button>
-                      </div>
-                    ))}
+                      </div>)}
                   </CardContent>
-                </Card>
-              )}
+                </Card>}
 
             </div>
 
-          </div>
-        )}
+          </div>}
       </div>
-    </div>
-  );
+    </div>;
 }
