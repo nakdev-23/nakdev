@@ -219,6 +219,7 @@ export const useCreateOrder = () => {
       user_id: string;
       payment_method_id: string;
       total_amount: number;
+      payment_proof_url?: string | null;
       items: Array<{
         item_id: string;
         item_type: 'course' | 'ebook' | 'tool';
@@ -227,13 +228,19 @@ export const useCreateOrder = () => {
       }>;
     }) => {
       // Create the order
+      const orderInsertData: any = {
+        user_id: orderData.user_id,
+        payment_method_id: orderData.payment_method_id,
+        total_amount: orderData.total_amount,
+      };
+      
+      if (orderData.payment_proof_url) {
+        orderInsertData.payment_proof_url = orderData.payment_proof_url;
+      }
+      
       const { data: order, error: orderError } = await supabase
         .from('orders')
-        .insert({
-          user_id: orderData.user_id,
-          payment_method_id: orderData.payment_method_id,
-          total_amount: orderData.total_amount,
-        })
+        .insert(orderInsertData)
         .select()
         .single();
 

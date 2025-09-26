@@ -1,16 +1,18 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { CreditCard, Building2, QrCode, ArrowLeft, CheckCircle, Smartphone } from "lucide-react";
+import { CreditCard, Building2, QrCode, ArrowLeft, CheckCircle, Smartphone, Upload, FileImage } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
 import { usePaymentMethods } from "@/hooks/usePaymentMethods";
 import { useCreateOrder } from "@/hooks/useOrders";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export default function Checkout() {
@@ -21,6 +23,8 @@ export default function Checkout() {
   const createOrderMutation = useCreateOrder();
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('');
   const [processingPayment, setProcessingPayment] = useState(false);
+  const [paymentSlip, setPaymentSlip] = useState<File | null>(null);
+  const [uploadingSlip, setUploadingSlip] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -48,15 +52,88 @@ export default function Checkout() {
 
   const selectedMethod = paymentMethods.find(method => method.id === selectedPaymentMethod);
 
+  const uploadPaymentSlip = async (file: File): Promise<string | null> => {
+    if (!user) return null;
+    
+    try {
+      setUploadingSlip(true);
+      
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      
+      const { data, error } = await supabase.storage
+        .from('payment-slips')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) {
+        console.error('Error uploading file:', error);
+        toast.error('เกิดข้อผิดพลาดในการอัปโหลดสลิป');
+        return null;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('payment-slips')
+        .getPublicUrl(data.path);
+
+      return publicUrl;
+    } catch (error) {
+      console.error('Error uploading payment slip:', error);
+      toast.error('เกิดข้อผิดพลาดในการอัปโหลดสลิป');
+      return null;
+    } finally {
+      setUploadingSlip(false);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        toast.error('กรุณาเลือกไฟล์รูปภาพ (JPG, PNG, WEBP)');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('ขนาดไฟล์ต้องไม่เกิน 5MB');
+        return;
+      }
+      
+      setPaymentSlip(file);
+    }
+  };
+
   const handlePayment = async () => {
     if (!selectedMethod || !user) {
       toast.error('กรุณาเลือกวิธีการชำระเงินและเข้าสู่ระบบ');
       return;
     }
 
+    // Check if payment slip is required for bank transfer or promptpay
+    const requiresSlip = selectedMethod.method_type === 'bank_transfer' || selectedMethod.method_type === 'promptpay';
+    if (requiresSlip && !paymentSlip) {
+      toast.error('กรุณาแนบสลิปการโอนเงิน');
+      return;
+    }
+
     setProcessingPayment(true);
     
     try {
+      let paymentProofUrl = null;
+      
+      // Upload payment slip if provided
+      if (paymentSlip) {
+        paymentProofUrl = await uploadPaymentSlip(paymentSlip);
+        if (!paymentProofUrl && requiresSlip) {
+          return; // Error already shown in uploadPaymentSlip
+        }
+      }
+
       // Create order
       const orderItems = cartItems.map(item => ({
         item_id: item.item_id,
@@ -69,11 +146,20 @@ export default function Checkout() {
         user_id: user.id,
         payment_method_id: selectedMethod.id,
         total_amount: totalAmount,
+        payment_proof_url: paymentProofUrl,
         items: orderItems
       });
       
       // Clear cart after successful order creation
       clearCart();
+      
+      // Show appropriate success message
+      if (requiresSlip) {
+        toast.success('คำสั่งซื้อถูกสร้างแล้ว รอการตรวจสอบการชำระเงิน');
+      } else {
+        toast.success('สั่งซื้อสำเร็จแล้ว');
+      }
+      
       navigate('/dashboard');
     } catch (error) {
       toast.error('เกิดข้อผิดพลาดในการสร้างคำสั่งซื้อ');
@@ -268,6 +354,67 @@ export default function Checkout() {
                         </CardContent>
                       </Card>
                     )}
+
+                    {/* Payment Slip Upload */}
+                    {(selectedMethod.method_type === 'bank_transfer' || selectedMethod.method_type === 'promptpay') && (
+                      <Card className="mt-6">
+                        <CardContent className="p-6">
+                          <h3 className="font-medium mb-4 flex items-center gap-2">
+                            <Upload className="h-4 w-4" />
+                            แนบสลิปการโอนเงิน
+                          </h3>
+                          
+                          <div className="space-y-4">
+                            <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+                              <Input
+                                type="file"
+                                accept="image/jpeg,image/jpg,image/png,image/webp"
+                                onChange={handleFileChange}
+                                className="hidden"
+                                id="payment-slip"
+                              />
+                              <Label htmlFor="payment-slip" className="cursor-pointer">
+                                <div className="flex flex-col items-center gap-2">
+                                  <FileImage className="h-8 w-8 text-muted-foreground" />
+                                  <div>
+                                    <p className="text-sm font-medium">คลิกเพื่อเลือกไฟล์สลิป</p>
+                                    <p className="text-xs text-muted-foreground">รองรับไฟล์ JPG, PNG, WEBP (ขนาดไม่เกิน 5MB)</p>
+                                  </div>
+                                </div>
+                              </Label>
+                            </div>
+                            
+                            {paymentSlip && (
+                              <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                                <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium text-green-800 dark:text-green-200">
+                                    ไฟล์ที่เลือก: {paymentSlip.name}
+                                  </p>
+                                  <p className="text-xs text-green-600 dark:text-green-400">
+                                    ขนาด: {(paymentSlip.size / 1024 / 1024).toFixed(2)} MB
+                                  </p>
+                                </div>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => setPaymentSlip(null)}
+                                  className="text-red-600 hover:text-red-700"
+                                >
+                                  ลบ
+                                </Button>
+                              </div>
+                            )}
+
+                            <div className="text-xs text-muted-foreground space-y-1">
+                              <p>• กรุณาแนบสลิปการโอนเงินที่ชัดเจน</p>
+                              <p>• ตรวจสอบให้แน่ใจว่าจำนวนเงินตรงกับคำสั่งซื้อ</p>
+                              <p>• สลิปจะถูกตรวจสอบและยืนยันภายใน 24 ชั่วโมง</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
                   </>
                 )}
 
@@ -276,12 +423,16 @@ export default function Checkout() {
                   className="w-full mt-6 glow-on-hover" 
                   size="lg"
                   onClick={handlePayment}
-                  disabled={processingPayment || !selectedMethod}
+                  disabled={processingPayment || uploadingSlip || !selectedMethod || 
+                    ((selectedMethod?.method_type === 'bank_transfer' || selectedMethod?.method_type === 'promptpay') && !paymentSlip)}
                 >
                   {processingPayment ? 'กำลังดำเนินการ...' : 
+                   uploadingSlip ? 'กำลังอัปโหลดสลิป...' :
                    !selectedMethod ? 'เลือกวิธีการชำระเงิน' :
+                   ((selectedMethod.method_type === 'bank_transfer' || selectedMethod.method_type === 'promptpay') && !paymentSlip) ? 'กรุณาแนบสลิป' :
                    selectedMethod.method_type === 'stripe' ? 'ไปยังหน้าชำระเงิน' : 
                    selectedMethod.method_type === 'bank_transfer' ? 'ยืนยันการโอนเงิน' :
+                   selectedMethod.method_type === 'promptpay' ? 'ยืนยันการชำระเงิน' :
                    'ยืนยันการชำระเงิน'}
                 </Button>
               </CardContent>
