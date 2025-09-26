@@ -84,7 +84,7 @@ export default function Dashboard() {
             <AlertCircle className="h-4 w-4 text-warning" />
             <AlertDescription className="text-warning-foreground">
               <div className="flex items-center justify-between">
-                <span>
+                <span className="text-stone-800">
                   คุณมี {pendingOrders.length} คำสั่งซื้อรอการยืนยัน กรุณารอการยืนยันจากแอดมิน
                 </span>
                 <Button variant="outline" size="sm" asChild className="ml-4">
