@@ -87,7 +87,7 @@ export default function Dashboard() {
                 <span className="text-stone-800">
                   คุณมี {pendingOrders.length} คำสั่งซื้อรอการยืนยัน กรุณารอการยืนยันจากแอดมิน
                 </span>
-                <Button variant="outline" size="sm" asChild className="ml-4">
+                <Button variant="secondary" size="sm" asChild className="ml-4">
                   <Link to="/my-courses">
                     <CreditCard className="h-4 w-4 mr-2" />
                     ดูสถานะ
