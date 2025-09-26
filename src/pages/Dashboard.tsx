@@ -8,14 +8,18 @@ import {
   CheckCircle,
   Circle,
   TrendingUp,
-  Award
+  Award,
+  AlertCircle,
+  CreditCard
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useUserStats } from "@/hooks/useUserStats";
 import { useEnrolledCourses } from "@/hooks/useEnrolledCourses";
+import { useOrders } from "@/hooks/useOrders";
 
 export default function Dashboard() {
   const { stats, profile, isLoading: userLoading } = useUserStats();
@@ -26,8 +30,9 @@ export default function Dashboard() {
     notStartedCourses,
     isLoading: coursesLoading 
   } = useEnrolledCourses();
+  const { data: orders, isLoading: ordersLoading } = useOrders();
 
-  if (userLoading || coursesLoading) {
+  if (userLoading || coursesLoading || ordersLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -42,6 +47,9 @@ export default function Dashboard() {
   const overallProgress = enrolledCourses.length > 0 
     ? enrolledCourses.reduce((sum, course) => sum + course.progress, 0) / enrolledCourses.length 
     : 0;
+
+  // Check for pending orders
+  const pendingOrders = orders?.filter(order => order.status === 'pending') || [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -84,6 +92,26 @@ export default function Dashboard() {
       </section>
 
       <div className="container mx-auto px-4 -mt-6 relative z-10">
+        
+        {/* Pending Orders Alert */}
+        {pendingOrders.length > 0 && (
+          <Alert className="mb-6 border-warning bg-warning/10">
+            <AlertCircle className="h-4 w-4 text-warning" />
+            <AlertDescription className="text-warning-foreground">
+              <div className="flex items-center justify-between">
+                <span>
+                  คุณมี {pendingOrders.length} คำสั่งซื้อรอการยืนยัน กรุณารอการยืนยันจากแอดมิน
+                </span>
+                <Button variant="outline" size="sm" asChild className="ml-4">
+                  <Link to="/my-courses">
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    ดูสถานะ
+                  </Link>
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
         
         {enrolledCourses.length === 0 ? (
           <Card className="glass-card text-center py-12">
