@@ -35,6 +35,7 @@ import AdminEbooks from "./pages/admin/AdminEbooks";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminPaymentMethods from "./pages/admin/AdminPaymentMethods";
 import AdminOrders from "./pages/admin/AdminOrders";
+import AdminReports from "./pages/admin/AdminReports";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -126,6 +127,7 @@ const App = () => (
             <Route path="admin/users" element={<AdminUsers />} />
             <Route path="admin/payment-methods" element={<AdminPaymentMethods />} />
             <Route path="admin/orders" element={<AdminOrders />} />
+            <Route path="admin/reports" element={<AdminReports />} />
             
             {/* Learning pages without main layout */}
             <Route path="learn/:courseSlug/:lessonSlug" element={<Learn />} />
