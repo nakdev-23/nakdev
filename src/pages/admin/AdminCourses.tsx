@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, BookOpen } from "lucide-react";
+import { Plus, Pencil, Trash2, BookOpen, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -23,6 +23,8 @@ interface Course {
   price: number | null;
   cover_image_url?: string;
   cover_image_path?: string;
+  tags: string[];
+  features: string[];
   created_at: string;
 }
 
@@ -42,9 +44,13 @@ export default function AdminCourses() {
     total_lessons: 0,
     price: 0,
     cover_image_url: '',
-    cover_image_path: ''
+    cover_image_path: '',
+    tags: [] as string[],
+    features: [] as string[]
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [newTag, setNewTag] = useState('');
+  const [newFeature, setNewFeature] = useState('');
 
   useEffect(() => {
     fetchCourses();
@@ -98,6 +104,40 @@ export default function AdminCourses() {
       return null
     }
   }
+
+  const addTag = () => {
+    if (newTag.trim() && !formData.tags.includes(newTag.trim())) {
+      setFormData({
+        ...formData,
+        tags: [...formData.tags, newTag.trim()]
+      });
+      setNewTag('');
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setFormData({
+      ...formData,
+      tags: formData.tags.filter(tag => tag !== tagToRemove)
+    });
+  };
+
+  const addFeature = () => {
+    if (newFeature.trim() && !formData.features.includes(newFeature.trim())) {
+      setFormData({
+        ...formData,
+        features: [...formData.features, newFeature.trim()]
+      });
+      setNewFeature('');
+    }
+  };
+
+  const removeFeature = (featureToRemove: string) => {
+    setFormData({
+      ...formData,
+      features: formData.features.filter(feature => feature !== featureToRemove)
+    });
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -154,7 +194,18 @@ export default function AdminCourses() {
 
       setIsDialogOpen(false);
       setEditingCourse(null);
-      setFormData({ title: '', slug: '', description: '', instructor: '', total_lessons: 0, price: 0, cover_image_url: '', cover_image_path: '' });
+      setFormData({ 
+        title: '', 
+        slug: '', 
+        description: '', 
+        instructor: '', 
+        total_lessons: 0, 
+        price: 0, 
+        cover_image_url: '', 
+        cover_image_path: '',
+        tags: [],
+        features: []
+      });
       setSelectedFile(null);
       fetchCourses();
     } catch (error) {
@@ -177,7 +228,9 @@ export default function AdminCourses() {
       total_lessons: course.total_lessons || 0,
       price: course.price || 0,
       cover_image_url: course.cover_image_url || '',
-      cover_image_path: course.cover_image_path || ''
+      cover_image_path: course.cover_image_path || '',
+      tags: course.tags || [],
+      features: course.features || []
     });
     setSelectedFile(null);
     setIsDialogOpen(true);
@@ -212,7 +265,18 @@ export default function AdminCourses() {
 
   const openAddDialog = () => {
     setEditingCourse(null);
-    setFormData({ title: '', slug: '', description: '', instructor: '', total_lessons: 0, price: 0, cover_image_url: '', cover_image_path: '' });
+    setFormData({ 
+      title: '', 
+      slug: '', 
+      description: '', 
+      instructor: '', 
+      total_lessons: 0, 
+      price: 0, 
+      cover_image_url: '', 
+      cover_image_path: '',
+      tags: [],
+      features: []
+    });
     setSelectedFile(null);
     setIsDialogOpen(true);
   };
