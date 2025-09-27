@@ -8,17 +8,69 @@ import { useEbookEnrollment } from "@/hooks/useEbookEnrollment";
 import { useCart } from "@/hooks/useCart";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 export default function EbookDetail() {
   const { slug } = useParams<{ slug: string }>();
   const { ebook, isLoading, error } = useEbook(slug || '');
   const { isEnrolled, isLoading: enrollmentLoading } = useEbookEnrollment(ebook?.id || '');
   const { addToCart } = useCart();
+  const { toast } = useToast();
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const handleDownload = async () => {
-    if (!ebook) return;
+    if (!ebook || isDownloading) return;
 
+    setIsDownloading(true);
     try {
+      // Check if user is authenticated
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast({
+          title: "กรุณาเข้าสู่ระบบ",
+          description: "คุณต้องเข้าสู่ระบบก่อนดาวน์โหลด",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // If ebook is free, record enrollment
+      if (ebook.price === 0 && !isEnrolled) {
+        // Check if already enrolled
+        const { data: existingEnrollment } = await supabase
+          .from('enrollments')
+          .select('id')
+          .eq('user_id', session.user.id)
+          .eq('item_id', ebook.id)
+          .eq('item_type', 'ebook')
+          .maybeSingle();
+
+        // Add to enrollments if not already enrolled
+        if (!existingEnrollment) {
+          const { error: enrollmentError } = await supabase
+            .from('enrollments')
+            .insert({
+              user_id: session.user.id,
+              item_id: ebook.id,
+              item_type: 'ebook',
+              price_paid: 0
+            });
+
+          if (enrollmentError) {
+            console.error('Error recording enrollment:', enrollmentError);
+            // Continue with download even if enrollment fails
+          } else {
+            toast({
+              title: "เพิ่มลงประวัติแล้ว",
+              description: "eBook นี้ได้ถูกเพิ่มลงในประวัติของคุณแล้ว",
+            });
+          }
+        }
+      }
+
+      // Proceed with download
       let downloadUrl = '';
       
       if (ebook.download_type === 'file' && ebook.file_path) {
@@ -36,10 +88,21 @@ export default function EbookDetail() {
       if (downloadUrl) {
         // Open in new tab to avoid Chrome blocking
         window.open(downloadUrl, '_blank');
+        
+        toast({
+          title: "เริ่มการดาวน์โหลด",
+          description: "กำลังเปิดลิงค์ดาวน์โหลดในหน้าต่างใหม่",
+        });
       }
     } catch (error) {
       console.error('Error downloading file:', error);
-      alert('เกิดข้อผิดพลาดในการดาวน์โหลดไฟล์');
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถดาวน์โหลดไฟล์ได้ กรุณาลองใหม่อีกครั้ง",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -131,10 +194,10 @@ export default function EbookDetail() {
                       size="lg" 
                       className="bg-white text-primary hover:bg-white/90"
                       onClick={handleDownload}
-                      disabled={!ebook.download_url && !ebook.file_path}
+                      disabled={(!ebook.download_url && !ebook.file_path) || isDownloading}
                     >
                       <Download className="mr-2 h-5 w-5" />
-                      ดาวน์โหลด PDF
+                      {isDownloading ? "กำลังดาวน์โหลด..." : "ดาวน์โหลด PDF"}
                     </Button>
                   ) : (
                     <Button 
@@ -198,10 +261,10 @@ export default function EbookDetail() {
                       <Button 
                         size="lg" 
                         onClick={handleDownload}
-                        disabled={!ebook.download_url && !ebook.file_path}
+                        disabled={(!ebook.download_url && !ebook.file_path) || isDownloading}
                       >
                         <Download className="mr-2 h-5 w-5" />
-                        ดาวน์โหลดทันที
+                        {isDownloading ? "กำลังดาวน์โหลด..." : "ดาวน์โหลดทันที"}
                       </Button>
                     </div>
                   )}

@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 import { useCart } from "@/hooks/useCart";
+import { useToast } from "@/hooks/use-toast";
 
 interface Tool {
   id: string;
@@ -26,7 +27,9 @@ export default function ToolDetail() {
   const [tool, setTool] = useState<Tool | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
   const { addToCart } = useCart();
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchTool = async () => {
@@ -56,9 +59,57 @@ export default function ToolDetail() {
   }, [slug]);
 
   const handleDownload = async () => {
-    if (!tool) return;
+    if (!tool || isDownloading) return;
 
+    setIsDownloading(true);
     try {
+      // Check if user is authenticated
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast({
+          title: "กรุณาเข้าสู่ระบบ",
+          description: "คุณต้องเข้าสู่ระบบก่อนดาวน์โหลด",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // If tool is free, record enrollment
+      if (tool.price === 0) {
+        // Check if already enrolled
+        const { data: existingEnrollment } = await supabase
+          .from('enrollments')
+          .select('id')
+          .eq('user_id', session.user.id)
+          .eq('item_id', tool.id)
+          .eq('item_type', 'tool')
+          .maybeSingle();
+
+        // Add to enrollments if not already enrolled
+        if (!existingEnrollment) {
+          const { error: enrollmentError } = await supabase
+            .from('enrollments')
+            .insert({
+              user_id: session.user.id,
+              item_id: tool.id,
+              item_type: 'tool',
+              price_paid: 0
+            });
+
+          if (enrollmentError) {
+            console.error('Error recording enrollment:', enrollmentError);
+            // Continue with download even if enrollment fails
+          } else {
+            toast({
+              title: "เพิ่มลงประวัติแล้ว",
+              description: "เครื่องมือนี้ได้ถูกเพิ่มลงในประวัติของคุณแล้ว",
+            });
+          }
+        }
+      }
+
+      // Proceed with download
       let downloadUrl = '';
       
       if (tool.download_type === 'file' && tool.file_path) {
@@ -76,10 +127,21 @@ export default function ToolDetail() {
       if (downloadUrl) {
         // Open in new tab to avoid Chrome blocking
         window.open(downloadUrl, '_blank');
+        
+        toast({
+          title: "เริ่มการดาวน์โหลด",
+          description: "กำลังเปิดลิงค์ดาวน์โหลดในหน้าต่างใหม่",
+        });
       }
     } catch (error) {
       console.error('Error downloading file:', error);
-      alert('เกิดข้อผิดพลาดในการดาวน์โหลดไฟล์');
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถดาวน์โหลดไฟล์ได้ กรุณาลองใหม่อีกครั้ง",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -158,10 +220,10 @@ export default function ToolDetail() {
                       size="lg" 
                       className="bg-white text-primary hover:bg-white/90"
                       onClick={handleDownload}
-                      disabled={!tool.download_url && !tool.file_path}
+                      disabled={(!tool.download_url && !tool.file_path) || isDownloading}
                     >
                       <Download className="mr-2 h-5 w-5" />
-                      ดาวน์โหลดฟรี
+                      {isDownloading ? "กำลังดาวน์โหลด..." : "ดาวน์โหลดฟรี"}
                     </Button>
                   ) : (
                     <Button 
@@ -213,10 +275,10 @@ export default function ToolDetail() {
                       <Button 
                         size="lg" 
                         onClick={handleDownload}
-                        disabled={!tool.download_url && !tool.file_path}
+                        disabled={(!tool.download_url && !tool.file_path) || isDownloading}
                       >
                         <Download className="mr-2 h-5 w-5" />
-                        ดาวน์โหลดทันที
+                        {isDownloading ? "กำลังดาวน์โหลด..." : "ดาวน์โหลดทันที"}
                       </Button>
                     </div>
                   )}
