@@ -390,10 +390,75 @@ export default function AdminCourses() {
                        step="0.01"
                      />
                    </div>
+                  </div>
+
+                 {/* Tags Section */}
+                 <div>
+                   <Label>แท็ก</Label>
+                   <div className="flex space-x-2 mb-2">
+                     <Input
+                       placeholder="เพิ่มแท็ก"
+                       value={newTag}
+                       onChange={(e) => setNewTag(e.target.value)}
+                       onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                     />
+                     <Button type="button" onClick={addTag} size="sm">
+                       <Plus className="h-4 w-4" />
+                     </Button>
+                   </div>
+                   <div className="flex flex-wrap gap-2">
+                     {formData.tags.map((tag) => (
+                       <Badge key={tag} variant="secondary" className="flex items-center gap-1">
+                         {tag}
+                         <Button
+                           type="button"
+                           variant="ghost"
+                           size="sm"
+                           className="h-auto p-0 hover:bg-transparent"
+                           onClick={() => removeTag(tag)}
+                         >
+                           <X className="h-3 w-3" />
+                         </Button>
+                       </Badge>
+                     ))}
+                   </div>
                  </div>
-                <Button type="submit" className="w-full">
-                  {editingCourse ? 'อัปเดต' : 'บันทึก'}
-                </Button>
+
+                 {/* Features Section */}
+                 <div>
+                   <Label>คุณสมบัติของคอร์ส</Label>
+                   <div className="flex space-x-2 mb-2">
+                     <Input
+                       placeholder="เพิ่มคุณสมบัติ"
+                       value={newFeature}
+                       onChange={(e) => setNewFeature(e.target.value)}
+                       onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addFeature())}
+                     />
+                     <Button type="button" onClick={addFeature} size="sm">
+                       <Plus className="h-4 w-4" />
+                     </Button>
+                   </div>
+                   <div className="flex flex-wrap gap-2">
+                     {formData.features.map((feature) => (
+                       <Badge key={feature} variant="secondary" className="flex items-center gap-1">
+                         {feature}
+                         <Button
+                           type="button"
+                           variant="ghost"
+                           size="sm"
+                           className="h-auto p-0 hover:bg-transparent"
+                           onClick={() => removeFeature(feature)}
+                         >
+                           <X className="h-3 w-3" />
+                         </Button>
+                       </Badge>
+                     ))}
+                   </div>
+                 </div>
+
+                 <Button type="submit" className="w-full">
+                   {editingCourse ? 'อัปเดต' : 'บันทึก'}
+                 </Button>
               </form>
             </DialogContent>
           </Dialog>
