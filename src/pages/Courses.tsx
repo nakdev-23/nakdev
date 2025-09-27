@@ -124,7 +124,7 @@ export default function Courses() {
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2 mb-3">
                     <Badge variant="outline" className="badge-level text-xs">
-                      เริ่มต้น
+                      {course.level}
                     </Badge>
                     {course.is_free || !course.price || course.price === 0 ? (
                       <Badge variant="outline" className="badge-free">
@@ -146,20 +146,30 @@ export default function Courses() {
                     <div className="flex items-center justify-between text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Clock className="h-4 w-4" />
-                        8 ชั่วโมง
+                        {course.duration_hours} ชั่วโมง
                       </span>
                       <span>{course.total_lessons} บทเรียน</span>
                     </div>
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
                       <Users className="h-4 w-4" />
-                      <span>1,250 นักเรียน</span>
+                      <span>{course.student_count?.toLocaleString() || 0} นักเรียน</span>
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap gap-1 mb-4">
-                    <Badge variant="secondary" className="text-xs">React</Badge>
-                    <Badge variant="secondary" className="text-xs">JavaScript</Badge>
-                  </div>
+                  {course.tags && course.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-4">
+                      {course.tags.slice(0, 3).map((tag) => (
+                        <Badge key={tag} variant="secondary" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                      {course.tags.length > 3 && (
+                        <Badge variant="secondary" className="text-xs">
+                          +{course.tags.length - 3}
+                        </Badge>
+                      )}
+                    </div>
+                  )}
                   
                   <Button className="w-full" asChild>
                     <Link to={`/courses/${course.slug}`}>ดูรายละเอียด</Link>
