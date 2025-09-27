@@ -177,6 +177,26 @@ export default function Learn() {
     .flatMap(c => c.lessons)
     .find(l => l.id === currentLesson?.id)?.completed || false;
 
+  // Helper function to convert YouTube URL to embed format
+  const getYouTubeEmbedUrl = (url: string) => {
+    if (!url) return '';
+    
+    // Handle different YouTube URL formats
+    const regexPatterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+      /youtube\.com\/embed\/([^&\n?#]+)/
+    ];
+    
+    for (const pattern of regexPatterns) {
+      const match = url.match(pattern);
+      if (match && match[1]) {
+        return `https://www.youtube.com/embed/${match[1]}`;
+      }
+    }
+    
+    return url; // Return original if no match found
+  };
+
   // Helper function to check if a lesson is locked
   const isLessonLocked = (lesson: any) => {
     // Determine position in the global lessons order
@@ -236,7 +256,7 @@ export default function Learn() {
             <div className="aspect-video bg-muted rounded-lg overflow-hidden">
               {currentLesson.youtube_url ? (
                 <iframe
-                  src={currentLesson.youtube_url}
+                  src={getYouTubeEmbedUrl(currentLesson.youtube_url)}
                   title={currentLesson.title}
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
