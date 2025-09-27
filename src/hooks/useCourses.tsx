@@ -23,6 +23,8 @@ interface Course {
   about_course: string | null;
   is_free: boolean;
   original_price: number | null;
+  cover_image_url: string | null;
+  cover_image_path: string | null;
 }
 
 interface Lesson {
