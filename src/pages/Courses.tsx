@@ -21,7 +21,13 @@ export default function Courses() {
     const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          course.description?.toLowerCase().includes(searchQuery.toLowerCase());
     
-    return matchesSearch; // Simplified filtering for now since we only have basic course data
+    const matchesLevel = levelFilter === "all" || course.level === levelFilter;
+    
+    const matchesPrice = priceFilter === "all" || 
+                        (priceFilter === "free" && (course.is_free || !course.price || course.price === 0)) ||
+                        (priceFilter === "paid" && !course.is_free && course.price && course.price > 0);
+    
+    return matchesSearch && matchesLevel && matchesPrice;
   });
 
   if (isLoading) {
