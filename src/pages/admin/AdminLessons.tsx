@@ -8,10 +8,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Plus, Pencil, Trash2, Play, Clock, BookOpen } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowLeft, Plus, Pencil, Trash2, Play, Clock, BookOpen, FileText, HelpCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import AdminLayout from "@/components/admin/AdminLayout";
+import { useAssignments, Assignment } from "@/hooks/useAssignments";
+import { useQuizzes, Quiz } from "@/hooks/useQuizzes";
+import AssignmentDialog from "@/components/admin/AssignmentDialog";
+import QuizDialog from "@/components/admin/QuizDialog";
 
 interface Course {
   id: string;
@@ -43,6 +48,16 @@ export default function AdminLessons() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
   const { toast } = useToast();
+
+  // Assignments & Quizzes hooks
+  const { assignments, createAssignment, updateAssignment, deleteAssignment } = useAssignments(courseId || '');
+  const { quizzes, createQuiz, updateQuiz, deleteQuiz } = useQuizzes(courseId || '');
+  
+  // Dialog states
+  const [isAssignmentDialogOpen, setIsAssignmentDialogOpen] = useState(false);
+  const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
+  const [isQuizDialogOpen, setIsQuizDialogOpen] = useState(false);
+  const [editingQuiz, setEditingQuiz] = useState<Quiz | null>(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -291,6 +306,25 @@ export default function AdminLessons() {
           </Card>
         </div>
 
+        {/* Content Tabs */}
+        <Tabs defaultValue="lessons" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="lessons">
+              <BookOpen className="h-4 w-4 mr-2" />
+              บทเรียน ({lessons.length})
+            </TabsTrigger>
+            <TabsTrigger value="assignments">
+              <FileText className="h-4 w-4 mr-2" />
+              การบ้าน ({assignments.length})
+            </TabsTrigger>
+            <TabsTrigger value="quizzes">
+              <HelpCircle className="h-4 w-4 mr-2" />
+              Quiz ({quizzes.length})
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Lessons Tab */}
+          <TabsContent value="lessons">
         {/* Lessons table */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
@@ -483,6 +517,223 @@ export default function AdminLessons() {
             )}
           </CardContent>
         </Card>
+          </TabsContent>
+
+          {/* Assignments Tab */}
+          <TabsContent value="assignments">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>การบ้านทั้งหมด</CardTitle>
+                <Button onClick={() => { setEditingAssignment(null); setIsAssignmentDialogOpen(true); }}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  เพิ่มการบ้านใหม่
+                </Button>
+              </CardHeader>
+              <CardContent>
+                {assignments.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">
+                    ยังไม่มีการบ้าน - เริ่มต้นด้วยการเพิ่มการบ้านแรก
+                  </p>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>ชื่อการบ้าน</TableHead>
+                        <TableHead>บทเรียน</TableHead>
+                        <TableHead>ประเภท</TableHead>
+                        <TableHead>คะแนน</TableHead>
+                        <TableHead>สถานะ</TableHead>
+                        <TableHead>การจัดการ</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {assignments.map((assignment) => {
+                        const lesson = lessons.find(l => l.id === assignment.lesson_id);
+                        return (
+                          <TableRow key={assignment.id}>
+                            <TableCell>
+                              <div>
+                                <div className="font-medium">{assignment.title}</div>
+                                {assignment.description && (
+                                  <div className="text-sm text-muted-foreground line-clamp-1">
+                                    {assignment.description}
+                                  </div>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {lesson ? (
+                                <Badge variant="secondary">
+                                  บทที่ {lesson.lesson_order}: {lesson.title}
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline">ทั้งคอร์ส</Badge>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline">{assignment.attachment_type || 'ไม่ระบุ'}</Badge>
+                            </TableCell>
+                            <TableCell>{assignment.points} คะแนน</TableCell>
+                            <TableCell>
+                              <Badge variant={assignment.is_required ? "default" : "secondary"}>
+                                {assignment.is_required ? 'บังคับ' : 'ไม่บังคับ'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex space-x-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => { setEditingAssignment(assignment); setIsAssignmentDialogOpen(true); }}
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    if (confirm('คุณแน่ใจหรือไม่ที่จะลบการบ้านนี้?')) {
+                                      deleteAssignment.mutate(assignment.id);
+                                    }
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Quizzes Tab */}
+          <TabsContent value="quizzes">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Quiz ทั้งหมด</CardTitle>
+                <Button onClick={() => { setEditingQuiz(null); setIsQuizDialogOpen(true); }}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  เพิ่ม Quiz ใหม่
+                </Button>
+              </CardHeader>
+              <CardContent>
+                {quizzes.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">
+                    ยังไม่มี Quiz - เริ่มต้นด้วยการเพิ่ม Quiz แรก
+                  </p>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>ชื่อ Quiz</TableHead>
+                        <TableHead>บทเรียน</TableHead>
+                        <TableHead>คะแนนผ่าน</TableHead>
+                        <TableHead>เวลาจำกัด</TableHead>
+                        <TableHead>สถานะ</TableHead>
+                        <TableHead>การจัดการ</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {quizzes.map((quiz) => {
+                        const lesson = lessons.find(l => l.id === quiz.lesson_id);
+                        return (
+                          <TableRow key={quiz.id}>
+                            <TableCell>
+                              <div>
+                                <div className="font-medium">{quiz.title}</div>
+                                {quiz.description && (
+                                  <div className="text-sm text-muted-foreground line-clamp-1">
+                                    {quiz.description}
+                                  </div>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {lesson ? (
+                                <Badge variant="secondary">
+                                  บทที่ {lesson.lesson_order}: {lesson.title}
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline">ทั้งคอร์ส</Badge>
+                              )}
+                            </TableCell>
+                            <TableCell>{quiz.passing_score}%</TableCell>
+                            <TableCell>
+                              {quiz.time_limit_minutes ? `${quiz.time_limit_minutes} นาที` : 'ไม่จำกัด'}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={quiz.is_required ? "default" : "secondary"}>
+                                {quiz.is_required ? 'บังคับ' : 'ไม่บังคับ'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex space-x-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => { setEditingQuiz(quiz); setIsQuizDialogOpen(true); }}
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    if (confirm('คุณแน่ใจหรือไม่ที่จะลบ Quiz นี้?')) {
+                                      deleteQuiz.mutate(quiz.id);
+                                    }
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+
+        {/* Dialogs */}
+        <AssignmentDialog
+          open={isAssignmentDialogOpen}
+          onOpenChange={setIsAssignmentDialogOpen}
+          courseId={courseId || ''}
+          lessons={lessons}
+          assignment={editingAssignment}
+          onSave={(data) => {
+            if (editingAssignment) {
+              updateAssignment.mutate({ ...data, id: editingAssignment.id });
+            } else {
+              createAssignment.mutate(data);
+            }
+          }}
+        />
+
+        <QuizDialog
+          open={isQuizDialogOpen}
+          onOpenChange={setIsQuizDialogOpen}
+          courseId={courseId || ''}
+          lessons={lessons}
+          quiz={editingQuiz}
+          onSave={(data) => {
+            if (editingQuiz) {
+              updateQuiz.mutate({ ...data, id: editingQuiz.id });
+            } else {
+              createQuiz.mutate(data);
+            }
+          }}
+        />
       </div>
     </AdminLayout>
   );
