@@ -110,7 +110,15 @@ export default function Index() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {displayCourses.map((course) => (
               <Card key={course.id || course.slug} className="hover-lift glass-card">
-                <div className="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 rounded-t-lg"></div>
+                <div className="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 rounded-t-lg overflow-hidden">
+                  {course.cover_image_url ? (
+                    <img 
+                      src={course.cover_image_url} 
+                      alt={course.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : null}
+                </div>
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2 mb-3">
                     <Badge variant="outline" className="badge-level text-xs">
