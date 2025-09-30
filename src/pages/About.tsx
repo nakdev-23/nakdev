@@ -2,6 +2,7 @@ import { Users, Target, Award, Heart, Code2, BookOpen, Zap } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 
 const values = [
   {
@@ -58,6 +59,8 @@ const team = [
 ];
 
 export default function About() {
+  const navigate = useNavigate();
+  
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -229,7 +232,7 @@ export default function About() {
             มาร่วมเป็นส่วนหนึ่งของชุมชนนักพัฒนาที่กำลังเติบโต 
             และพัฒนาทักษะไปด้วยกัน
           </p>
-          <Button size="lg" className="text-lg px-8 py-6 glow-on-hover">
+          <Button size="lg" className="text-lg px-8 py-6 glow-on-hover" onClick={() => navigate('/auth/signin')}>
             เริ่มเรียนฟรี
           </Button>
         </div>
