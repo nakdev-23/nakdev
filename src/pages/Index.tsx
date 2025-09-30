@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useCourses } from "@/hooks/useCourses";
 import { useTools } from "@/hooks/useTools";
 import { useEbooks } from "@/hooks/useEbooks";
+import { useTestimonials } from "@/hooks/useTestimonials";
 
 const valueProps = [
   {
@@ -31,34 +32,12 @@ const valueProps = [
 ];
 
 
-const testimonials = [
-  {
-    name: "สมชาย เจริญสุข",
-    role: "Frontend Developer",
-    company: "Tech Startup",
-    content: "คอร์สเรียนที่นี่ช่วยให้ผมเข้าใจ React ได้อย่างลึกซึ้ง และสามารถนำไปใช้ในงานจริงได้ทันทีเลย",
-    rating: 5
-  },
-  {
-    name: "วิภาวี สร้างสรรค์",
-    role: "Full Stack Developer",
-    company: "Digital Agency",
-    content: "เครื่องมือและ eBook ที่ได้จากที่นี่ช่วยประหยัดเวลาในการทำงานได้มาก คุ้มค่ามากๆ",
-    rating: 5
-  },
-  {
-    name: "กรกต นวัตกรรม",
-    role: "Backend Developer",
-    company: "Enterprise",
-    content: "จากคนที่ไม่รู้อะไรเลย กลายเป็นสามารถสร้างเว็บแอปพลิเคชันได้จริงๆ ขอบคุณมากครับ",
-    rating: 5
-  }
-];
 
 export default function Index() {
   const { courses, isLoading: coursesLoading } = useCourses();
   const { tools, isLoading: toolsLoading } = useTools();
   const { ebooks, isLoading: ebooksLoading } = useEbooks();
+  const { testimonials, isLoading: testimonialsLoading } = useTestimonials();
 
   // Use real data from Supabase
   const displayCourses = courses.slice(0, 3);
