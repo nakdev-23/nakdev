@@ -24,6 +24,13 @@ import { SecureVideoPlayer } from "@/components/video/SecureVideoPlayer";
 import { supabase } from "@/integrations/supabase/client";
 import { useCourse } from "@/hooks/useCourse";
 import { useToast } from "@/hooks/use-toast";
+import { useAssignments } from "@/hooks/useAssignments";
+import { useQuizzes } from "@/hooks/useQuizzes";
+import AssignmentList from "@/components/learn/AssignmentList";
+import QuizList from "@/components/learn/QuizList";
+import AssignmentSubmitDialog from "@/components/learn/AssignmentSubmitDialog";
+import QuizTakingDialog from "@/components/learn/QuizTakingDialog";
+import { useQuery } from "@tanstack/react-query";
 
 // Mock transcript data - in a real app, this would come from the database
 const getTranscript = (lessonSlug: string) => {
@@ -49,12 +56,45 @@ export default function Learn() {
   const [openChapters, setOpenChapters] = useState<number[]>([1, 2, 3]);
   const [user, setUser] = useState(null);
   const [isMarkingComplete, setIsMarkingComplete] = useState(false);
+  const [selectedAssignmentId, setSelectedAssignmentId] = useState<string | null>(null);
+  const [selectedQuizId, setSelectedQuizId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const { course, lessons, chapters, currentLesson, completedLessons, markLessonComplete, isLoading, error } = useCourse(
     courseSlug || '', 
     lessonSlug
   );
+
+  const { assignments, isLoading: assignmentsLoading } = useAssignments(course?.id || '');
+  const { quizzes, isLoading: quizzesLoading } = useQuizzes(course?.id || '');
+
+  const { data: submissions = [], refetch: refetchSubmissions } = useQuery({
+    queryKey: ["student_assignments", user],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("student_assignments")
+        .select("*")
+        .eq("user_id", (user as any)?.id);
+      
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  const { data: attempts = [], refetch: refetchAttempts } = useQuery({
+    queryKey: ["student_quiz_attempts", user],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("student_quiz_attempts")
+        .select("*")
+        .eq("user_id", (user as any)?.id);
+      
+      if (error) throw error;
+      return data || [];
+    },
+  });
   
   // Check authentication
   useEffect(() => {
@@ -341,26 +381,28 @@ export default function Learn() {
                 </TabsContent>
                 
                 <TabsContent value="resources" className="mt-6">
-                  <Card>
-                    <CardContent className="p-6">
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-3 p-3 border rounded-lg">
-                          <FileText className="h-5 w-5 text-primary" />
-                          <div>
-                            <h4 className="font-medium">React Documentation</h4>
-                            <p className="text-sm text-muted-foreground">เอกสารอย่างเป็นทางการของ React</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3 p-3 border rounded-lg">
-                          <FileText className="h-5 w-5 text-primary" />
-                          <div>
-                            <h4 className="font-medium">Code Examples</h4>
-                            <p className="text-sm text-muted-foreground">ตัวอย่างโค้ดจากบทเรียนนี้</p>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <Tabs defaultValue="assignments">
+                    <TabsList>
+                      <TabsTrigger value="assignments">การบ้าน</TabsTrigger>
+                      <TabsTrigger value="quizzes">Quiz</TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="assignments" className="mt-4">
+                      <AssignmentList
+                        assignments={assignments || []}
+                        submissions={submissions}
+                        onSubmit={(id) => setSelectedAssignmentId(id)}
+                      />
+                    </TabsContent>
+                    
+                    <TabsContent value="quizzes" className="mt-4">
+                      <QuizList
+                        quizzes={quizzes || []}
+                        attempts={attempts}
+                        onTakeQuiz={(id) => setSelectedQuizId(id)}
+                      />
+                    </TabsContent>
+                  </Tabs>
                 </TabsContent>
               </Tabs>
             </div>
@@ -399,6 +441,21 @@ export default function Learn() {
             </div>
           </div>
         </main>
+
+        {/* Dialogs */}
+        <AssignmentSubmitDialog
+          open={!!selectedAssignmentId}
+          onOpenChange={(open) => !open && setSelectedAssignmentId(null)}
+          assignmentId={selectedAssignmentId || ""}
+          onSubmitSuccess={refetchSubmissions}
+        />
+
+        <QuizTakingDialog
+          open={!!selectedQuizId}
+          onOpenChange={(open) => !open && setSelectedQuizId(null)}
+          quizId={selectedQuizId || ""}
+          onComplete={refetchAttempts}
+        />
 
         {/* Sidebar */}
         <aside className="w-80 border-l bg-muted/30">
