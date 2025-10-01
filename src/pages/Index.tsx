@@ -46,101 +46,192 @@ export default function Index() {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative bg-hero-gradient overflow-hidden">
+      {/* Hero Section - Futuristic */}
+      <section className="relative bg-hero-gradient overflow-hidden min-h-[90vh] flex items-center">
         {/* Animated background blobs */}
         <div className="absolute inset-0">
           <div className="gradient-blob"></div>
           <div className="gradient-blob"></div>
+          <div className="gradient-blob"></div>
         </div>
         
+        {/* Grid pattern overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.02)_1px,transparent_1px)] bg-[size:100px_100px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,#000_70%,transparent_110%)]" />
+        
         <div className="relative container mx-auto px-4 py-20 lg:py-32">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 animate-fade-up">
+          <div className="max-w-5xl mx-auto text-center">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-8 animate-fade-in">
+              <div className="w-2 h-2 rounded-full bg-accent animate-pulse-glow" />
+              <span className="text-sm font-medium text-white/90">เทคโนโลยีการศึกษายุคใหม่</span>
+            </div>
+            
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-8 animate-fade-up leading-tight">
               เริ่มต้นเส้นทาง
-              <span className="block text-gradient">นัก Dev มืออาชีพ</span>
+              <span className="block mt-2 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent animate-shimmer bg-[length:200%_auto]">
+                นัก Dev มืออาชีพ
+              </span>
             </h1>
-            <p className="text-xl md:text-2xl text-white/80 mb-8 animate-fade-in-delay-1">
-              เรียนเขียนโปรแกรมด้วยคอร์สคุณภาพ พร้อมเครื่องมือและ eBook 
-              ที่จะพาคุณไปสู่ความสำเร็จในวงการเทคโนโลยี
+            
+            <p className="text-xl md:text-2xl text-white/70 mb-10 max-w-3xl mx-auto animate-fade-in-delay-1 leading-relaxed">
+              เรียนเขียนโปรแกรมด้วยคอร์สคุณภาพระดับโลก พร้อมเครื่องมือ AI และ eBook 
+              ที่จะพาคุณก้าวสู่อนาคตแห่งเทคโนโลยี
             </p>
+            
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-delay-2">
-              <Button size="lg" className="text-lg px-8 py-6 glow-on-hover" asChild>
+              <Button size="lg" className="text-lg px-10 py-7 glow-on-hover rounded-full group relative overflow-hidden" asChild>
                 <Link to="/courses">
-                  เริ่มเรียนเลย
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <span className="relative z-10 flex items-center">
+                    เริ่มเรียนเลย
+                    <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  </span>
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="text-lg px-8 py-6 bg-white/10 border-white/20 text-white hover:bg-white/20" asChild>
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="text-lg px-10 py-7 glass-card border-white/20 text-white hover:bg-white/10 rounded-full backdrop-blur-xl" 
+                asChild
+              >
                 <Link to="/tools">
                   ดูเครื่องมือ
                 </Link>
               </Button>
             </div>
+            
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-8 max-w-2xl mx-auto mt-16 animate-fade-in-delay-3">
+              {[
+                { value: "50+", label: "คอร์สเรียน" },
+                { value: "5K+", label: "นักเรียน" },
+                { value: "95%", label: "ความพึงพอใจ" }
+              ].map((stat, i) => (
+                <div key={i} className="text-center">
+                  <div className="text-3xl md:text-4xl font-bold text-white mb-2">{stat.value}</div>
+                  <div className="text-sm text-white/60">{stat.label}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
+        
+        {/* Bottom fade */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
       </section>
 
-      {/* Value Propositions */}
-      <section className="py-20 bg-background">
+      {/* Value Propositions - Enhanced */}
+      <section className="py-24 bg-background relative">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+              ทำไมต้องเลือกเรา
+            </h2>
+            <p className="text-muted-foreground text-lg">แพลตฟอร์มการเรียนรู้ที่ครบครันที่สุดสำหรับนักพัฒนา</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {valueProps.map((prop, index) => (
-              <Card key={prop.title} className={`glass-card hover-lift animate-fade-in-delay-${index + 1}`}>
-                <CardContent className="p-6 text-center">
-                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <prop.icon className="h-6 w-6 text-primary" />
+              <Card 
+                key={prop.title} 
+                className="glass-card hover-lift group relative overflow-hidden"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <CardContent className="p-8 text-center relative z-10">
+                  <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                    <prop.icon className="h-8 w-8 text-primary" />
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">{prop.title}</h3>
-                  <p className="text-muted-foreground text-sm">{prop.description}</p>
+                  <h3 className="text-xl font-semibold mb-3">{prop.title}</h3>
+                  <p className="text-muted-foreground">{prop.description}</p>
                 </CardContent>
+                
+                {/* Hover glow effect */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5" />
+                </div>
               </Card>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Popular Courses */}
-      <section className="py-20 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">คอร์สยอดนิยม</h2>
-            <p className="text-xl text-muted-foreground">เรียนรู้จากคอร์สที่ได้รับความนิยมจากนักพัฒนาทั่วประเทศ</p>
+      {/* Popular Courses - Enhanced */}
+      <section className="py-24 bg-muted/20 relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-primary/5 to-secondary/5 rounded-full blur-3xl" />
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-16">
+            <Badge variant="outline" className="mb-4 px-4 py-2 text-sm font-medium">
+              🔥 HOT COURSES
+            </Badge>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+              คอร์สยอดนิยม
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              เรียนรู้จากคอร์สที่ได้รับความนิยมสูงสุดจากนักพัฒนาทั่วประเทศ
+            </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {displayCourses.map((course) => (
-              <Card key={course.id || course.slug} className="hover-lift glass-card">
-                <div className="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 rounded-t-lg overflow-hidden">
+            {displayCourses.map((course, index) => (
+              <Card 
+                key={course.id || course.slug} 
+                className="hover-lift glass-card group overflow-hidden"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <div className="aspect-video bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20 rounded-t-lg overflow-hidden relative">
                   {course.cover_image_url ? (
                     <img 
                       src={course.cover_image_url} 
                       alt={course.title}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
-                  ) : null}
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Code2 className="h-16 w-16 text-primary/40" />
+                    </div>
+                  )}
+                  
+                  {/* Overlay gradient on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </div>
+                
                 <CardContent className="p-6">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Badge variant="outline" className="badge-level text-xs">
+                  <div className="flex items-center gap-2 mb-3 flex-wrap">
+                    <Badge variant="outline" className="badge-level text-xs px-3 py-1">
                       เริ่มต้น
                     </Badge>
-                    <Badge variant="outline" className={course.price === 0 || course.price === null ? "badge-free" : "badge-paid"}>
+                    <Badge 
+                      variant="outline" 
+                      className={course.price === 0 || course.price === null ? "badge-free px-3 py-1" : "badge-paid px-3 py-1"}
+                    >
                       {course.price === 0 || course.price === null ? "ฟรี" : `฿${course.price}`}
                     </Badge>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">{course.title}</h3>
-                  <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
+                  
+                  <h3 className="text-xl font-semibold mb-3 group-hover:text-primary transition-colors">
+                    {course.title}
+                  </h3>
+                  
+                  <p className="text-muted-foreground mb-4 line-clamp-2 leading-relaxed">
                     {course.description}
                   </p>
-                  <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
-                    <span className="flex items-center gap-1">
+                  
+                  <div className="flex items-center justify-between text-sm text-muted-foreground mb-6 pb-6 border-b border-border/50">
+                    <span className="flex items-center gap-2">
                       <Clock className="h-4 w-4" />
                       8 ชั่วโมง
                     </span>
-                    <span>{course.total_lessons || 24} บทเรียน</span>
+                    <span className="flex items-center gap-2">
+                      <BookOpen className="h-4 w-4" />
+                      {course.total_lessons || 24} บทเรียน
+                    </span>
                   </div>
-                  <Button className="w-full" asChild>
-                    <Link to={`/courses/${course.slug || course.id}`}>รายละเอียด</Link>
+                  
+                  <Button className="w-full group/btn" asChild>
+                    <Link to={`/courses/${course.slug || course.id}`}>
+                      รายละเอียด
+                      <ArrowRight className="ml-2 h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
+                    </Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -258,25 +349,81 @@ export default function Index() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-hero-gradient relative overflow-hidden">
+      {/* CTA Section - Enhanced */}
+      <section className="py-32 bg-hero-gradient relative overflow-hidden">
         <div className="absolute inset-0">
           <div className="gradient-blob"></div>
+          <div className="gradient-blob"></div>
         </div>
-        <div className="relative container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-            พร้อมเริ่มต้นเส้นทางนักพัฒนาแล้วหรือยัง?
-          </h2>
-          <p className="text-xl text-white/80 mb-8 max-w-2xl mx-auto">
-            สมัครสมาชิกฟรีวันนี้ เพื่อเข้าถึงคอร์สฟรี เครื่องมือ และ eBook เบื้องต้น
-          </p>
-          <Button size="lg" className="text-lg px-8 py-6 glow-on-hover" asChild>
-            <Link to="/auth/signup">
-              สมัครสมาชิกฟรี
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Link>
-          </Button>
+        
+        {/* Grid overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.02)_1px,transparent_1px)] bg-[size:100px_100px]" />
+        
+        <div className="relative container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full glass-card mb-8">
+              <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+              <span className="text-white/90 font-medium">เข้าร่วมกับนักพัฒนากว่า 5,000+ คน</span>
+            </div>
+            
+            <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
+              พร้อมเริ่มต้นเส้นทาง
+              <span className="block mt-2 bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
+                นักพัฒนาแล้วหรือยัง?
+              </span>
+            </h2>
+            
+            <p className="text-xl text-white/70 mb-10 max-w-2xl mx-auto leading-relaxed">
+              สมัครสมาชิกฟรีวันนี้ เพื่อเข้าถึงคอร์สฟรี เครื่องมือ AI และ eBook เบื้องต้น 
+              พร้อมรับ <span className="text-accent font-semibold">ส่วนลด 20%</span> สำหรับคอร์สแรก
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button 
+                size="lg" 
+                className="text-lg px-10 py-7 glow-on-hover rounded-full bg-white text-primary hover:bg-white/90 group" 
+                asChild
+              >
+                <Link to="/auth/signup">
+                  <span className="flex items-center">
+                    สมัครสมาชิกฟรี
+                    <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  </span>
+                </Link>
+              </Button>
+              
+              <Button 
+                size="lg" 
+                variant="outline"
+                className="text-lg px-10 py-7 glass-card border-white/20 text-white hover:bg-white/10 rounded-full backdrop-blur-xl" 
+                asChild
+              >
+                <Link to="/courses">
+                  เรียกดูคอร์ส
+                </Link>
+              </Button>
+            </div>
+            
+            {/* Trust badges */}
+            <div className="flex items-center justify-center gap-8 mt-12 text-white/60 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-success" />
+                <span>ฟรีตลอดชีพ</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-success" />
+                <span>ไม่ต้องใช้บัตรเครดิต</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-success" />
+                <span>ยกเลิกได้ทุกเมื่อ</span>
+              </div>
+            </div>
+          </div>
         </div>
+        
+        {/* Bottom fade */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
       </section>
     </div>
   );

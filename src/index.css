@@ -8,61 +8,66 @@
 
 @layer base {
   :root {
-    /* Core Colors - Deep Sea Blue Theme */
-    --background: 0 0% 100%;
-    --foreground: 210 15% 15%;
+    /* Core Colors - Futuristic Tech Theme */
+    --background: 220 26% 97%;
+    --foreground: 222 47% 11%;
 
-    /* Brand Colors */
-    --primary: 205 89% 31%; /* #0369A1 - Deep Sea Blue */
+    /* Brand Colors - Cyber Blue & Purple */
+    --primary: 217 91% 60%; /* Electric Blue */
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 205 89% 45%; /* Lighter version for glows */
+    --primary-glow: 217 91% 70%;
     
-    --secondary: 213 27% 84%; /* Light Sky */
-    --secondary-foreground: 205 89% 31%;
+    --secondary: 270 91% 65%; /* Neon Purple */
+    --secondary-foreground: 0 0% 100%;
     
-    --accent: 200 86% 57%; /* Sky Blue */
-    --accent-foreground: 0 0% 100%;
+    --accent: 180 100% 50%; /* Cyan Glow */
+    --accent-foreground: 222 47% 11%;
     
     /* Surface Colors */
     --card: 0 0% 100%;
-    --card-foreground: 210 15% 15%;
-    --card-glass: 0 0% 100% / 0.05; /* For glassmorphism */
+    --card-foreground: 222 47% 11%;
+    --card-glass: 217 91% 60% / 0.03;
     
     --popover: 0 0% 100%;
-    --popover-foreground: 210 15% 15%;
+    --popover-foreground: 222 47% 11%;
     
-    --muted: 213 27% 96%;
-    --muted-foreground: 210 15% 45%;
+    --muted: 220 26% 95%;
+    --muted-foreground: 222 47% 40%;
     
     /* Interactive States */
-    --border: 213 27% 90%;
-    --border-glass: 200 86% 57% / 0.2; /* Sky border for glass cards */
-    --input: 213 27% 90%;
-    --ring: 205 89% 31%;
+    --border: 220 26% 88%;
+    --border-glass: 217 91% 60% / 0.15;
+    --input: 220 26% 88%;
+    --ring: 217 91% 60%;
     
     /* Status Colors */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --success: 142 69% 58%;
+    --success: 142 76% 36%;
     --success-foreground: 0 0% 100%;
-    --warning: 38 100% 59%;
+    --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
     
-    /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(218 92% 15%), hsl(213 86% 20%), hsl(205 89% 31%));
-    --gradient-card: linear-gradient(135deg, hsl(0 0% 100% / 0.05), hsl(0 0% 100% / 0.02));
-    --gradient-glow: radial-gradient(circle at 50% 50%, hsl(205 89% 45% / 0.3), transparent 70%);
+    /* Futuristic Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(217 91% 60%), hsl(270 91% 65%), hsl(180 100% 50%));
+    --gradient-card: linear-gradient(135deg, hsl(217 91% 60% / 0.05), hsl(270 91% 65% / 0.03));
+    --gradient-glow: radial-gradient(circle at 50% 50%, hsl(217 91% 60% / 0.4), hsl(270 91% 65% / 0.2), transparent 70%);
+    --gradient-mesh: radial-gradient(at 40% 20%, hsl(217 91% 60%) 0, transparent 50%),
+                     radial-gradient(at 80% 0%, hsl(270 91% 65%) 0, transparent 50%),
+                     radial-gradient(at 0% 50%, hsl(180 100% 50%) 0, transparent 50%);
     
-    /* Shadows */
-    --shadow-glass: 0 8px 32px hsl(205 89% 31% / 0.12);
-    --shadow-glow: 0 0 40px hsl(205 89% 45% / 0.3);
-    --shadow-card: 0 4px 16px hsl(210 15% 15% / 0.1);
+    /* Advanced Shadows */
+    --shadow-glass: 0 8px 32px hsl(217 91% 60% / 0.1), 0 0 0 1px hsl(217 91% 60% / 0.05);
+    --shadow-glow: 0 0 40px hsl(217 91% 60% / 0.4), 0 0 80px hsl(270 91% 65% / 0.2);
+    --shadow-card: 0 4px 24px hsl(222 47% 11% / 0.08);
+    --shadow-neon: 0 0 20px hsl(180 100% 50% / 0.5), 0 0 40px hsl(180 100% 50% / 0.3);
     
     /* Animation Variables */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-spring: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    --transition-bounce: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     
-    --radius: 0.75rem;
+    --radius: 1rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -81,47 +86,51 @@
   }
 
   .dark {
-    /* Core Colors - Dark Mode */
-    --background: 218 92% 8%; /* Deep navy background */
-    --foreground: 213 27% 95%;
+    /* Core Colors - Futuristic Dark Mode */
+    --background: 222 47% 7%;
+    --foreground: 220 26% 97%;
 
-    /* Brand Colors - Adjusted for dark mode */
-    --primary: 200 86% 57%; /* Brighter sky blue for contrast */
-    --primary-foreground: 218 92% 8%;
-    --primary-glow: 200 86% 65%;
+    /* Brand Colors - Neon Bright for Dark */
+    --primary: 217 91% 70%;
+    --primary-foreground: 222 47% 7%;
+    --primary-glow: 217 91% 80%;
     
-    --secondary: 217 25% 20%; /* Dark secondary */
-    --secondary-foreground: 213 27% 95%;
+    --secondary: 270 91% 70%;
+    --secondary-foreground: 222 47% 7%;
     
-    --accent: 205 89% 45%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 180 100% 60%;
+    --accent-foreground: 222 47% 7%;
     
     /* Surface Colors */
-    --card: 217 25% 12%;
-    --card-foreground: 213 27% 95%;
-    --card-glass: 0 0% 100% / 0.03; /* Subtle glass for dark mode */
+    --card: 222 47% 11%;
+    --card-foreground: 220 26% 97%;
+    --card-glass: 217 91% 70% / 0.05;
     
-    --popover: 217 25% 12%;
-    --popover-foreground: 213 27% 95%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 220 26% 97%;
     
-    --muted: 217 25% 15%;
-    --muted-foreground: 213 15% 65%;
+    --muted: 222 47% 15%;
+    --muted-foreground: 220 26% 65%;
     
     /* Interactive States */
-    --border: 217 25% 20%;
-    --border-glass: 200 86% 57% / 0.15;
-    --input: 217 25% 20%;
-    --ring: 200 86% 57%;
+    --border: 222 47% 20%;
+    --border-glass: 217 91% 70% / 0.2;
+    --input: 222 47% 20%;
+    --ring: 217 91% 70%;
     
-    /* Gradients - Dark Mode */
-    --gradient-hero: linear-gradient(135deg, hsl(218 92% 8%), hsl(217 25% 12%), hsl(213 86% 15%));
-    --gradient-card: linear-gradient(135deg, hsl(0 0% 100% / 0.02), hsl(0 0% 100% / 0.01));
-    --gradient-glow: radial-gradient(circle at 50% 50%, hsl(200 86% 57% / 0.2), transparent 70%);
+    /* Futuristic Gradients - Dark */
+    --gradient-hero: linear-gradient(135deg, hsl(222 47% 7%), hsl(217 91% 20%), hsl(270 91% 25%));
+    --gradient-card: linear-gradient(135deg, hsl(217 91% 70% / 0.08), hsl(270 91% 70% / 0.05));
+    --gradient-glow: radial-gradient(circle at 50% 50%, hsl(217 91% 70% / 0.3), hsl(270 91% 70% / 0.15), transparent 70%);
+    --gradient-mesh: radial-gradient(at 40% 20%, hsl(217 91% 30%) 0, transparent 50%),
+                     radial-gradient(at 80% 0%, hsl(270 91% 35%) 0, transparent 50%),
+                     radial-gradient(at 0% 50%, hsl(180 100% 30%) 0, transparent 50%);
     
-    /* Shadows - Dark Mode */
-    --shadow-glass: 0 8px 32px hsl(218 92% 8% / 0.8);
-    --shadow-glow: 0 0 40px hsl(200 86% 57% / 0.2);
-    --shadow-card: 0 4px 16px hsl(218 92% 8% / 0.5);
+    /* Shadows - Dark Mode with Neon */
+    --shadow-glass: 0 8px 32px hsl(217 91% 70% / 0.15), 0 0 0 1px hsl(217 91% 70% / 0.1);
+    --shadow-glow: 0 0 40px hsl(217 91% 70% / 0.5), 0 0 80px hsl(270 91% 70% / 0.3);
+    --shadow-card: 0 4px 24px hsl(222 47% 7% / 0.6);
+    --shadow-neon: 0 0 20px hsl(180 100% 60% / 0.6), 0 0 40px hsl(180 100% 60% / 0.4);
   }
 }
 
@@ -142,15 +151,33 @@
 }
 
 @layer components {
-  /* Glass Card Component */
+  /* Glass Card Component - Futuristic */
   .glass-card {
-    @apply bg-white/5 backdrop-blur-md border border-sky-800/20 shadow-[var(--shadow-glass)];
+    @apply backdrop-blur-xl bg-gradient-to-br from-card-glass to-transparent 
+           border shadow-[var(--shadow-glass)]
+           relative overflow-hidden;
+    border-color: hsl(var(--border-glass));
   }
   
-  /* Hero Gradient Background */
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+      transparent, 
+      hsl(var(--primary) / 0.3), 
+      transparent
+    );
+  }
+  
+  /* Hero Gradient Background - Enhanced */
   .hero-gradient {
     background: var(--gradient-hero);
     position: relative;
+    overflow: hidden;
   }
   
   .hero-gradient::before {
@@ -160,51 +187,107 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: var(--gradient-glow);
-    opacity: 0.6;
+    background: var(--gradient-mesh);
+    opacity: 0.4;
+    animation: mesh-move 15s ease-in-out infinite;
     pointer-events: none;
   }
   
-  /* Animated Gradient Blobs */
+  .hero-gradient::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--gradient-glow);
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  
+  /* Animated Gradient Blobs - More Dynamic */
   .gradient-blob {
     position: absolute;
     border-radius: 50%;
-    filter: blur(40px);
-    opacity: 0.7;
-    animation: blob-float 6s ease-in-out infinite;
+    filter: blur(60px);
+    opacity: 0.6;
+    animation: blob-float 8s ease-in-out infinite;
   }
   
   .gradient-blob:nth-child(1) {
     top: 10%;
     left: 10%;
-    width: 300px;
-    height: 300px;
-    background: hsl(205 89% 45% / 0.3);
+    width: 400px;
+    height: 400px;
+    background: hsl(217 91% 60% / 0.4);
     animation-delay: 0s;
   }
   
   .gradient-blob:nth-child(2) {
-    top: 60%;
+    top: 50%;
     right: 10%;
-    width: 200px;
-    height: 200px;
-    background: hsl(200 86% 57% / 0.25);
-    animation-delay: 2s;
+    width: 300px;
+    height: 300px;
+    background: hsl(270 91% 65% / 0.3);
+    animation-delay: 3s;
   }
   
-  /* Hover Effects */
+  .gradient-blob:nth-child(3) {
+    bottom: 10%;
+    left: 50%;
+    width: 250px;
+    height: 250px;
+    background: hsl(180 100% 50% / 0.25);
+    animation-delay: 6s;
+  }
+  
+  /* Hover Effects - More Dramatic */
   .hover-lift {
     transition: var(--transition-spring);
+    position: relative;
+  }
+  
+  .hover-lift::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    opacity: 0;
+    transition: var(--transition-smooth);
+    background: linear-gradient(135deg, 
+      hsl(var(--primary) / 0.1), 
+      hsl(var(--secondary) / 0.1)
+    );
+    pointer-events: none;
   }
   
   .hover-lift:hover {
-    transform: translateY(-8px);
+    transform: translateY(-12px) scale(1.02);
     box-shadow: var(--shadow-glow);
   }
   
-  /* Glow Effect */
+  .hover-lift:hover::after {
+    opacity: 1;
+  }
+  
+  /* Glow Effect - Enhanced */
   .glow-on-hover {
     position: relative;
+    transition: var(--transition-smooth);
+  }
+  
+  .glow-on-hover::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    opacity: 0;
+    background: linear-gradient(135deg, 
+      hsl(var(--primary)), 
+      hsl(var(--secondary)),
+      hsl(var(--accent))
+    );
+    z-index: -1;
     transition: var(--transition-smooth);
   }
   
@@ -212,7 +295,12 @@
     box-shadow: var(--shadow-glow);
   }
   
-  /* Underline Animation */
+  .glow-on-hover:hover::before {
+    opacity: 0.5;
+    filter: blur(20px);
+  }
+  
+  /* Underline Animation - Gradient */
   .animated-underline {
     position: relative;
     display: inline-block;
@@ -225,7 +313,11 @@
     height: 2px;
     bottom: -4px;
     left: 0;
-    background: hsl(var(--primary));
+    background: linear-gradient(90deg, 
+      hsl(var(--primary)), 
+      hsl(var(--secondary)),
+      hsl(var(--accent))
+    );
     transform: scaleX(0);
     transform-origin: bottom right;
     transition: transform 0.3s ease-out;
@@ -286,16 +378,16 @@
   }
 }
 
-/* Keyframe Animations */
+/* Keyframe Animations - Enhanced */
 @keyframes blob-float {
   0%, 100% {
-    transform: translate(0px, 0px) scale(1);
+    transform: translate(0px, 0px) scale(1) rotate(0deg);
   }
   33% {
-    transform: translate(30px, -50px) scale(1.1);
+    transform: translate(40px, -60px) scale(1.15) rotate(120deg);
   }
   66% {
-    transform: translate(-20px, 20px) scale(0.9);
+    transform: translate(-30px, 30px) scale(0.85) rotate(240deg);
   }
 }
 
@@ -319,6 +411,35 @@
   }
 }
 
+@keyframes mesh-move {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(50px, 30px) scale(1.1);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.5;
+    filter: blur(40px);
+  }
+  50% {
+    opacity: 0.8;
+    filter: blur(60px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
 /* Marquee Animation */
 .animate-marquee {
   animation: marquee 20s linear infinite;
@@ -326,4 +447,16 @@
 
 .animate-marquee:hover {
   animation-play-state: paused;
+}
+
+/* Shimmer Effect */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    hsl(var(--primary) / 0.1) 50%,
+    transparent 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 3s infinite;
 }

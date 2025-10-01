@@ -39,48 +39,55 @@ export const Header = () => {
   const cartItemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
   return (
-    <header className="sticky top-0 z-50 w-full glass-card border-b backdrop-blur-lg">
+    <header className="sticky top-0 z-50 w-full glass-card border-b backdrop-blur-2xl bg-background/60">
       <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
+        <div className="flex h-20 items-center justify-between">
+          {/* Logo - Enhanced */}
           <Link 
             to="/" 
-            className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+            className="flex items-center space-x-3 hover:opacity-90 transition-all group"
           >
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">Dev</span>
+            <div className="relative w-10 h-10 bg-gradient-to-br from-primary via-secondary to-accent rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-primary/20">
+              <span className="text-white font-bold text-base">Dev</span>
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary to-secondary opacity-0 group-hover:opacity-100 transition-opacity blur-xl" />
             </div>
-            <span className="text-xl font-bold text-gradient">นัก dev ฝึกหัด</span>
+            <div className="hidden sm:block">
+              <span className="text-xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+                นัก dev ฝึกหัด
+              </span>
+            </div>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          {/* Desktop Navigation - Enhanced */}
+          <nav className="hidden md:flex items-center space-x-1">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 to={item.href}
                 className={cn(
-                  "text-sm font-medium transition-colors animated-underline",
+                  "px-4 py-2 text-sm font-medium rounded-lg transition-all relative group",
                   location.pathname.startsWith(item.href)
-                    ? "text-primary"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "text-primary bg-primary/10"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 )}
               >
                 {item.name}
+                {location.pathname.startsWith(item.href) && (
+                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-gradient-to-r from-primary to-secondary rounded-full" />
+                )}
               </Link>
             ))}
           </nav>
 
-          {/* Right Actions */}
-          <div className="flex items-center space-x-4">
-            {/* Cart */}
-            <Button variant="ghost" size="sm" className="relative" asChild>
+          {/* Right Actions - Enhanced */}
+          <div className="flex items-center space-x-2">
+            {/* Cart - Enhanced */}
+            <Button variant="ghost" size="sm" className="relative hover:bg-muted/50 rounded-lg" asChild>
               <Link to="/cart">
                 <ShoppingCart className="h-5 w-5" />
                 {cartItemCount > 0 && (
                   <Badge 
-                    variant="secondary" 
-                    className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+                    className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-gradient-to-r from-primary to-secondary text-white border-0 animate-pulse-glow"
                   >
                     {cartItemCount}
                   </Badge>
@@ -88,26 +95,28 @@ export const Header = () => {
               </Link>
             </Button>
 
-            {/* Auth Buttons */}
+            {/* Auth Buttons - Enhanced */}
             <div className="hidden md:flex items-center space-x-2">
               {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="flex items-center space-x-2">
-                      <User className="h-4 w-4" />
-                      <span>{profile?.full_name || user.email}</span>
+                    <Button variant="ghost" size="sm" className="flex items-center space-x-2 hover:bg-muted/50 rounded-lg px-3">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                        <User className="h-4 w-4 text-white" />
+                      </div>
+                      <span className="max-w-[150px] truncate">{profile?.full_name || user.email}</span>
                       <ChevronDown className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuItem asChild>
+                  <DropdownMenuContent align="end" className="w-56 glass-card backdrop-blur-xl">
+                    <DropdownMenuItem asChild className="cursor-pointer">
                       <Link to="/dashboard">
                         <Settings className="h-4 w-4 mr-2" />
                         แดชบอร์ด
                       </Link>
                     </DropdownMenuItem>
                     {isAdmin && (
-                      <DropdownMenuItem asChild>
+                      <DropdownMenuItem asChild className="cursor-pointer">
                         <Link to="/admin">
                           <Crown className="h-4 w-4 mr-2" />
                           ผู้ดูแลระบบ
@@ -115,7 +124,7 @@ export const Header = () => {
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={signOut}>
+                    <DropdownMenuItem onClick={signOut} className="cursor-pointer text-destructive">
                       <LogOut className="h-4 w-4 mr-2" />
                       ออกจากระบบ
                     </DropdownMenuItem>
@@ -123,10 +132,14 @@ export const Header = () => {
                 </DropdownMenu>
               ) : (
                 <>
-                  <Button variant="ghost" size="sm" asChild>
+                  <Button variant="ghost" size="sm" className="hover:bg-muted/50 rounded-lg" asChild>
                     <Link to="/auth/signin">เข้าสู่ระบบ</Link>
                   </Button>
-                  <Button size="sm" asChild className="glow-on-hover">
+                  <Button 
+                    size="sm" 
+                    className="glow-on-hover bg-gradient-to-r from-primary via-secondary to-accent rounded-lg px-6" 
+                    asChild
+                  >
                     <Link to="/auth/signup">สมัครสมาชิก</Link>
                   </Button>
                 </>
