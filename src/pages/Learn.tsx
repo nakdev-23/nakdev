@@ -237,6 +237,29 @@ export default function Learn() {
     return url; // Return original if no match found
   };
 
+  // Helper function to check if lesson has incomplete required assignments/quizzes
+  const hasIncompleteRequiredTasks = (lessonId: string) => {
+    // Check required assignments
+    const lessonAssignments = assignments.filter(a => a.lesson_id === lessonId && a.is_required);
+    for (const assignment of lessonAssignments) {
+      const submission = submissions.find(s => s.assignment_id === assignment.id);
+      if (!submission || !submission.score) {
+        return true; // Has incomplete required assignment
+      }
+    }
+
+    // Check required quizzes
+    const lessonQuizzes = quizzes.filter(q => q.lesson_id === lessonId && q.is_required);
+    for (const quiz of lessonQuizzes) {
+      const attempt = attempts.find(a => a.quiz_id === quiz.id && a.passed);
+      if (!attempt) {
+        return true; // Has incomplete required quiz
+      }
+    }
+
+    return false; // All required tasks completed
+  };
+
   // Helper function to check if a lesson is locked
   const isLessonLocked = (lesson: any) => {
     // Determine position in the global lessons order
@@ -248,12 +271,21 @@ export default function Learn() {
       chapters.flatMap(c => c.lessons.filter(l => l.completed).map(l => l.id))
     );
 
-    // If any previous lesson (by global order) is not completed, lock it
+    // Check all previous lessons
     for (let i = 0; i < idx; i++) {
-      if (!completedSet.has(lessons[i].id)) {
+      const prevLesson = lessons[i];
+      
+      // If previous lesson is not completed, lock current lesson
+      if (!completedSet.has(prevLesson.id)) {
+        return true;
+      }
+      
+      // If previous lesson has incomplete required assignments/quizzes, lock current lesson
+      if (hasIncompleteRequiredTasks(prevLesson.id)) {
         return true;
       }
     }
+    
     return false;
   };
 
