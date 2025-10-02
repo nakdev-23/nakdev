@@ -185,16 +185,51 @@ export default function Learn() {
   };
 
   const handleMarkComplete = async () => {
-    if (!currentLesson) return;
+    if (!currentLesson || isMarkingComplete) return;
+    
+    // Check if current lesson has incomplete required assignments/quizzes
+    const currentLessonAssignments = assignments.filter(a => a.lesson_id === currentLesson.id && a.is_required);
+    for (const assignment of currentLessonAssignments) {
+      const submission = submissions.find(s => s.assignment_id === assignment.id);
+      if (!submission || !submission.score) {
+        toast({
+          title: "ไม่สามารถทำเครื่องหมายจบได้",
+          description: "กรุณาส่งการบ้านที่บังคับก่อน",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
 
+    const currentLessonQuizzes = quizzes.filter(q => q.lesson_id === currentLesson.id && q.is_required);
+    for (const quiz of currentLessonQuizzes) {
+      const attempt = attempts.find(a => a.quiz_id === quiz.id && a.passed);
+      if (!attempt) {
+        toast({
+          title: "ไม่สามารถทำเครื่องหมายจบได้",
+          description: "กรุณาทำ Quiz ที่บังคับให้ผ่านก่อน",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+    
     setIsMarkingComplete(true);
     try {
       const result = await markLessonComplete(currentLesson.id);
+      
       if (result.success) {
         toast({
-          title: "เรียนจบแล้ว!",
-          description: "บทเรียนนี้ได้ถูกทำเครื่องหมายว่าเรียนจบแล้ว",
+          title: "สำเร็จ",
+          description: "บันทึกความคืบหน้าเรียบร้อยแล้ว",
         });
+        
+        // Auto navigate to next lesson if available
+        if (nextLesson) {
+          setTimeout(() => {
+            window.location.href = `/learn/${courseSlug}/${nextLesson.slug}`;
+          }, 1000);
+        }
       } else {
         toast({
           title: "เกิดข้อผิดพลาด",
@@ -413,32 +448,51 @@ export default function Learn() {
                 </TabsContent>
                 
                 <TabsContent value="resources" className="mt-6">
-                  <Tabs defaultValue="assignments">
-                    <TabsList>
-                      <TabsTrigger value="assignments">การบ้าน</TabsTrigger>
-                      <TabsTrigger value="quizzes">Quiz</TabsTrigger>
-                    </TabsList>
-                    
-                    <TabsContent value="assignments" className="mt-4">
-                      <AssignmentList
-                        assignments={assignments || []}
-                        submissions={submissions}
-                        onSubmit={(id) => setSelectedAssignmentId(id)}
-                      />
-                    </TabsContent>
-                    
-                    <TabsContent value="quizzes" className="mt-4">
-                      <QuizList
-                        quizzes={quizzes || []}
-                        attempts={attempts}
-                        onTakeQuiz={(id) => setSelectedQuizId(id)}
-                      />
-                    </TabsContent>
-                  </Tabs>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>เอกสารประกอบ</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground">
+                        เอกสารและไฟล์ประกอบการเรียนสำหรับบทนี้
+                      </p>
+                    </CardContent>
+                  </Card>
                 </TabsContent>
               </Tabs>
             </div>
           </div>
+
+          {/* Assignments and Quizzes for current lesson */}
+          {currentLesson && (
+            <div className="p-6">
+              <div className="max-w-4xl mx-auto space-y-6">
+                {/* Assignments */}
+                {assignments.filter(a => a.lesson_id === currentLesson.id).length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4">การบ้านของบทนี้</h3>
+                    <AssignmentList
+                      assignments={assignments.filter(a => a.lesson_id === currentLesson.id)}
+                      submissions={submissions}
+                      onSubmit={(id) => setSelectedAssignmentId(id)}
+                    />
+                  </div>
+                )}
+
+                {/* Quizzes */}
+                {quizzes.filter(q => q.lesson_id === currentLesson.id).length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4">Quiz ของบทนี้</h3>
+                    <QuizList
+                      quizzes={quizzes.filter(q => q.lesson_id === currentLesson.id)}
+                      attempts={attempts}
+                      onTakeQuiz={(id) => setSelectedQuizId(id)}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Navigation */}
           <div className="p-6">
