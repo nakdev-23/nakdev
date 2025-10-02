@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface MyTool {
   id: string;
+  slug: string;
   title: string;
   description: string;
   category: string;
@@ -50,7 +51,7 @@ export default function MyTools() {
         // Fetch tools data
         const { data: tools, error: toolsError } = await supabase
           .from('tools')
-          .select('id, title, description, category, download_url')
+          .select('id, slug, title, description, category, download_url')
           .in('id', toolIds);
 
         if (toolsError) throw toolsError;
@@ -189,7 +190,7 @@ export default function MyTools() {
                                 </Button>
                               )}
                               <Button size="sm" variant="outline" asChild>
-                                <Link to={`/tools/${tool.id}`}>
+                                <Link to={`/tools/${tool.slug}`}>
                                   <ExternalLink className="h-4 w-4 mr-2" />
                                   ดูรายละเอียด
                                 </Link>
@@ -234,7 +235,7 @@ export default function MyTools() {
                             </Button>
                           )}
                           <Button size="sm" variant="outline" asChild>
-                            <Link to={`/tools/${tool.id}`}>
+                            <Link to={`/tools/${tool.slug}`}>
                               <ExternalLink className="h-4 w-4 mr-2" />
                               ดูรายละเอียด
                             </Link>
