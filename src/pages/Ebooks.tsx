@@ -188,11 +188,9 @@ export default function Ebooks() {
                       </Link>
                     </Button>
                   ) : (
-                    <Button className="w-full" asChild>
-                      <Link to={`/ebooks/${ebook.slug}`}>
-                        <Eye className="mr-2 h-4 w-4" />
-                        ดูรายละเอียด ฿{ebook.price}
-                      </Link>
+                    <Button className="w-full" onClick={() => addToCart(ebook.id, 'ebook')}>
+                      <ShoppingCart className="mr-2 h-4 w-4" />
+                      เพิ่มลงตะกร้า ฿{ebook.price.toLocaleString()}
                     </Button>
                   )}
                 </CardContent>
