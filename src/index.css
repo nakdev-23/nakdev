@@ -4,63 +4,63 @@
 @tailwind components;
 @tailwind utilities;
 
-/* นัก dev ฝึกหัด Design System - Elegant & Trustworthy */
+/* Space Odyssey Design System - Deep Blue Space Theme */
 
 @layer base {
   :root {
-    /* Core Colors - Futuristic Tech Theme */
-    --background: 220 26% 97%;
-    --foreground: 222 47% 11%;
+    /* Core Colors - Deep Space Theme */
+    --background: 225 35% 12%;
+    --foreground: 210 40% 96%;
 
-    /* Brand Colors - Cyber Blue & Purple */
-    --primary: 217 91% 60%; /* Electric Blue */
+    /* Brand Colors - Space Blue & Stellar Silver */
+    --primary: 210 100% 60%; /* Stellar Blue */
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 217 91% 70%;
+    --primary-glow: 210 100% 70%;
     
-    --secondary: 270 91% 65%; /* Neon Purple */
+    --secondary: 230 60% 50%; /* Deep Indigo */
     --secondary-foreground: 0 0% 100%;
     
-    --accent: 180 100% 50%; /* Cyan Glow */
-    --accent-foreground: 222 47% 11%;
+    --accent: 195 100% 65%; /* Cosmic Cyan */
+    --accent-foreground: 225 35% 12%;
     
     /* Surface Colors */
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
-    --card-glass: 217 91% 60% / 0.03;
+    --card: 225 30% 16%;
+    --card-foreground: 210 40% 96%;
+    --card-glass: 210 100% 60% / 0.05;
     
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover: 225 30% 16%;
+    --popover-foreground: 210 40% 96%;
     
-    --muted: 220 26% 95%;
-    --muted-foreground: 222 47% 40%;
+    --muted: 225 25% 20%;
+    --muted-foreground: 210 30% 70%;
     
     /* Interactive States */
-    --border: 220 26% 88%;
-    --border-glass: 217 91% 60% / 0.15;
-    --input: 220 26% 88%;
-    --ring: 217 91% 60%;
+    --border: 225 25% 25%;
+    --border-glass: 210 100% 60% / 0.2;
+    --input: 225 25% 25%;
+    --ring: 210 100% 60%;
     
     /* Status Colors */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --success: 142 76% 36%;
+    --success: 142 76% 40%;
     --success-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;
+    --warning: 38 92% 55%;
     --warning-foreground: 0 0% 100%;
     
-    /* Futuristic Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(217 91% 60%), hsl(270 91% 65%), hsl(180 100% 50%));
-    --gradient-card: linear-gradient(135deg, hsl(217 91% 60% / 0.05), hsl(270 91% 65% / 0.03));
-    --gradient-glow: radial-gradient(circle at 50% 50%, hsl(217 91% 60% / 0.4), hsl(270 91% 65% / 0.2), transparent 70%);
-    --gradient-mesh: radial-gradient(at 40% 20%, hsl(217 91% 60%) 0, transparent 50%),
-                     radial-gradient(at 80% 0%, hsl(270 91% 65%) 0, transparent 50%),
-                     radial-gradient(at 0% 50%, hsl(180 100% 50%) 0, transparent 50%);
+    /* Space Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(225 50% 8%), hsl(230 60% 15%), hsl(240 70% 20%));
+    --gradient-card: linear-gradient(135deg, hsl(210 100% 60% / 0.08), hsl(230 60% 50% / 0.05));
+    --gradient-glow: radial-gradient(circle at 50% 50%, hsl(210 100% 60% / 0.3), hsl(230 60% 50% / 0.15), transparent 70%);
+    --gradient-mesh: radial-gradient(at 40% 20%, hsl(210 100% 25%) 0, transparent 50%),
+                     radial-gradient(at 80% 0%, hsl(230 60% 25%) 0, transparent 50%),
+                     radial-gradient(at 0% 50%, hsl(195 100% 30%) 0, transparent 50%);
     
-    /* Advanced Shadows */
-    --shadow-glass: 0 8px 32px hsl(217 91% 60% / 0.1), 0 0 0 1px hsl(217 91% 60% / 0.05);
-    --shadow-glow: 0 0 40px hsl(217 91% 60% / 0.4), 0 0 80px hsl(270 91% 65% / 0.2);
-    --shadow-card: 0 4px 24px hsl(222 47% 11% / 0.08);
-    --shadow-neon: 0 0 20px hsl(180 100% 50% / 0.5), 0 0 40px hsl(180 100% 50% / 0.3);
+    /* Space Shadows */
+    --shadow-glass: 0 8px 32px hsl(210 100% 60% / 0.15), 0 0 0 1px hsl(210 100% 60% / 0.1);
+    --shadow-glow: 0 0 50px hsl(210 100% 60% / 0.5), 0 0 100px hsl(230 60% 50% / 0.3);
+    --shadow-card: 0 4px 24px hsl(225 50% 5% / 0.6);
+    --shadow-neon: 0 0 30px hsl(195 100% 65% / 0.6), 0 0 60px hsl(195 100% 65% / 0.4);
     
     /* Animation Variables */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -86,51 +86,51 @@
   }
 
   .dark {
-    /* Core Colors - Futuristic Dark Mode */
-    --background: 222 47% 7%;
-    --foreground: 220 26% 97%;
+    /* Core Colors - Deep Space Dark Mode */
+    --background: 225 50% 5%;
+    --foreground: 210 40% 98%;
 
-    /* Brand Colors - Neon Bright for Dark */
-    --primary: 217 91% 70%;
-    --primary-foreground: 222 47% 7%;
-    --primary-glow: 217 91% 80%;
+    /* Brand Colors - Brighter Space Colors */
+    --primary: 210 100% 70%;
+    --primary-foreground: 225 50% 5%;
+    --primary-glow: 210 100% 80%;
     
-    --secondary: 270 91% 70%;
-    --secondary-foreground: 222 47% 7%;
+    --secondary: 230 70% 60%;
+    --secondary-foreground: 225 50% 5%;
     
-    --accent: 180 100% 60%;
-    --accent-foreground: 222 47% 7%;
+    --accent: 195 100% 70%;
+    --accent-foreground: 225 50% 5%;
     
     /* Surface Colors */
-    --card: 222 47% 11%;
-    --card-foreground: 220 26% 97%;
-    --card-glass: 217 91% 70% / 0.05;
+    --card: 225 40% 8%;
+    --card-foreground: 210 40% 98%;
+    --card-glass: 210 100% 70% / 0.08;
     
-    --popover: 222 47% 11%;
-    --popover-foreground: 220 26% 97%;
+    --popover: 225 40% 8%;
+    --popover-foreground: 210 40% 98%;
     
-    --muted: 222 47% 15%;
-    --muted-foreground: 220 26% 65%;
+    --muted: 225 35% 12%;
+    --muted-foreground: 210 30% 75%;
     
     /* Interactive States */
-    --border: 222 47% 20%;
-    --border-glass: 217 91% 70% / 0.2;
-    --input: 222 47% 20%;
-    --ring: 217 91% 70%;
+    --border: 225 30% 18%;
+    --border-glass: 210 100% 70% / 0.25;
+    --input: 225 30% 18%;
+    --ring: 210 100% 70%;
     
-    /* Futuristic Gradients - Dark */
-    --gradient-hero: linear-gradient(135deg, hsl(222 47% 7%), hsl(217 91% 20%), hsl(270 91% 25%));
-    --gradient-card: linear-gradient(135deg, hsl(217 91% 70% / 0.08), hsl(270 91% 70% / 0.05));
-    --gradient-glow: radial-gradient(circle at 50% 50%, hsl(217 91% 70% / 0.3), hsl(270 91% 70% / 0.15), transparent 70%);
-    --gradient-mesh: radial-gradient(at 40% 20%, hsl(217 91% 30%) 0, transparent 50%),
-                     radial-gradient(at 80% 0%, hsl(270 91% 35%) 0, transparent 50%),
-                     radial-gradient(at 0% 50%, hsl(180 100% 30%) 0, transparent 50%);
+    /* Deep Space Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(225 60% 3%), hsl(230 70% 10%), hsl(240 80% 15%));
+    --gradient-card: linear-gradient(135deg, hsl(210 100% 70% / 0.1), hsl(230 70% 60% / 0.08));
+    --gradient-glow: radial-gradient(circle at 50% 50%, hsl(210 100% 70% / 0.4), hsl(230 70% 60% / 0.2), transparent 70%);
+    --gradient-mesh: radial-gradient(at 40% 20%, hsl(210 100% 20%) 0, transparent 50%),
+                     radial-gradient(at 80% 0%, hsl(230 70% 25%) 0, transparent 50%),
+                     radial-gradient(at 0% 50%, hsl(195 100% 25%) 0, transparent 50%);
     
-    /* Shadows - Dark Mode with Neon */
-    --shadow-glass: 0 8px 32px hsl(217 91% 70% / 0.15), 0 0 0 1px hsl(217 91% 70% / 0.1);
-    --shadow-glow: 0 0 40px hsl(217 91% 70% / 0.5), 0 0 80px hsl(270 91% 70% / 0.3);
-    --shadow-card: 0 4px 24px hsl(222 47% 7% / 0.6);
-    --shadow-neon: 0 0 20px hsl(180 100% 60% / 0.6), 0 0 40px hsl(180 100% 60% / 0.4);
+    /* Shadows - Deep Space with Glow */
+    --shadow-glass: 0 8px 32px hsl(210 100% 70% / 0.2), 0 0 0 1px hsl(210 100% 70% / 0.15);
+    --shadow-glow: 0 0 50px hsl(210 100% 70% / 0.6), 0 0 100px hsl(230 70% 60% / 0.4);
+    --shadow-card: 0 4px 24px hsl(225 60% 3% / 0.8);
+    --shadow-neon: 0 0 30px hsl(195 100% 70% / 0.7), 0 0 60px hsl(195 100% 70% / 0.5);
   }
 }
 
@@ -219,7 +219,7 @@
     left: 10%;
     width: 400px;
     height: 400px;
-    background: hsl(217 91% 60% / 0.4);
+    background: hsl(210 100% 60% / 0.35);
     animation-delay: 0s;
   }
   
@@ -228,7 +228,7 @@
     right: 10%;
     width: 300px;
     height: 300px;
-    background: hsl(270 91% 65% / 0.3);
+    background: hsl(230 60% 50% / 0.3);
     animation-delay: 3s;
   }
   
@@ -237,7 +237,7 @@
     left: 50%;
     width: 250px;
     height: 250px;
-    background: hsl(180 100% 50% / 0.25);
+    background: hsl(195 100% 65% / 0.25);
     animation-delay: 6s;
   }
   
@@ -358,6 +358,7 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    text-shadow: 0 0 20px hsl(var(--primary) / 0.3);
   }
   
   /* Animation Utilities */
