@@ -34,30 +34,6 @@ const stats = [
   { number: "95%", label: "ความพึงพอใจ" }
 ];
 
-const team = [
-  {
-    name: "สมชาย นักพัฒนา",
-    role: "Co-Founder & Lead Instructor",
-    experience: "8+ ปี",
-    specialty: "Full Stack Development",
-    description: "อดีต Senior Developer จากบริษัทเทคโนโลยีชั้นนำ มีประสบการณ์สอนมากกว่า 5 ปี"
-  },
-  {
-    name: "วิภาวี สร้างสรรค์",
-    role: "Co-Founder & UX Director", 
-    experience: "6+ ปี",
-    specialty: "UI/UX Design",
-    description: "ผู้เชี่ยวชาญด้านการออกแบบ UI/UX และการวิจัยผู้ใช้งาน"
-  },
-  {
-    name: "กรกต เทคโนโลยี",
-    role: "Technical Director",
-    experience: "10+ ปี",
-    specialty: "Backend & Infrastructure",
-    description: "ผู้เชี่ยวชาญด้านสถาปัตยกรรมระบบและการพัฒนา Backend"
-  }
-];
-
 export default function About() {
   const navigate = useNavigate();
   
@@ -184,37 +160,113 @@ export default function About() {
         </div>
       </section>
 
-      {/* Team Section */}
+      {/* Consultation Services Section */}
       <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">ทีมงานของเรา</h2>
-            <p className="text-xl text-muted-foreground">
-              กลุ่มผู้เชี่ยวชาญที่มีประสบการณ์และหลงใหลในการสอน
+            <Badge className="mb-4">บริการพิเศษ</Badge>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">รับปรึกษาและตรวจสอบโปรเจค</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              ให้ผู้เชี่ยวชาญช่วยดูแลโปรเจคของคุณ ตรวจสอบความปลอดภัย และให้คำแนะนำที่เหมาะสม
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {team.map((member, index) => (
-              <Card key={member.name} className={`glass-card hover-lift animate-fade-in-delay-${index + 1}`}>
-                <CardContent className="p-6 text-center">
-                  <div className="w-20 h-20 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full mx-auto mb-4 flex items-center justify-center">
-                    <Users className="h-8 w-8 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">{member.name}</h3>
-                  <p className="text-primary font-medium mb-2">{member.role}</p>
-                  <div className="flex items-center justify-center gap-2 mb-4">
-                    <Badge variant="outline" className="badge-level text-xs">
-                      {member.experience}
-                    </Badge>
-                    <Badge variant="outline" className="badge-free text-xs">
-                      {member.specialty}
-                    </Badge>
-                  </div>
-                  <p className="text-muted-foreground text-sm">{member.description}</p>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <Card className="glass-card hover-lift animate-fade-in-delay-1 border-primary/20">
+              <CardContent className="p-8">
+                <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-6">
+                  <svg className="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold mb-3">ตรวจสอบความปลอดภัย</h3>
+                <p className="text-muted-foreground mb-4">
+                  วิเคราะห์และตรวจสอบช่องโหว่ด้านความปลอดภัยในโค้ดและระบบของคุณ พร้อมให้คำแนะนำในการแก้ไข
+                </p>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-1">✓</span>
+                    <span>Security Audit</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-1">✓</span>
+                    <span>Vulnerability Assessment</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-1">✓</span>
+                    <span>Best Practices Review</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card className="glass-card hover-lift animate-fade-in-delay-2 border-accent/20">
+              <CardContent className="p-8">
+                <div className="w-14 h-14 bg-accent/10 rounded-xl flex items-center justify-center mb-6">
+                  <Code2 className="w-7 h-7 text-accent" />
+                </div>
+                <h3 className="text-xl font-semibold mb-3">รีวิวและปรับปรุงโค้ด</h3>
+                <p className="text-muted-foreground mb-4">
+                  ให้ผู้เชี่ยวชาญตรวจสอบโค้ดของคุณ แนะนำการปรับปรุง และช่วยให้โค้ดมีคุณภาพและ maintainable มากขึ้น
+                </p>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-start gap-2">
+                    <span className="text-accent mt-1">✓</span>
+                    <span>Code Quality Review</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-accent mt-1">✓</span>
+                    <span>Performance Optimization</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-accent mt-1">✓</span>
+                    <span>Refactoring Suggestions</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card className="glass-card hover-lift animate-fade-in-delay-3 border-primary/20">
+              <CardContent className="p-8">
+                <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-6">
+                  <svg className="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold mb-3">ตรวจสอบ Supabase Flow</h3>
+                <p className="text-muted-foreground mb-4">
+                  วิเคราะห์การออกแบบฐานข้อมูล RLS policies และ architecture ของ Supabase ให้เหมาะสมและปลอดภัย
+                </p>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-1">✓</span>
+                    <span>Database Schema Review</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-1">✓</span>
+                    <span>RLS Policies Audit</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-1">✓</span>
+                    <span>Architecture Consultation</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="mt-12 text-center">
+            <Card className="glass-card max-w-2xl mx-auto">
+              <CardContent className="p-8">
+                <h3 className="text-2xl font-semibold mb-4">สนใจบริการปรึกษา?</h3>
+                <p className="text-muted-foreground mb-6">
+                  ติดต่อเราเพื่อขอคำปรึกษาและรับ quote ตามความต้องการของคุณ
+                </p>
+                <Button size="lg" className="glow-on-hover">
+                  ติดต่อเรา
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
