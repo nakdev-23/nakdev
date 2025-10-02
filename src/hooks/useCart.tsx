@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
@@ -25,6 +25,12 @@ export function useCart() {
   const [cartItems, setCartItems] = useState<CartItemWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  const channelRef = useRef<any>(null);
+  const broadcastUpdate = () => {
+    try {
+      channelRef.current?.send({ type: 'broadcast', event: 'cart:update', payload: { userId: user?.id, ts: Date.now() } });
+    } catch {}
+  };
 
   const fetchCartItems = async () => {
     if (!user) {
@@ -124,6 +130,8 @@ export function useCart() {
 
       if (existingItem) {
         toast.success('สินค้านี้อยู่ในตะกร้าแล้ว');
+        await fetchCartItems();
+        broadcastUpdate();
         return;
       }
 
@@ -140,7 +148,14 @@ export function useCart() {
 
       await fetchCartItems();
       toast.success('เพิ่มสินค้าลงตะกร้าแล้ว');
-    } catch (error) {
+      broadcastUpdate();
+    } catch (error: any) {
+      if (error?.code === '23505') {
+        await fetchCartItems();
+        toast.success('สินค้านี้อยู่ในตะกร้าแล้ว');
+        broadcastUpdate();
+        return;
+      }
       console.error('Error adding to cart:', error);
       toast.error('ไม่สามารถเพิ่มสินค้าลงตะกร้าได้');
     }
@@ -160,6 +175,7 @@ export function useCart() {
       if (error) throw error;
 
       await fetchCartItems();
+      broadcastUpdate();
     } catch (error) {
       console.error('Error updating quantity:', error);
       toast.error('ไม่สามารถอัปเดตจำนวนได้');
@@ -176,6 +192,7 @@ export function useCart() {
       if (error) throw error;
 
       await fetchCartItems();
+      broadcastUpdate();
       toast.success('ลบสินค้าออกจากตะกร้าแล้ว');
     } catch (error) {
       console.error('Error removing item:', error);
@@ -195,6 +212,7 @@ export function useCart() {
       if (error) throw error;
 
       setCartItems([]);
+      broadcastUpdate();
       toast.success('ลบสินค้าทั้งหมดออกจากตะกร้าแล้ว');
     } catch (error) {
       console.error('Error clearing cart:', error);
@@ -205,10 +223,9 @@ export function useCart() {
   useEffect(() => {
     fetchCartItems();
 
-    // Subscribe to real-time changes
     if (user) {
       const channel = supabase
-        .channel('cart-changes')
+        .channel(`cart-${user.id}`)
         .on(
           'postgres_changes',
           {
@@ -221,9 +238,15 @@ export function useCart() {
             fetchCartItems();
           }
         )
+        .on('broadcast', { event: 'cart:update' }, () => {
+          fetchCartItems();
+        })
         .subscribe();
 
+      channelRef.current = channel;
+
       return () => {
+        channelRef.current = null;
         supabase.removeChannel(channel);
       };
     }
