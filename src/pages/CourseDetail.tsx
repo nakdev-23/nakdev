@@ -286,7 +286,7 @@ export default function CourseDetail() {
                           <AccordionItem key={sectionIndex} value={`item-${sectionIndex}`}>
                             <AccordionTrigger className="text-left">
                               <div>
-                                <div className="font-semibold">{chapterTitle}</div>
+                                <div className="font-semibold">บทที่ {sectionIndex + 1}: {chapterTitle}</div>
                                 <div className="text-sm text-muted-foreground">
                                   {chapterLessons.length} บทเรียน
                                 </div>
