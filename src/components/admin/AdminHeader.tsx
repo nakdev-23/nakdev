@@ -20,10 +20,14 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { usePendingOrdersCount } from '@/hooks/usePendingOrders';
+import { useToast } from '@/hooks/use-toast';
 
 export default function AdminHeader() {
   const { profile } = useAuth();
   const navigate = useNavigate();
+  const { data: pendingCount = 0 } = usePendingOrdersCount();
+  const { toast } = useToast();
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -55,11 +59,23 @@ export default function AdminHeader() {
             variant="ghost" 
             size="icon" 
             className="relative hover:bg-muted/50 transition-colors"
+            onClick={() => {
+              if (pendingCount > 0) {
+                navigate('/admin/orders');
+              } else {
+                toast({
+                  title: "ไม่มีการแจ้งเตือน",
+                  description: "ไม่มีคำสั่งซื้อที่รอการยืนยัน",
+                });
+              }
+            }}
           >
             <Bell className="h-5 w-5" />
-            <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-[10px] bg-red-500 border-0 shadow-glow">
-              3
-            </Badge>
+            {pendingCount > 0 && (
+              <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-[10px] bg-red-500 border-0 shadow-glow flex items-center justify-center">
+                {pendingCount}
+              </Badge>
+            )}
           </Button>
 
           {/* User menu */}
