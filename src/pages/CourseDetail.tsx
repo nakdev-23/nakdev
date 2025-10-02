@@ -130,10 +130,20 @@ export default function CourseDetail() {
             {/* Sticky Buy Panel - Desktop */}
             <div className="lg:col-span-1">
               <Card className="glass-card sticky top-24">
-                <div className="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 rounded-t-lg relative">
+                <div className="aspect-video rounded-t-lg relative overflow-hidden">
+                  {course.cover_image_url || course.cover_image_path ? (
+                    <img 
+                      src={course.cover_image_url || course.cover_image_path} 
+                      alt={course.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20" />
+                  )}
+                  <div className="absolute inset-0 bg-black/20" />
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <Button size="lg" className="rounded-full w-16 h-16">
-                      <Play className="h-6 w-6" />
+                    <Button size="lg" className="rounded-full w-16 h-16 bg-white/90 hover:bg-white">
+                      <Play className="h-6 w-6 text-primary" />
                     </Button>
                   </div>
                 </div>
