@@ -13,48 +13,46 @@ import { useAuth } from "@/hooks/useAuth";
 import { useEnrolledCourses } from "@/hooks/useEnrolledCourses";
 
 // Default features if none provided
-const defaultFeatures = [
-  "วิดีโอ HD คุณภาพสูง",
-  "แบบฝึกหัดและโปรเจค", 
-  "ใบประกาศนียบัตร",
-  "เข้าถึงได้ตลอดชีวิต",
-  "ชุมชนนักเรียน",
-  "การสนับสนุนจากผู้สอน"
-];
-
+const defaultFeatures = ["วิดีโอ HD คุณภาพสูง", "แบบฝึกหัดและโปรเจค", "ใบประกาศนียบัตร", "เข้าถึงได้ตลอดชีวิต", "ชุมชนนักเรียน", "การสนับสนุนจากผู้สอน"];
 export default function CourseDetail() {
-  const { slug } = useParams();
+  const {
+    slug
+  } = useParams();
   const [couponCode, setCouponCode] = useState("");
-  
-  const { course, lessons, isLoading, error } = useCourseWithLessons(slug || '');
-  const { addToCart } = useCart();
-  const { user } = useAuth();
-  const { enrolledCourses } = useEnrolledCourses();
+  const {
+    course,
+    lessons,
+    isLoading,
+    error
+  } = useCourseWithLessons(slug || '');
+  const {
+    addToCart
+  } = useCart();
+  const {
+    user
+  } = useAuth();
+  const {
+    enrolledCourses
+  } = useEnrolledCourses();
 
   // Check if user is already enrolled in this course
   const isEnrolled = enrolledCourses.some(enrolledCourse => enrolledCourse.id === course?.id);
-
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
+    return <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">กำลังโหลด...</h1>
         </div>
-      </div>
-    );
+      </div>;
   }
-
   if (error || !course) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
+    return <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-4xl font-bold mb-4">ไม่พบคอร์สที่ค้นหา</h1>
           <Button asChild>
             <Link to="/courses">กลับไปดูคอร์สอื่น</Link>
           </Button>
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // Group lessons by chapter
@@ -69,15 +67,12 @@ export default function CourseDetail() {
 
   // Get first lesson slug for navigation
   const firstLesson = lessons.length > 0 ? lessons[0] : null;
-
   const handleAddToCart = () => {
     if (course?.id) {
       addToCart(course.id, 'course');
     }
   };
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       {/* Course Header */}
       <section className="bg-hero-gradient py-20">
         <div className="container mx-auto px-4">
@@ -88,11 +83,9 @@ export default function CourseDetail() {
                 <Badge variant="outline" className="badge-level">
                   {course.level}
                 </Badge>
-                {course.is_free && (
-                  <Badge variant="outline" className="badge-free">
+                {course.is_free && <Badge variant="outline" className="badge-free">
                     ฟรี
-                  </Badge>
-                )}
+                  </Badge>}
               </div>
               
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 animate-fade-up">
@@ -108,22 +101,14 @@ export default function CourseDetail() {
                   <Clock className="h-5 w-5" />
                   <span>{course.duration_hours} ชั่วโมง</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  <span>{course.student_count.toLocaleString()} นักเรียน</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <span>{course.rating} ({course.review_count} รีวิว)</span>
-                </div>
+                
+                
               </div>
 
               <div className="flex flex-wrap gap-2 animate-fade-in-delay-3">
-                {course.tags?.map((tag, index) => (
-                  <Badge key={index} variant="secondary" className="bg-white/10 text-white border-white/20">
+                {course.tags?.map((tag, index) => <Badge key={index} variant="secondary" className="bg-white/10 text-white border-white/20">
                     {tag}
-                  </Badge>
-                ))}
+                  </Badge>)}
               </div>
             </div>
 
@@ -131,15 +116,7 @@ export default function CourseDetail() {
             <div className="lg:col-span-1">
               <Card className="glass-card sticky top-24">
                 <div className="aspect-video rounded-t-lg relative overflow-hidden">
-                  {course.cover_image_url || course.cover_image_path ? (
-                    <img 
-                      src={course.cover_image_url || course.cover_image_path} 
-                      alt={course.title}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20" />
-                  )}
+                  {course.cover_image_url || course.cover_image_path ? <img src={course.cover_image_url || course.cover_image_path} alt={course.title} className="w-full h-full object-cover" /> : <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20" />}
                   <div className="absolute inset-0 bg-black/20" />
                   <div className="absolute inset-0 flex items-center justify-center">
                     <Button size="lg" className="rounded-full w-16 h-16 bg-white/90 hover:bg-white">
@@ -150,68 +127,41 @@ export default function CourseDetail() {
                 <CardContent className="p-6">
                   <div className="text-center mb-6">
                     <div>
-                      {course.is_free || !course.price || course.price === 0 ? (
-                        <>
+                      {course.is_free || !course.price || course.price === 0 ? <>
                           <div className="text-3xl font-bold text-success mb-2">ฟรี!</div>
-                          {course.original_price && (
-                            <div className="text-muted-foreground line-through">
+                          {course.original_price && <div className="text-muted-foreground line-through">
                               ฿{course.original_price.toLocaleString()}
-                            </div>
-                          )}
-                        </>
-                      ) : (
-                        <>
+                            </div>}
+                        </> : <>
                           <div className="text-3xl font-bold mb-2">
                             ฿{course.price?.toLocaleString()}
                           </div>
-                          {course.original_price && course.original_price > (course.price || 0) && (
-                            <div className="text-muted-foreground line-through">
+                          {course.original_price && course.original_price > (course.price || 0) && <div className="text-muted-foreground line-through">
                               ฿{course.original_price.toLocaleString()}
-                            </div>
-                          )}
-                        </>
-                      )}
+                            </div>}
+                        </>}
                     </div>
                   </div>
 
-                  {course.is_free ? (
-                    <Button className="w-full glow-on-hover mb-4" size="lg" asChild>
+                  {course.is_free ? <Button className="w-full glow-on-hover mb-4" size="lg" asChild>
                       <Link to={firstLesson ? `/learn/${course.slug}/${firstLesson.slug}` : '#'}>
                         เริ่มเรียนฟรี
                         <ArrowRight className="ml-2 h-5 w-5" />
                       </Link>
-                    </Button>
-                  ) : (
-                    <div className="space-y-3 mb-4">
-                      {isEnrolled ? (
-                        <Button 
-                          className="w-full glow-on-hover" 
-                          size="lg"
-                          asChild
-                        >
+                    </Button> : <div className="space-y-3 mb-4">
+                      {isEnrolled ? <Button className="w-full glow-on-hover" size="lg" asChild>
                           <Link to={firstLesson ? `/learn/${course.slug}/${firstLesson.slug}` : '#'}>
                             เรียนต่อตอนนี้
                             <ArrowRight className="ml-2 h-5 w-5" />
                           </Link>
-                        </Button>
-                      ) : (
-                        <Button 
-                          className="w-full glow-on-hover" 
-                          size="lg"
-                          onClick={handleAddToCart}
-                          disabled={!user}
-                        >
+                        </Button> : <Button className="w-full glow-on-hover" size="lg" onClick={handleAddToCart} disabled={!user}>
                           <ShoppingCart className="mr-2 h-5 w-5" />
                           {user ? 'เพิ่มลงตะกร้า' : 'เข้าสู่ระบบเพื่อซื้อ'}
-                        </Button>
-                      )}
-                      {!user && !isEnrolled && (
-                        <Button variant="outline" className="w-full" asChild>
+                        </Button>}
+                      {!user && !isEnrolled && <Button variant="outline" className="w-full" asChild>
                           <Link to="/auth/signin">เข้าสู่ระบบ</Link>
-                        </Button>
-                      )}
-                    </div>
-                  )}
+                        </Button>}
+                    </div>}
 
                   <Button variant="outline" className="w-full mb-6">
                     <Share2 className="mr-2 h-4 w-4" />
@@ -220,12 +170,10 @@ export default function CourseDetail() {
 
                   <div className="space-y-2 text-sm">
                     <h4 className="font-semibold mb-3">สิ่งที่คุณจะได้รับ:</h4>
-                    {(course.features?.length ? course.features : defaultFeatures).map((feature, index) => (
-                      <div key={index} className="flex items-center gap-2">
+                    {(course.features?.length ? course.features : defaultFeatures).map((feature, index) => <div key={index} className="flex items-center gap-2">
                         <CheckCircle className="h-4 w-4 text-success flex-shrink-0" />
                         <span>{feature}</span>
-                      </div>
-                    ))}
+                      </div>)}
                   </div>
                 </CardContent>
               </Card>
@@ -243,7 +191,7 @@ export default function CourseDetail() {
                 <TabsList className="grid w-full grid-cols-4">
                   <TabsTrigger value="overview">ภาพรวม</TabsTrigger>
                   <TabsTrigger value="curriculum">หลักสูตร</TabsTrigger>
-                  <TabsTrigger value="reviews">รีวิว</TabsTrigger>
+                  
                   <TabsTrigger value="instructor">ผู้สอน</TabsTrigger>
                 </TabsList>
 
@@ -252,20 +200,16 @@ export default function CourseDetail() {
                       <CardContent className="p-8">
                         <h3 className="text-2xl font-bold mb-6">เกี่ยวกับคอร์สนี้</h3>
                         <div className="prose max-w-none">
-                          {course.about_course ? (
-                            <div className="text-muted-foreground whitespace-pre-line">
+                          {course.about_course ? <div className="text-muted-foreground whitespace-pre-line">
                               {course.about_course}
-                            </div>
-                          ) : (
-                            <>
+                            </div> : <>
                               <p className="text-muted-foreground mb-4">
                                 {course.description}
                               </p>
                               <p className="text-muted-foreground mb-4">
                                 คอร์สนี้ออกแบบมาเพื่อให้คุณเรียนรู้จากพื้นฐานจนสามารถนำไปใช้งานได้จริง
                               </p>
-                            </>
-                          )}
+                            </>}
                         </div>
                       </CardContent>
                     </Card>
@@ -282,8 +226,7 @@ export default function CourseDetail() {
                       </div>
 
                       <Accordion type="single" collapsible defaultValue="item-0">
-                        {Object.entries(chapters).map(([chapterTitle, chapterLessons], sectionIndex) => (
-                          <AccordionItem key={sectionIndex} value={`item-${sectionIndex}`}>
+                        {Object.entries(chapters).map(([chapterTitle, chapterLessons], sectionIndex) => <AccordionItem key={sectionIndex} value={`item-${sectionIndex}`}>
                             <AccordionTrigger className="text-left">
                               <div>
                                 <div className="font-semibold">บทที่ {sectionIndex + 1}: {chapterTitle}</div>
@@ -294,32 +237,23 @@ export default function CourseDetail() {
                             </AccordionTrigger>
                             <AccordionContent>
                               <div className="space-y-2">
-                                {chapterLessons.map((lesson, lessonIndex) => (
-                                  <div key={lessonIndex} className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50">
+                                {chapterLessons.map((lesson, lessonIndex) => <div key={lessonIndex} className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50">
                                     <div className="flex items-center gap-3">
-                                      {lessonIndex < 2 ? (
-                                        <Play className="h-4 w-4 text-primary" />
-                                      ) : (
-                                        <Lock className="h-4 w-4 text-muted-foreground" />
-                                      )}
+                                      {lessonIndex < 2 ? <Play className="h-4 w-4 text-primary" /> : <Lock className="h-4 w-4 text-muted-foreground" />}
                                       <span className={lessonIndex < 2 ? "text-primary" : "text-foreground"}>
                                         {lesson.title}
                                       </span>
-                                      {lessonIndex < 2 && (
-                                        <Badge variant="outline" className="badge-free text-xs">
+                                      {lessonIndex < 2 && <Badge variant="outline" className="badge-free text-xs">
                                           ดูฟรี
-                                        </Badge>
-                                      )}
+                                        </Badge>}
                                     </div>
                                     <span className="text-sm text-muted-foreground">
                                       {lesson.duration_text}
                                     </span>
-                                  </div>
-                                ))}
+                                  </div>)}
                               </div>
                             </AccordionContent>
-                          </AccordionItem>
-                        ))}
+                          </AccordionItem>)}
                       </Accordion>
                     </CardContent>
                   </Card>
@@ -345,18 +279,14 @@ export default function CourseDetail() {
                           <div className="w-20 h-20 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full flex-shrink-0"></div>
                           <div>
                             <h4 className="text-xl font-semibold mb-2">{course.instructor}</h4>
-                            {(course.instructor_title || course.instructor_company) && (
-                              <p className="text-muted-foreground mb-2">
+                            {(course.instructor_title || course.instructor_company) && <p className="text-muted-foreground mb-2">
                                 {course.instructor_title}
                                 {course.instructor_title && course.instructor_company && ' • '}
                                 {course.instructor_company}
-                              </p>
-                            )}
-                            {course.instructor_experience && (
-                              <p className="text-muted-foreground mb-4">
+                              </p>}
+                            {course.instructor_experience && <p className="text-muted-foreground mb-4">
                                 {course.instructor_experience}
-                              </p>
-                            )}
+                              </p>}
                             <p className="text-muted-foreground">
                               {course.instructor_bio || 'ผู้เชี่ยวชาญที่มีประสบการณ์ในการสอนและพัฒนาแอปพลิเคชัน'}
                             </p>
@@ -373,44 +303,26 @@ export default function CourseDetail() {
               <Card className="glass-card">
                 <CardContent className="p-6">
                   <div className="text-center mb-4">
-                    {course.is_free || !course.price || course.price === 0 ? (
-                      <div className="text-2xl font-bold text-success">ฟรี!</div>
-                    ) : (
-                      <div className="text-2xl font-bold">฿{course.price?.toLocaleString()}</div>
-                    )}
+                    {course.is_free || !course.price || course.price === 0 ? <div className="text-2xl font-bold text-success">ฟรี!</div> : <div className="text-2xl font-bold">฿{course.price?.toLocaleString()}</div>}
                   </div>
-                  {course.is_free ? (
-                    <Button className="w-full glow-on-hover" size="lg" asChild>
+                  {course.is_free ? <Button className="w-full glow-on-hover" size="lg" asChild>
                       <Link to={firstLesson ? `/learn/${course.slug}/${firstLesson.slug}` : '#'}>
                         เริ่มเรียนฟรี
                       </Link>
-                    </Button>
-                  ) : (
-                    isEnrolled ? (
-                      <Button className="w-full glow-on-hover" size="lg" asChild>
+                    </Button> : isEnrolled ? <Button className="w-full glow-on-hover" size="lg" asChild>
                         <Link to={firstLesson ? `/learn/${course.slug}/${firstLesson.slug}` : '#'}>
                           เรียนต่อตอนนี้
                           <ArrowRight className="ml-2 h-5 w-5" />
                         </Link>
-                      </Button>
-                    ) : (
-                      <Button 
-                        className="w-full glow-on-hover" 
-                        size="lg"
-                        onClick={handleAddToCart}
-                        disabled={!user}
-                      >
+                      </Button> : <Button className="w-full glow-on-hover" size="lg" onClick={handleAddToCart} disabled={!user}>
                         <ShoppingCart className="mr-2 h-5 w-5" />
                         {user ? 'เพิ่มลงตะกร้า' : 'เข้าสู่ระบบเพื่อซื้อ'}
-                      </Button>
-                    )
-                  )}
+                      </Button>}
                 </CardContent>
               </Card>
             </div>
           </div>
         </div>
       </section>
-    </div>
-  );
+    </div>;
 }
