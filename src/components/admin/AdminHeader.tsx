@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -9,162 +8,118 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 import { 
   Settings, 
   LogOut, 
   User, 
-  Menu,
-  Home,
-  BookOpen,
-  Users,
-  Wrench,
-  FileText,
-  BarChart3,
   Bell,
-  CreditCard
+  Sparkles
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-
-const navigation = [
-  { name: 'แดชบอร์ด', href: '/admin', icon: Home },
-  { name: 'จัดการคอร์ส', href: '/admin/courses', icon: BookOpen },
-  { name: 'จัดการผู้ใช้', href: '/admin/users', icon: Users },
-  { name: 'จัดการเครื่องมือ', href: '/admin/tools', icon: Wrench },
-  { name: 'จัดการ E-books', href: '/admin/ebooks', icon: FileText },
-  { name: 'ข้อมูลการชำระเงิน', href: '/admin/payment-methods', icon: CreditCard },
-  { name: 'คำสั่งซื้อ', href: '/admin/orders', icon: Bell },
-  { name: 'รายงาน', href: '/admin/reports', icon: BarChart3 },
-];
 
 export default function AdminHeader() {
   const { profile } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-  const [isOpen, setIsOpen] = useState(false);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate('/');
   };
 
-  const isActivePath = (path: string) => {
-    if (path === '/admin') {
-      return location.pathname === '/admin';
-    }
-    return location.pathname.startsWith(path);
-  };
-
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
+    <header className="sticky top-0 z-40 w-full border-b glass-card">
+      <div className="flex h-16 items-center justify-between px-4 md:px-6">
+        {/* Left section with trigger and logo */}
         <div className="flex items-center gap-4">
-          {/* Mobile menu */}
-          <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-72">
-              <nav className="flex flex-col gap-2 pt-6">
-                {navigation.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <Button
-                      key={item.name}
-                      variant={isActivePath(item.href) ? "secondary" : "ghost"}
-                      className="justify-start gap-2"
-                      onClick={() => {
-                        navigate(item.href);
-                        setIsOpen(false);
-                      }}
-                    >
-                      <Icon className="h-4 w-4" />
-                      {item.name}
-                    </Button>
-                  );
-                })}
-              </nav>
-            </SheetContent>
-          </Sheet>
-
-          {/* Logo and title */}
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Settings className="h-4 w-4" />
+          <SidebarTrigger className="hover:bg-muted/50" />
+          
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-secondary shadow-glow">
+              <Sparkles className="h-5 w-5 text-primary-foreground" />
             </div>
-            <h1 className="text-lg font-semibold">ระบบจัดการ</h1>
+            <div className="hidden md:block">
+              <h1 className="text-lg font-bold text-gradient">Admin Panel</h1>
+              <p className="text-xs text-muted-foreground">ระบบจัดการ</p>
+            </div>
           </div>
         </div>
 
-        {/* Desktop navigation */}
-        <nav className="hidden md:flex items-center gap-1">
-          {navigation.map((item) => {
-            const Icon = item.icon;
-            return (
-              <Button
-                key={item.name}
-                variant={isActivePath(item.href) ? "secondary" : "ghost"}
-                size="sm"
-                className="gap-2"
-                onClick={() => navigate(item.href)}
-              >
-                <Icon className="h-4 w-4" />
-                {item.name}
-              </Button>
-            );
-          })}
-        </nav>
-
-        {/* User menu */}
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-4 w-4" />
-            <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs">
+        {/* Right section with notifications and user menu */}
+        <div className="flex items-center gap-3">
+          {/* Notifications */}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="relative hover:bg-muted/50 transition-colors"
+          >
+            <Bell className="h-5 w-5" />
+            <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-[10px] bg-red-500 border-0 shadow-glow">
               3
             </Badge>
           </Button>
 
+          {/* User menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                <Avatar className="h-8 w-8">
+              <Button 
+                variant="ghost" 
+                className="relative h-10 w-10 rounded-full hover:bg-muted/50 transition-all hover:ring-2 hover:ring-primary/20"
+              >
+                <Avatar className="h-10 w-10 border-2 border-primary/20">
                   <AvatarImage src="" alt={profile?.full_name || 'Admin'} />
-                  <AvatarFallback>
+                  <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground font-semibold">
                     {profile?.full_name?.charAt(0) || profile?.email?.charAt(0) || 'A'}
                   </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end" forceMount>
+            <DropdownMenuContent className="w-64 glass-card" align="end" forceMount>
               <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">
-                    {profile?.full_name || 'ผู้ดูแลระบบ'}
-                  </p>
-                  <p className="text-xs leading-none text-muted-foreground">
-                    {profile?.email}
-                  </p>
-                  <Badge variant="secondary" className="w-fit mt-1">
-                    {profile?.role}
-                  </Badge>
+                <div className="flex items-center gap-3 py-2">
+                  <Avatar className="h-12 w-12 border-2 border-primary/20">
+                    <AvatarImage src="" alt={profile?.full_name || 'Admin'} />
+                    <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground">
+                      {profile?.full_name?.charAt(0) || profile?.email?.charAt(0) || 'A'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col space-y-1 flex-1">
+                    <p className="text-sm font-semibold leading-none">
+                      {profile?.full_name || 'ผู้ดูแลระบบ'}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground truncate">
+                      {profile?.email}
+                    </p>
+                    <Badge variant="secondary" className="w-fit mt-1 text-xs">
+                      <Sparkles className="h-3 w-3 mr-1" />
+                      {profile?.role}
+                    </Badge>
+                  </div>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate('/dashboard')}>
+              <DropdownMenuItem 
+                onClick={() => navigate('/dashboard')}
+                className="cursor-pointer"
+              >
                 <User className="mr-2 h-4 w-4" />
                 โปรไฟล์ของฉัน
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/admin/settings')}>
+              <DropdownMenuItem 
+                onClick={() => navigate('/admin/settings')}
+                className="cursor-pointer"
+              >
                 <Settings className="mr-2 h-4 w-4" />
                 ตั้งค่าระบบ
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleSignOut}>
+              <DropdownMenuItem 
+                onClick={handleSignOut}
+                className="cursor-pointer text-destructive focus:text-destructive"
+              >
                 <LogOut className="mr-2 h-4 w-4" />
                 ออกจากระบบ
               </DropdownMenuItem>

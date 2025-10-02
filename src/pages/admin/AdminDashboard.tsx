@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Plus, Users, BookOpen, Wrench, ShoppingBag } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -95,28 +96,45 @@ export default function AdminDashboard() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">แดชบอร์ดผู้ดูแลระบบ</h1>
-          <p className="text-muted-foreground">
-            ยินดีต้อนรับ, {profile.full_name || profile.email}
-          </p>
+      <div className="space-y-6 animate-fade-in">
+        {/* Welcome Section */}
+        <div className="glass-card p-6 md:p-8 rounded-2xl border shadow-card">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold text-gradient mb-2">
+                แดชบอร์ดผู้ดูแลระบบ
+              </h1>
+              <p className="text-sm md:text-base text-muted-foreground">
+                ยินดีต้อนรับ, {profile.full_name || profile.email}
+              </p>
+            </div>
+            <Badge className="w-fit bg-gradient-to-r from-primary to-secondary text-primary-foreground border-0 shadow-glow">
+              Admin Dashboard
+            </Badge>
+          </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        {/* Stats Grid */}
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {statsList.map((stat, index) => {
             const Icon = stat.icon;
             return (
-              <Card key={index}>
+              <Card 
+                key={index} 
+                className="glass-card hover:shadow-glow transition-all duration-300 hover:-translate-y-1 border"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
                     {stat.title}
                   </CardTitle>
-                  <Icon className="h-4 w-4 text-muted-foreground" />
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <Icon className="h-5 w-5 text-primary" />
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stat.value}</div>
-                  <p className="text-xs text-muted-foreground">
+                  <div className="text-3xl font-bold text-gradient">{stat.value}</div>
+                  <p className="text-xs text-muted-foreground mt-1">
                     {stat.description}
                   </p>
                 </CardContent>
@@ -125,41 +143,53 @@ export default function AdminDashboard() {
           })}
         </div>
 
-        <Card>
+        {/* Quick Actions */}
+        <Card className="glass-card border shadow-card">
           <CardHeader>
-            <CardTitle>การดำเนินการด่วน</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5 text-primary" />
+              การดำเนินการด่วน
+            </CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <CardContent className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             <Button 
-              className="h-auto p-4 flex flex-col items-center gap-2"
+              className="h-auto p-6 flex flex-col items-center gap-3 bg-gradient-to-br from-primary to-primary/80 hover:shadow-glow transition-all duration-300 hover:scale-105"
               onClick={() => navigate('/admin/courses')}
             >
-              <Plus className="h-6 w-6" />
-              <span>จัดการคอร์ส</span>
+              <div className="p-3 rounded-full bg-background/20">
+                <BookOpen className="h-6 w-6" />
+              </div>
+              <span className="font-medium">จัดการคอร์ส</span>
             </Button>
             <Button 
               variant="outline" 
-              className="h-auto p-4 flex flex-col items-center gap-2"
+              className="h-auto p-6 flex flex-col items-center gap-3 glass-card hover:shadow-card transition-all duration-300 hover:scale-105"
               onClick={() => navigate('/admin/tools')}
             >
-              <Wrench className="h-6 w-6" />
-              <span>จัดการเครื่องมือ</span>
+              <div className="p-3 rounded-full bg-primary/10">
+                <Wrench className="h-6 w-6 text-primary" />
+              </div>
+              <span className="font-medium">จัดการเครื่องมือ</span>
             </Button>
             <Button 
               variant="outline" 
-              className="h-auto p-4 flex flex-col items-center gap-2"
+              className="h-auto p-6 flex flex-col items-center gap-3 glass-card hover:shadow-card transition-all duration-300 hover:scale-105"
               onClick={() => navigate('/admin/ebooks')}
             >
-              <BookOpen className="h-6 w-6" />
-              <span>จัดการ E-books</span>
+              <div className="p-3 rounded-full bg-primary/10">
+                <BookOpen className="h-6 w-6 text-primary" />
+              </div>
+              <span className="font-medium">จัดการ E-books</span>
             </Button>
             <Button 
               variant="outline" 
-              className="h-auto p-4 flex flex-col items-center gap-2"
+              className="h-auto p-6 flex flex-col items-center gap-3 glass-card hover:shadow-card transition-all duration-300 hover:scale-105"
               onClick={() => navigate('/admin/users')}
             >
-              <Users className="h-6 w-6" />
-              <span>จัดการผู้ใช้</span>
+              <div className="p-3 rounded-full bg-primary/10">
+                <Users className="h-6 w-6 text-primary" />
+              </div>
+              <span className="font-medium">จัดการผู้ใช้</span>
             </Button>
           </CardContent>
         </Card>
