@@ -30,6 +30,7 @@ import MyCertificates from "./pages/MyCertificates";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminCourses from "./pages/admin/AdminCourses";
 import AdminLessons from "./pages/admin/AdminLessons";
+import AdminLessonsOverview from "./pages/admin/AdminLessonsOverview";
 import AdminTools from "./pages/admin/AdminTools";
 import AdminEbooks from "./pages/admin/AdminEbooks";
 import AdminUsers from "./pages/admin/AdminUsers";
@@ -121,6 +122,7 @@ const App = () => (
             {/* Admin Routes - without nested Layout */}
             <Route path="admin" element={<AdminDashboard />} />
             <Route path="admin/courses" element={<AdminCourses />} />
+            <Route path="admin/lessons" element={<AdminLessonsOverview />} />
             <Route path="admin/courses/:courseId/lessons" element={<AdminLessons />} />
             <Route path="admin/tools" element={<AdminTools />} />
             <Route path="admin/ebooks" element={<AdminEbooks />} />
