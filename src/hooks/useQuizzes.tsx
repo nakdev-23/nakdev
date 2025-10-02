@@ -57,21 +57,62 @@ export const useQuizzes = (courseId: string) => {
   });
 
   const createQuiz = useMutation({
-    mutationFn: async (quiz: Omit<Partial<Quiz>, 'id' | 'created_at' | 'updated_at'> & { course_id: string; title: string }) => {
-      const { data, error } = await supabase
+    mutationFn: async (quizData: any) => {
+      const { questions, ...quiz } = quizData;
+      
+      // Step 1: Create quiz
+      const { data: quizRecord, error: quizError } = await supabase
         .from("quizzes")
         .insert([quiz])
         .select()
         .single();
 
-      if (error) throw error;
-      return data;
+      if (quizError) throw quizError;
+
+      // Step 2: Create questions if provided
+      if (questions && questions.length > 0) {
+        for (const question of questions) {
+          const { options, ...questionData } = question;
+          
+          const { data: questionRecord, error: questionError } = await supabase
+            .from("quiz_questions")
+            .insert([{
+              quiz_id: quizRecord.id,
+              question_text: questionData.question_text,
+              question_type: questionData.question_type,
+              points: questionData.points,
+              order_number: questionData.order_number,
+            }])
+            .select()
+            .single();
+
+          if (questionError) throw questionError;
+
+          // Step 3: Create options for this question
+          if (options && options.length > 0) {
+            const optionsToInsert = options.map((opt: any) => ({
+              question_id: questionRecord.id,
+              option_text: opt.option_text,
+              is_correct: opt.is_correct,
+              order_number: opt.order_number,
+            }));
+
+            const { error: optionsError } = await supabase
+              .from("quiz_answer_options")
+              .insert(optionsToInsert);
+
+            if (optionsError) throw optionsError;
+          }
+        }
+      }
+
+      return quizRecord;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["quizzes", courseId] });
       toast({
         title: "สำเร็จ",
-        description: "เพิ่ม Quiz เรียบร้อยแล้ว",
+        description: "เพิ่ม Quiz พร้อมคำถามเรียบร้อยแล้ว",
       });
     },
     onError: (error: Error) => {
