@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Pencil, Trash2, Upload, Link } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -33,6 +34,9 @@ export default function AdminTools() {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTool, setEditingTool] = useState<Tool | null>(null);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [isNewCategory, setIsNewCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -64,10 +68,17 @@ export default function AdminTools() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setTools((data || []).map(tool => ({
+      const toolsList = (data || []).map(tool => ({
         ...tool,
         download_type: tool.download_type as 'url' | 'file'
-      })));
+      }));
+      setTools(toolsList);
+
+      // Extract unique categories
+      const uniqueCategories = Array.from(
+        new Set(toolsList.map(tool => tool.category).filter(Boolean))
+      ) as string[];
+      setCategories(uniqueCategories);
     } catch (error) {
       console.error('Error fetching tools:', error);
       toast({
@@ -114,7 +125,10 @@ export default function AdminTools() {
     setUploading(true);
     
     try {
-      let finalFormData = { ...formData };
+      let finalFormData = { 
+        ...formData,
+        category: isNewCategory ? newCategoryName : formData.category
+      };
 
       if (formData.download_type === 'file' && selectedFile) {
         // Generate ID for new tools or use existing ID
@@ -241,6 +255,8 @@ export default function AdminTools() {
       cover_image_path: ''
     });
     setSelectedFile(null);
+    setIsNewCategory(false);
+    setNewCategoryName('');
     setIsDialogOpen(true);
   };
 
@@ -315,11 +331,42 @@ export default function AdminTools() {
                   </div>
                   <div>
                     <Label htmlFor="category">หมวดหมู่</Label>
-                    <Input
-                      id="category"
-                      value={formData.category}
-                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    />
+                    <Select 
+                      value={isNewCategory ? 'new' : formData.category} 
+                      onValueChange={(value) => {
+                        if (value === 'new') {
+                          setIsNewCategory(true);
+                          setFormData({ ...formData, category: '' });
+                        } else {
+                          setIsNewCategory(false);
+                          setNewCategoryName('');
+                          setFormData({ ...formData, category: value });
+                        }
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="เลือกหมวดหมู่" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background border border-border z-50">
+                        {categories.map((cat) => (
+                          <SelectItem key={cat} value={cat}>
+                            {cat}
+                          </SelectItem>
+                        ))}
+                        <SelectItem value="new" className="font-semibold text-primary">
+                          + สร้างหมวดหมู่ใหม่
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {isNewCategory && (
+                      <Input
+                        className="mt-2"
+                        placeholder="ชื่อหมวดหมู่ใหม่"
+                        value={newCategoryName}
+                        onChange={(e) => setNewCategoryName(e.target.value)}
+                        required
+                      />
+                    )}
                   </div>
                 </div>
                 <div>
