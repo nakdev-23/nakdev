@@ -66,19 +66,7 @@ export const Footer = () => {
             </p>
             
             {/* Newsletter */}
-            <div>
-              <h3 className="font-semibold mb-3 text-sm">รับข่าวสารล่าสุด</h3>
-              <div className="flex gap-2">
-                <Input 
-                  type="email" 
-                  placeholder="อีเมลของคุณ" 
-                  className="flex-1"
-                />
-                <Button size="sm">
-                  <Mail className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+            
             
           </div>
 
