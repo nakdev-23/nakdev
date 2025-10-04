@@ -278,14 +278,14 @@ export default function About() {
         </div>
         <div className="relative container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-            พร้อมเริ่มต้นเส้นทางแล้วหรือยัง?
+            ต้องการสอบถามข้อมูลเพิ่มเติม?
           </h2>
           <p className="text-xl text-white/80 mb-8 max-w-2xl mx-auto">
-            มาร่วมเป็นส่วนหนึ่งของชุมชนนักพัฒนาที่กำลังเติบโต 
-            และพัฒนาทักษะไปด้วยกัน
+            ทีมงานของเราพร้อมให้คำปรึกษาและตอบคำถามทุกข้อสงสัย
+            ติดต่อเราได้ทันที
           </p>
-          <Button size="lg" className="text-lg px-8 py-6 glow-on-hover" onClick={() => navigate('/auth/signin')}>
-            เริ่มเรียนฟรี
+          <Button size="lg" className="text-lg px-8 py-6 glow-on-hover" onClick={() => navigate('/contact')}>
+            ติดต่อเรา
           </Button>
         </div>
       </section>
