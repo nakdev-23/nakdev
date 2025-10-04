@@ -26,6 +26,8 @@ interface Tool {
   file_path: string;
   cover_image_url?: string;
   cover_image_path?: string;
+  prompt?: string;
+  note?: string;
   created_at: string;
 }
 
@@ -49,7 +51,9 @@ export default function AdminTools() {
     download_type: 'url' as 'url' | 'file',
     file_path: '',
     cover_image_url: '',
-    cover_image_path: ''
+    cover_image_path: '',
+    prompt: '',
+    note: ''
   });
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -179,7 +183,9 @@ export default function AdminTools() {
         download_type: 'url', 
         file_path: '',
         cover_image_url: '',
-        cover_image_path: ''
+        cover_image_path: '',
+        prompt: '',
+        note: ''
       });
       setSelectedFile(null);
       fetchTools();
@@ -207,7 +213,9 @@ export default function AdminTools() {
       download_type: tool.download_type || 'url',
       file_path: tool.file_path || '',
       cover_image_url: tool.cover_image_url || '',
-      cover_image_path: tool.cover_image_path || ''
+      cover_image_path: tool.cover_image_path || '',
+      prompt: tool.prompt || '',
+      note: tool.note || ''
     });
     setSelectedFile(null);
     setIsDialogOpen(true);
@@ -252,7 +260,9 @@ export default function AdminTools() {
       download_type: 'url', 
       file_path: '',
       cover_image_url: '',
-      cover_image_path: ''
+      cover_image_path: '',
+      prompt: '',
+      note: ''
     });
     setSelectedFile(null);
     setIsNewCategory(false);
@@ -369,9 +379,35 @@ export default function AdminTools() {
                     )}
                   </div>
                 </div>
+
+                {formData.category === 'prompt' && (
+                  <>
+                    <div>
+                      <Label htmlFor="prompt">Prompt</Label>
+                      <Textarea
+                        id="prompt"
+                        value={formData.prompt}
+                        onChange={(e) => setFormData({ ...formData, prompt: e.target.value })}
+                        rows={5}
+                        placeholder="กรอก prompt ที่ต้องการให้ user copy"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="note">Note</Label>
+                      <Textarea
+                        id="note"
+                        value={formData.note}
+                        onChange={(e) => setFormData({ ...formData, note: e.target.value })}
+                        rows={3}
+                        placeholder="Note เพิ่มเติมสำหรับ user"
+                      />
+                    </div>
+                  </>
+                )}
+
                 <div>
                   <Label>ประเภทการดาวน์โหลด</Label>
-                  <RadioGroup 
+                  <RadioGroup
                     value={formData.download_type} 
                     onValueChange={(value: 'url' | 'file') => setFormData({ ...formData, download_type: value })}
                     className="flex flex-row space-x-4"

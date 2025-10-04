@@ -870,7 +870,9 @@ export type Database = {
           download_url: string | null
           file_path: string | null
           id: string
+          note: string | null
           price: number | null
+          prompt: string | null
           slug: string
           title: string
           updated_at: string
@@ -885,7 +887,9 @@ export type Database = {
           download_url?: string | null
           file_path?: string | null
           id?: string
+          note?: string | null
           price?: number | null
+          prompt?: string | null
           slug: string
           title: string
           updated_at?: string
@@ -900,7 +904,9 @@ export type Database = {
           download_url?: string | null
           file_path?: string | null
           id?: string
+          note?: string | null
           price?: number | null
+          prompt?: string | null
           slug?: string
           title?: string
           updated_at?: string
