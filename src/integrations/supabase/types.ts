@@ -862,6 +862,7 @@ export type Database = {
       tools: {
         Row: {
           category: string | null
+          content_type: string | null
           cover_image_path: string | null
           cover_image_url: string | null
           created_at: string
@@ -879,6 +880,7 @@ export type Database = {
         }
         Insert: {
           category?: string | null
+          content_type?: string | null
           cover_image_path?: string | null
           cover_image_url?: string | null
           created_at?: string
@@ -896,6 +898,7 @@ export type Database = {
         }
         Update: {
           category?: string | null
+          content_type?: string | null
           cover_image_path?: string | null
           cover_image_url?: string | null
           created_at?: string

@@ -21,6 +21,7 @@ interface Tool {
   description: string;
   price: number;
   category: string;
+  content_type: 'download' | 'prompt';
   download_url: string;
   download_type: 'url' | 'file';
   file_path: string;
@@ -47,6 +48,7 @@ export default function AdminTools() {
     description: '',
     price: 0,
     category: '',
+    content_type: 'download' as 'download' | 'prompt',
     download_url: '',
     download_type: 'url' as 'url' | 'file',
     file_path: '',
@@ -74,7 +76,8 @@ export default function AdminTools() {
       if (error) throw error;
       const toolsList = (data || []).map(tool => ({
         ...tool,
-        download_type: tool.download_type as 'url' | 'file'
+        download_type: tool.download_type as 'url' | 'file',
+        content_type: (tool.content_type || 'download') as 'download' | 'prompt'
       }));
       setTools(toolsList);
 
@@ -178,7 +181,8 @@ export default function AdminTools() {
         slug: '', 
         description: '', 
         price: 0, 
-        category: '', 
+        category: '',
+        content_type: 'download',
         download_url: '', 
         download_type: 'url', 
         file_path: '',
@@ -209,6 +213,7 @@ export default function AdminTools() {
       description: tool.description || '',
       price: tool.price || 0,
       category: tool.category || '',
+      content_type: tool.content_type || 'download',
       download_url: tool.download_url || '',
       download_type: tool.download_type || 'url',
       file_path: tool.file_path || '',
@@ -255,7 +260,8 @@ export default function AdminTools() {
       slug: '', 
       description: '', 
       price: 0, 
-      category: '', 
+      category: '',
+      content_type: 'download',
       download_url: '', 
       download_type: 'url', 
       file_path: '',
@@ -380,7 +386,85 @@ export default function AdminTools() {
                   </div>
                 </div>
 
-                {formData.category === 'prompt' && (
+                <div>
+                  <Label>ประเภทเนื้อหา</Label>
+                  <RadioGroup
+                    value={formData.content_type} 
+                    onValueChange={(value: 'download' | 'prompt') => setFormData({ ...formData, content_type: value })}
+                    className="flex flex-row space-x-4"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="download" id="download" />
+                      <Label htmlFor="download" className="flex items-center space-x-1">
+                        <Upload className="h-4 w-4" />
+                        <span>ดาวน์โหลดไฟล์</span>
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="prompt" id="prompt-type" />
+                      <Label htmlFor="prompt-type" className="flex items-center space-x-1">
+                        <span>Prompt Text</span>
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+
+                {formData.content_type === 'download' ? (
+                  <>
+                    <div>
+                      <Label>ประเภทการดาวน์โหลด</Label>
+                      <RadioGroup
+                        value={formData.download_type} 
+                        onValueChange={(value: 'url' | 'file') => setFormData({ ...formData, download_type: value })}
+                        className="flex flex-row space-x-4"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="url" id="url" />
+                          <Label htmlFor="url" className="flex items-center space-x-1">
+                            <Link className="h-4 w-4" />
+                            <span>ลิงก์</span>
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="file" id="file" />
+                          <Label htmlFor="file" className="flex items-center space-x-1">
+                            <Upload className="h-4 w-4" />
+                            <span>อัพโหลดไฟล์ ZIP</span>
+                          </Label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+
+                    {formData.download_type === 'url' ? (
+                      <div>
+                        <Label htmlFor="download_url">ลิงก์ดาวน์โหลด</Label>
+                        <Input
+                          id="download_url"
+                          type="url"
+                          value={formData.download_url}
+                          onChange={(e) => setFormData({ ...formData, download_url: e.target.value })}
+                          required={formData.download_type === 'url'}
+                        />
+                      </div>
+                    ) : (
+                      <div>
+                        <Label htmlFor="tool_file">ไฟล์เครื่องมือ (ZIP)</Label>
+                        <Input
+                          id="tool_file"
+                          type="file"
+                          accept=".zip"
+                          onChange={handleFileChange}
+                          required={formData.download_type === 'file' && !editingTool}
+                        />
+                        {selectedFile && (
+                          <p className="text-sm text-muted-foreground mt-1">
+                            ไฟล์ที่เลือก: {selectedFile.name}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </>
+                ) : (
                   <>
                     <div>
                       <Label htmlFor="prompt">Prompt</Label>
@@ -390,6 +474,7 @@ export default function AdminTools() {
                         onChange={(e) => setFormData({ ...formData, prompt: e.target.value })}
                         rows={5}
                         placeholder="กรอก prompt ที่ต้องการให้ user copy"
+                        required={formData.content_type === 'prompt'}
                       />
                     </div>
                     <div>
@@ -403,59 +488,6 @@ export default function AdminTools() {
                       />
                     </div>
                   </>
-                )}
-
-                <div>
-                  <Label>ประเภทการดาวน์โหลด</Label>
-                  <RadioGroup
-                    value={formData.download_type} 
-                    onValueChange={(value: 'url' | 'file') => setFormData({ ...formData, download_type: value })}
-                    className="flex flex-row space-x-4"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="url" id="url" />
-                      <Label htmlFor="url" className="flex items-center space-x-1">
-                        <Link className="h-4 w-4" />
-                        <span>ลิงก์</span>
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="file" id="file" />
-                      <Label htmlFor="file" className="flex items-center space-x-1">
-                        <Upload className="h-4 w-4" />
-                        <span>อัพโหลดไฟล์ ZIP</span>
-                      </Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-
-                {formData.download_type === 'url' ? (
-                  <div>
-                    <Label htmlFor="download_url">ลิงก์ดาวน์โหลด</Label>
-                    <Input
-                      id="download_url"
-                      type="url"
-                      value={formData.download_url}
-                      onChange={(e) => setFormData({ ...formData, download_url: e.target.value })}
-                      required={formData.download_type === 'url'}
-                    />
-                  </div>
-                ) : (
-                  <div>
-                    <Label htmlFor="tool_file">ไฟล์เครื่องมือ (ZIP)</Label>
-                    <Input
-                      id="tool_file"
-                      type="file"
-                      accept=".zip"
-                      onChange={handleFileChange}
-                      required={formData.download_type === 'file' && !editingTool}
-                    />
-                    {selectedFile && (
-                      <p className="text-sm text-muted-foreground mt-1">
-                        ไฟล์ที่เลือก: {selectedFile.name}
-                      </p>
-                    )}
-                  </div>
                 )}
                 <Button type="submit" className="w-full" disabled={uploading}>
                   {uploading ? 'กำลังอัพโหลด...' : (editingTool ? 'อัปเดต' : 'บันทึก')}
