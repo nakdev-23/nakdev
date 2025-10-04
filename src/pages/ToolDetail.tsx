@@ -20,6 +20,12 @@ interface Tool {
   file_path: string;
   category: string;
   created_at: string;
+  content_type: 'download' | 'prompt';
+  prompt?: string;
+  note?: string;
+  cover_image_url?: string;
+  cover_image_path?: string;
+  gallery_images?: string[];
 }
 
 export default function ToolDetail() {
@@ -45,7 +51,8 @@ export default function ToolDetail() {
         if (error) throw error;
         setTool({
           ...data,
-          download_type: data.download_type as 'url' | 'file'
+          download_type: data.download_type as 'url' | 'file',
+          content_type: data.content_type as 'download' | 'prompt'
         });
       } catch (err) {
         console.error('Error fetching tool:', err);
@@ -187,10 +194,22 @@ export default function ToolDetail() {
             </Button>
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Tool Icon */}
+              {/* Tool Icon/Cover Image */}
               <div className="lg:col-span-1">
-                <div className="w-full max-w-sm mx-auto bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl p-8 flex items-center justify-center h-96">
-                  <Wrench className="h-24 w-24 text-white" />
+                <div className="w-full max-w-sm mx-auto bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl overflow-hidden h-96">
+                  {tool.cover_image_path || tool.cover_image_url ? (
+                    <img
+                      src={tool.cover_image_path 
+                        ? supabase.storage.from('product-covers').getPublicUrl(tool.cover_image_path).data.publicUrl
+                        : tool.cover_image_url}
+                      alt={tool.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center p-8">
+                      <Wrench className="h-24 w-24 text-white" />
+                    </div>
+                  )}
                 </div>
               </div>
               
@@ -215,17 +234,31 @@ export default function ToolDetail() {
                 
                 {/* Action Buttons */}
                 <div className="flex flex-col sm:flex-row gap-4">
-                  {tool.price === 0 ? (
-                    <Button 
-                      size="lg" 
-                      className="bg-white text-primary hover:bg-white/90"
-                      onClick={handleDownload}
-                      disabled={(!tool.download_url && !tool.file_path) || isDownloading}
-                    >
-                      <Download className="mr-2 h-5 w-5" />
-                      {isDownloading ? "กำลังดาวน์โหลด..." : "ดาวน์โหลดฟรี"}
-                    </Button>
-                  ) : (
+                  {tool.content_type === 'download' && (
+                    <>
+                      {tool.price === 0 ? (
+                        <Button 
+                          size="lg" 
+                          className="bg-white text-primary hover:bg-white/90"
+                          onClick={handleDownload}
+                          disabled={(!tool.download_url && !tool.file_path) || isDownloading}
+                        >
+                          <Download className="mr-2 h-5 w-5" />
+                          {isDownloading ? "กำลังดาวน์โหลด..." : "ดาวน์โหลดฟรี"}
+                        </Button>
+                      ) : (
+                        <Button 
+                          size="lg" 
+                          className="bg-white text-primary hover:bg-white/90"
+                          onClick={() => addToCart(tool.id, 'tool')}
+                        >
+                          <ShoppingCart className="mr-2 h-5 w-5" />
+                          เพิ่มลงตะกร้า ฿{tool.price}
+                        </Button>
+                      )}
+                    </>
+                  )}
+                  {tool.content_type === 'prompt' && tool.price > 0 && (
                     <Button 
                       size="lg" 
                       className="bg-white text-primary hover:bg-white/90"
@@ -248,53 +281,108 @@ export default function ToolDetail() {
           <div className="max-w-4xl mx-auto">
             <Card className="glass-card">
               <CardContent className="p-8">
-                <h2 className="text-2xl font-bold mb-6">เกี่ยวกับเครื่องมือนี้</h2>
-                <div className="prose prose-gray dark:prose-invert max-w-none">
-                  <p className="text-muted-foreground text-lg leading-relaxed">
-                    {tool.description}
-                  </p>
-                  
-                  <div className="mt-8 p-6 bg-muted/50 rounded-lg">
-                    <h3 className="text-lg font-semibold mb-4">รายละเอียด</h3>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="font-medium">หมวดหมู่:</span>
-                        <span className="ml-2 text-muted-foreground">{tool.category || 'เครื่องมือ'}</span>
+                {tool.content_type === 'prompt' ? (
+                  <>
+                    <h2 className="text-2xl font-bold mb-6">Prompt</h2>
+                    {tool.prompt && (
+                      <div className="mb-8 p-6 bg-muted/50 rounded-lg">
+                        <pre className="whitespace-pre-wrap text-foreground font-mono text-sm leading-relaxed">
+                          {tool.prompt}
+                        </pre>
                       </div>
-                      <div>
-                        <span className="font-medium">ราคา:</span>
-                        <span className="ml-2 text-muted-foreground">
-                          {tool.price === 0 ? "ฟรี" : `฿${tool.price}`}
-                        </span>
+                    )}
+                    
+                    {tool.note && (
+                      <>
+                        <h3 className="text-xl font-bold mb-4">หมายเหตุ</h3>
+                        <div className="mb-8 p-6 bg-muted/50 rounded-lg">
+                          <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                            {tool.note}
+                          </p>
+                        </div>
+                      </>
+                    )}
+                    
+                    {tool.gallery_images && tool.gallery_images.length > 0 && (
+                      <>
+                        <h3 className="text-xl font-bold mb-4">ภาพตัวอย่าง</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                          {tool.gallery_images.map((imagePath, index) => (
+                            <div key={index} className="rounded-lg overflow-hidden">
+                              <img
+                                src={supabase.storage.from('product-covers').getPublicUrl(imagePath).data.publicUrl}
+                                alt={`Gallery ${index + 1}`}
+                                className="w-full h-auto object-cover"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                    
+                    {tool.price > 0 && (
+                      <div className="mt-6 text-center">
+                        <Button 
+                          size="lg" 
+                          onClick={() => addToCart(tool.id, 'tool')}
+                        >
+                          <ShoppingCart className="mr-2 h-5 w-5" />
+                          เพิ่มลงตะกร้า ฿{tool.price}
+                        </Button>
                       </div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <h2 className="text-2xl font-bold mb-6">เกี่ยวกับเครื่องมือนี้</h2>
+                    <div className="prose prose-gray dark:prose-invert max-w-none">
+                      <p className="text-muted-foreground text-lg leading-relaxed">
+                        {tool.description}
+                      </p>
+                      
+                      <div className="mt-8 p-6 bg-muted/50 rounded-lg">
+                        <h3 className="text-lg font-semibold mb-4">รายละเอียด</h3>
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <span className="font-medium">หมวดหมู่:</span>
+                            <span className="ml-2 text-muted-foreground">{tool.category || 'เครื่องมือ'}</span>
+                          </div>
+                          <div>
+                            <span className="font-medium">ราคา:</span>
+                            <span className="ml-2 text-muted-foreground">
+                              {tool.price === 0 ? "ฟรี" : `฿${tool.price}`}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {tool.price === 0 && (
+                        <div className="mt-6 text-center">
+                          <Button 
+                            size="lg" 
+                            onClick={handleDownload}
+                            disabled={(!tool.download_url && !tool.file_path) || isDownloading}
+                          >
+                            <Download className="mr-2 h-5 w-5" />
+                            {isDownloading ? "กำลังดาวน์โหลด..." : "ดาวน์โหลดทันที"}
+                          </Button>
+                        </div>
+                      )}
+                      
+                      {tool.price > 0 && (
+                        <div className="mt-6 text-center">
+                          <Button 
+                            size="lg" 
+                            onClick={() => addToCart(tool.id, 'tool')}
+                          >
+                            <ShoppingCart className="mr-2 h-5 w-5" />
+                            เพิ่มลงตะกร้า ฿{tool.price}
+                          </Button>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                  
-                  {tool.price === 0 && (
-                    <div className="mt-6 text-center">
-                      <Button 
-                        size="lg" 
-                        onClick={handleDownload}
-                        disabled={(!tool.download_url && !tool.file_path) || isDownloading}
-                      >
-                        <Download className="mr-2 h-5 w-5" />
-                        {isDownloading ? "กำลังดาวน์โหลด..." : "ดาวน์โหลดทันที"}
-                      </Button>
-                    </div>
-                  )}
-                  
-                  {tool.price > 0 && (
-                    <div className="mt-6 text-center">
-                      <Button 
-                        size="lg" 
-                        onClick={() => addToCart(tool.id, 'tool')}
-                      >
-                        <ShoppingCart className="mr-2 h-5 w-5" />
-                        เพิ่มลงตะกร้า ฿{tool.price}
-                      </Button>
-                    </div>
-                  )}
-                </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           </div>
