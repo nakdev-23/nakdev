@@ -26,7 +26,7 @@ const footerSections = {
       href: "/about"
     }, {
       name: "ติดต่อเรา",
-      href: "/contact"
+      href: "/about#contact-section"
     }, {
       name: "รับปรึกษาโปรเจค",
       href: "/consultation"

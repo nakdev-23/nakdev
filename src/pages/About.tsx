@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 const values = [
   {
@@ -36,6 +37,16 @@ const stats = [
 
 export default function About() {
   const navigate = useNavigate();
+  
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash) {
+      setTimeout(() => {
+        const element = document.querySelector(hash);
+        element?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  }, []);
   
   return (
     <div className="min-h-screen bg-background">
