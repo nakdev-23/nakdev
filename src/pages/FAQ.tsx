@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Plus, Minus, ChevronDown, ChevronRight, MessageCircle, ThumbsUp } from "lucide-react";
+import { Search, Plus, Minus, ChevronDown, ChevronRight, MessageCircle, ThumbsUp, Facebook } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -267,11 +267,19 @@ export default function FAQ() {
               ทีมซัพพอร์ตของเราพร้อมช่วยเหลือคุณตลอด 24 ชั่วโมง
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="glow-on-hover">
-                <MessageCircle className="h-5 w-5 mr-2" />
-                แชทสด
+              <Button 
+                size="lg" 
+                className="glow-on-hover"
+                onClick={() => window.open('https://facebook.com', '_blank')}
+              >
+                <Facebook className="h-5 w-5 mr-2" />
+                ติดต่อผ่าน Facebook
               </Button>
-              <Button size="lg" variant="outline">
+              <Button 
+                size="lg" 
+                variant="outline"
+                onClick={() => window.location.href = 'mailto:nakdev23@gmail.com'}
+              >
                 ส่งอีเมล
               </Button>
             </div>
