@@ -870,6 +870,7 @@ export type Database = {
           download_type: string | null
           download_url: string | null
           file_path: string | null
+          gallery_images: string[] | null
           id: string
           note: string | null
           price: number | null
@@ -888,6 +889,7 @@ export type Database = {
           download_type?: string | null
           download_url?: string | null
           file_path?: string | null
+          gallery_images?: string[] | null
           id?: string
           note?: string | null
           price?: number | null
@@ -906,6 +908,7 @@ export type Database = {
           download_type?: string | null
           download_url?: string | null
           file_path?: string | null
+          gallery_images?: string[] | null
           id?: string
           note?: string | null
           price?: number | null

@@ -27,6 +27,7 @@ interface Tool {
   file_path: string;
   cover_image_url?: string;
   cover_image_path?: string;
+  gallery_images?: string[];
   prompt?: string;
   note?: string;
   created_at: string;
@@ -60,6 +61,7 @@ export default function AdminTools() {
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedCoverFile, setSelectedCoverFile] = useState<File | null>(null);
+  const [selectedGalleryFiles, setSelectedGalleryFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
@@ -114,6 +116,42 @@ export default function AdminTools() {
     }
   };
 
+  const handleCoverImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!validTypes.includes(file.type)) {
+        toast({
+          title: "ไฟล์ไม่ถูกต้อง",
+          description: "กรุณาเลือกไฟล์รูปภาพ (JPG, PNG, WEBP)",
+          variant: "destructive",
+        });
+        return;
+      }
+      setSelectedCoverFile(file);
+    }
+  };
+
+  const handleGalleryImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      // Validate file types
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      const invalidFiles = files.filter(file => !validTypes.includes(file.type));
+      
+      if (invalidFiles.length > 0) {
+        toast({
+          title: "ไฟล์ไม่ถูกต้อง",
+          description: "กรุณาเลือกไฟล์รูปภาพเท่านั้น (JPG, PNG, WEBP)",
+          variant: "destructive",
+        });
+        return;
+      }
+      setSelectedGalleryFiles(files);
+    }
+  };
+
   const uploadFile = async (file: File, toolId: string) => {
     const fileExt = 'zip';
     const fileName = `${toolId}.${fileExt}`;
@@ -127,20 +165,66 @@ export default function AdminTools() {
     return filePath;
   };
 
+  const uploadCoverImage = async (file: File, toolId: string) => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${toolId}-cover.${fileExt}`;
+    const filePath = `tools/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('product-covers')
+      .upload(filePath, file, { upsert: true });
+
+    if (uploadError) throw uploadError;
+    return filePath;
+  };
+
+  const uploadGalleryImages = async (files: File[], toolId: string) => {
+    const uploadPromises = files.map(async (file, index) => {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${toolId}-gallery-${index}-${Date.now()}.${fileExt}`;
+      const filePath = `tools/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('product-covers')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+      return filePath;
+    });
+
+    return Promise.all(uploadPromises);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setUploading(true);
     
     try {
+      // Generate ID for new tools or use existing ID
+      const toolId = editingTool?.id || crypto.randomUUID();
+      
       let finalFormData = { 
         ...formData,
         category: isNewCategory ? newCategoryName : formData.category
       };
 
+      // Handle cover image upload
+      if (selectedCoverFile) {
+        const coverPath = await uploadCoverImage(selectedCoverFile, toolId);
+        finalFormData.cover_image_path = coverPath;
+        finalFormData.cover_image_url = ''; // Clear URL when using file
+      }
+
+      // Handle gallery images upload
+      if (selectedGalleryFiles.length > 0) {
+        const galleryPaths = await uploadGalleryImages(selectedGalleryFiles, toolId);
+        finalFormData = {
+          ...finalFormData,
+          gallery_images: galleryPaths
+        } as any;
+      }
+
       if (formData.download_type === 'file' && selectedFile) {
-        // Generate ID for new tools or use existing ID
-        const toolId = editingTool?.id || crypto.randomUUID();
-        
         // Upload file first
         const filePath = await uploadFile(selectedFile, toolId);
         finalFormData.file_path = filePath;
@@ -192,6 +276,8 @@ export default function AdminTools() {
         note: ''
       });
       setSelectedFile(null);
+      setSelectedCoverFile(null);
+      setSelectedGalleryFiles([]);
       fetchTools();
     } catch (error) {
       console.error('Error saving tool:', error);
@@ -223,6 +309,8 @@ export default function AdminTools() {
       note: tool.note || ''
     });
     setSelectedFile(null);
+    setSelectedCoverFile(null);
+    setSelectedGalleryFiles([]);
     setIsDialogOpen(true);
   };
 
@@ -271,6 +359,8 @@ export default function AdminTools() {
       note: ''
     });
     setSelectedFile(null);
+    setSelectedCoverFile(null);
+    setSelectedGalleryFiles([]);
     setIsNewCategory(false);
     setNewCategoryName('');
     setIsDialogOpen(true);
@@ -384,6 +474,42 @@ export default function AdminTools() {
                       />
                     )}
                   </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="cover_image">รูปภาพปก (Optional)</Label>
+                  <Input
+                    id="cover_image"
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                    onChange={handleCoverImageChange}
+                  />
+                  {selectedCoverFile && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      ไฟล์ที่เลือก: {selectedCoverFile.name}
+                    </p>
+                  )}
+                  {formData.cover_image_path && !selectedCoverFile && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      มีรูปปกอยู่แล้ว
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="gallery_images">รูปภาพเพิ่มเติม (Optional - หลายรูป)</Label>
+                  <Input
+                    id="gallery_images"
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                    onChange={handleGalleryImagesChange}
+                    multiple
+                  />
+                  {selectedGalleryFiles.length > 0 && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      เลือก {selectedGalleryFiles.length} รูป
+                    </p>
+                  )}
                 </div>
 
                 <div>
