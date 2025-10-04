@@ -46,13 +46,11 @@ export default function Tools() {
   const {
     addToCart
   } = useCart();
-
   const handleCopyPrompt = (toolId: string, prompt: string) => {
     navigator.clipboard.writeText(prompt);
     setCopiedId(toolId);
     setTimeout(() => setCopiedId(null), 2000);
   };
-
   const filteredTools = tools.filter(tool => {
     const matchesSearch = tool.title.toLowerCase().includes(searchQuery.toLowerCase()) || tool.description?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = categoryFilter === "all" || tool.category === categoryFilter;
@@ -130,15 +128,9 @@ export default function Tools() {
             {filteredTools.map(tool => <Card key={tool.id} className="glass-card hover-lift">
                 <CardContent className="p-6">
                   {/* Cover Image for Prompts */}
-                  {tool.category === 'prompt' && (tool.cover_image_url || tool.cover_image_path) && (
-                    <div className="mb-4 rounded-lg overflow-hidden">
-                      <img 
-                        src={tool.cover_image_url || tool.cover_image_path} 
-                        alt={tool.title}
-                        className="w-full h-48 object-cover"
-                      />
-                    </div>
-                  )}
+                  {tool.category === 'prompt' && (tool.cover_image_url || tool.cover_image_path) && <div className="mb-4 rounded-lg overflow-hidden">
+                      <img src={tool.cover_image_url || tool.cover_image_path} alt={tool.title} className="w-full h-48 object-cover" />
+                    </div>}
                   
                   <div className="flex items-center justify-between mb-3">
                     <Badge variant="outline" className="badge-level text-xs">
@@ -155,40 +147,17 @@ export default function Tools() {
                   </p>
                   
                   <div className="flex gap-2">
-                    {tool.category === 'prompt' && (
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        className="flex-1"
-                        onClick={() => tool.description && handleCopyPrompt(tool.id, tool.description)}
-                      >
-                        {copiedId === tool.id ? (
-                          <>
-                            <Check className="mr-2 h-4 w-4" />
-                            คัดลอกแล้ว
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="mr-2 h-4 w-4" />
-                            Copy Prompt
-                          </>
-                        )}
-                      </Button>
-                    )}
+                    {tool.category === 'prompt'}
                     
-                    {tool.price === 0 ? (
-                      <Button className={tool.category === 'prompt' ? 'flex-1' : 'w-full'} asChild>
+                    {tool.price === 0 ? <Button className={tool.category === 'prompt' ? 'flex-1' : 'w-full'} asChild>
                         <Link to={`/tools/${tool.slug}`}>
                           <ExternalLink className="mr-2 h-4 w-4" />
                           {tool.category === 'prompt' ? 'ดูรายละเอียด' : 'ดาวน์โหลดฟรี'}
                         </Link>
-                      </Button>
-                    ) : (
-                      <Button className={tool.category === 'prompt' ? 'flex-1' : 'w-full'} onClick={() => addToCart(tool.id, 'tool')}>
+                      </Button> : <Button className={tool.category === 'prompt' ? 'flex-1' : 'w-full'} onClick={() => addToCart(tool.id, 'tool')}>
                         <ShoppingCart className="mr-2 h-4 w-4" />
                         เพิ่มลงตะกร้า ฿{tool.price.toLocaleString()}
-                      </Button>
-                    )}
+                      </Button>}
                   </div>
                 </CardContent>
               </Card>)}
