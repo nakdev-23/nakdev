@@ -89,8 +89,8 @@ export default function Index() {
                 </Link>
               </Button>
               <Button size="lg" variant="outline" className="text-lg px-10 py-7 glass-card border-white/20 text-white hover:bg-white/10 rounded-full backdrop-blur-xl" asChild>
-                <Link to="/tools">
-                  ดูเครื่องมือ
+                <Link to="/about">
+                  เกี่ยวกับเรา
                 </Link>
               </Button>
             </div>
