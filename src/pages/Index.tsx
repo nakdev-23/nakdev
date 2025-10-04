@@ -7,45 +7,46 @@ import { useCourses } from "@/hooks/useCourses";
 import { useTools } from "@/hooks/useTools";
 import { useEbooks } from "@/hooks/useEbooks";
 import { useTestimonials } from "@/hooks/useTestimonials";
-
-const valueProps = [
-  {
-    icon: Code2,
-    title: "คอร์สคุณภาพสูง",
-    description: "เรียนจากผู้เชี่ยวชาญด้วยหลักสูตรที่ออกแบบมาเพื่อนักพัฒนาระดับเริ่มต้น"
-  },
-  {
-    icon: Wrench,
-    title: "เครื่องมือช่วยเหลือ",
-    description: "เข้าถึงเครื่องมือและเทมเพลตที่จะช่วยเพิ่มประสิทธิภาพการทำงาน"
-  },
-  {
-    icon: BookOpen,
-    title: "eBook และแหล่งเรียนรู้",
-    description: "คลังความรู้ที่ครบครันในรูปแบบ eBook ที่อ่านง่ายและทำความเข้าใจได้เร็ว"
-  },
-  {
-    icon: Users,
-    title: "ชุมชนนักพัฒนา",
-    description: "เข้าร่วมชุมชนนักพัฒนาที่จะช่วยเหลือและแบ่งปันประสบการณ์ซึ่งกันและกัน"
-  }
-];
-
-
-
+const valueProps = [{
+  icon: Code2,
+  title: "คอร์สคุณภาพสูง",
+  description: "เรียนจากผู้เชี่ยวชาญด้วยหลักสูตรที่ออกแบบมาเพื่อนักพัฒนาระดับเริ่มต้น"
+}, {
+  icon: Wrench,
+  title: "เครื่องมือช่วยเหลือ",
+  description: "เข้าถึงเครื่องมือและเทมเพลตที่จะช่วยเพิ่มประสิทธิภาพการทำงาน"
+}, {
+  icon: BookOpen,
+  title: "eBook และแหล่งเรียนรู้",
+  description: "คลังความรู้ที่ครบครันในรูปแบบ eBook ที่อ่านง่ายและทำความเข้าใจได้เร็ว"
+}, {
+  icon: Users,
+  title: "ชุมชนนักพัฒนา",
+  description: "เข้าร่วมชุมชนนักพัฒนาที่จะช่วยเหลือและแบ่งปันประสบการณ์ซึ่งกันและกัน"
+}];
 export default function Index() {
-  const { courses, isLoading: coursesLoading } = useCourses();
-  const { tools, isLoading: toolsLoading } = useTools();
-  const { ebooks, isLoading: ebooksLoading } = useEbooks();
-  const { testimonials, isLoading: testimonialsLoading } = useTestimonials();
+  const {
+    courses,
+    isLoading: coursesLoading
+  } = useCourses();
+  const {
+    tools,
+    isLoading: toolsLoading
+  } = useTools();
+  const {
+    ebooks,
+    isLoading: ebooksLoading
+  } = useEbooks();
+  const {
+    testimonials,
+    isLoading: testimonialsLoading
+  } = useTestimonials();
 
   // Use real data from Supabase
   const displayCourses = courses.slice(0, 3);
   const displayTools = tools.slice(0, 2);
   const displayEbooks = ebooks.slice(0, 2);
-
-  return (
-    <div className="min-h-screen">
+  return <div className="min-h-screen">
       {/* Hero Section - Futuristic */}
       <section className="relative bg-hero-gradient overflow-hidden min-h-[90vh] flex items-center">
         {/* Animated background blobs */}
@@ -58,7 +59,7 @@ export default function Index() {
         {/* Grid pattern overlay */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.02)_1px,transparent_1px)] bg-[size:100px_100px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,#000_70%,transparent_110%)]" />
         
-        <div className="relative container mx-auto px-4 py-20 lg:py-32">
+        <div className="relative container mx-auto px-4 lg:py-32 py-[10px]">
           <div className="max-w-5xl mx-auto text-center">
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-8 animate-fade-in">
@@ -87,12 +88,7 @@ export default function Index() {
                   </span>
                 </Link>
               </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="text-lg px-10 py-7 glass-card border-white/20 text-white hover:bg-white/10 rounded-full backdrop-blur-xl" 
-                asChild
-              >
+              <Button size="lg" variant="outline" className="text-lg px-10 py-7 glass-card border-white/20 text-white hover:bg-white/10 rounded-full backdrop-blur-xl" asChild>
                 <Link to="/tools">
                   ดูเครื่องมือ
                 </Link>
@@ -101,22 +97,25 @@ export default function Index() {
             
             {/* Stats */}
             <div className="grid grid-cols-3 gap-8 max-w-2xl mx-auto mt-16 animate-fade-in-delay-3">
-              {[
-                { value: "50+", label: "คอร์สเรียน" },
-                { value: "5K+", label: "นักเรียน" },
-                { value: "95%", label: "ความพึงพอใจ" }
-              ].map((stat, i) => (
-                <div key={i} className="text-center">
-                  <div className="text-3xl md:text-4xl font-bold text-white mb-2">{stat.value}</div>
-                  <div className="text-sm text-white/60">{stat.label}</div>
-                </div>
-              ))}
+              {[{
+              value: "50+",
+              label: "คอร์สเรียน"
+            }, {
+              value: "5K+",
+              label: "นักเรียน"
+            }, {
+              value: "95%",
+              label: "ความพึงพอใจ"
+            }].map((stat, i) => <div key={i} className="text-center">
+                  
+                  
+                </div>)}
             </div>
           </div>
         </div>
         
         {/* Bottom fade */}
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
+        
       </section>
 
       {/* Value Propositions - Enhanced */}
@@ -130,12 +129,9 @@ export default function Index() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {valueProps.map((prop, index) => (
-              <Card 
-                key={prop.title} 
-                className="glass-card hover-lift group relative overflow-hidden"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
+            {valueProps.map((prop, index) => <Card key={prop.title} className="glass-card hover-lift group relative overflow-hidden" style={{
+            animationDelay: `${index * 0.1}s`
+          }}>
                 <CardContent className="p-8 text-center relative z-10">
                   <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                     <prop.icon className="h-8 w-8 text-primary" />
@@ -148,8 +144,7 @@ export default function Index() {
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5" />
                 </div>
-              </Card>
-            ))}
+              </Card>)}
           </div>
         </div>
       </section>
@@ -172,24 +167,13 @@ export default function Index() {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {displayCourses.map((course, index) => (
-              <Card 
-                key={course.id || course.slug} 
-                className="hover-lift glass-card group overflow-hidden"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
+            {displayCourses.map((course, index) => <Card key={course.id || course.slug} className="hover-lift glass-card group overflow-hidden" style={{
+            animationDelay: `${index * 0.1}s`
+          }}>
                 <div className="aspect-video bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20 rounded-t-lg overflow-hidden relative">
-                  {course.cover_image_url ? (
-                    <img 
-                      src={course.cover_image_url} 
-                      alt={course.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
+                  {course.cover_image_url ? <img src={course.cover_image_url} alt={course.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" /> : <div className="w-full h-full flex items-center justify-center">
                       <Code2 className="h-16 w-16 text-primary/40" />
-                    </div>
-                  )}
+                    </div>}
                   
                   {/* Overlay gradient on hover */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -200,10 +184,7 @@ export default function Index() {
                     <Badge variant="outline" className="badge-level text-xs px-3 py-1">
                       เริ่มต้น
                     </Badge>
-                    <Badge 
-                      variant="outline" 
-                      className={course.price === 0 || course.price === null ? "badge-free px-3 py-1" : "badge-paid px-3 py-1"}
-                    >
+                    <Badge variant="outline" className={course.price === 0 || course.price === null ? "badge-free px-3 py-1" : "badge-paid px-3 py-1"}>
                       {course.price === 0 || course.price === null ? "ฟรี" : `฿${course.price}`}
                     </Badge>
                   </div>
@@ -234,8 +215,7 @@ export default function Index() {
                     </Link>
                   </Button>
                 </CardContent>
-              </Card>
-            ))}
+              </Card>)}
           </div>
           <div className="text-center mt-12">
             <Button variant="outline" size="lg" asChild>
@@ -253,8 +233,7 @@ export default function Index() {
             <div>
               <h2 className="text-3xl font-bold mb-8">เครื่องมือช่วยเหลือ</h2>
               <div className="space-y-6">
-                {displayTools.map((tool) => (
-                  <Card key={tool.id} className="glass-card hover-lift">
+                {displayTools.map(tool => <Card key={tool.id} className="glass-card hover-lift">
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between mb-3">
                         <Badge variant="outline" className="badge-level">
@@ -270,8 +249,7 @@ export default function Index() {
                         <Link to={`/tools/${tool.slug}`}>ดูรายละเอียด</Link>
                       </Button>
                     </CardContent>
-                  </Card>
-                ))}
+                  </Card>)}
               </div>
               <div className="mt-8">
                 <Button variant="outline" asChild>
@@ -284,8 +262,7 @@ export default function Index() {
             <div>
               <h2 className="text-3xl font-bold mb-8">eBook และคู่มือ</h2>
               <div className="space-y-6">
-                {displayEbooks.map((ebook) => (
-                  <Card key={ebook.id} className="glass-card hover-lift">
+                {displayEbooks.map(ebook => <Card key={ebook.id} className="glass-card hover-lift">
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4">
                         <div className="w-16 h-20 bg-gradient-to-br from-primary/20 to-accent/20 rounded flex-shrink-0"></div>
@@ -304,8 +281,7 @@ export default function Index() {
                         </div>
                       </div>
                     </CardContent>
-                  </Card>
-                ))}
+                  </Card>)}
               </div>
               <div className="mt-8">
                 <Button variant="outline" asChild>
@@ -326,13 +302,10 @@ export default function Index() {
           </div>
           <div className="relative">
             <div className="flex space-x-6 animate-marquee hover:animation-pause">
-              {[...testimonials, ...testimonials].map((testimonial, index) => (
-                <Card key={index} className="flex-shrink-0 w-80 glass-card">
+              {[...testimonials, ...testimonials].map((testimonial, index) => <Card key={index} className="flex-shrink-0 w-80 glass-card">
                   <CardContent className="p-6">
                     <div className="flex items-center mb-4">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
-                      ))}
+                      {[...Array(testimonial.rating)].map((_, i) => <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />)}
                     </div>
                     <p className="text-muted-foreground mb-4">"{testimonial.content}"</p>
                     <div>
@@ -342,8 +315,7 @@ export default function Index() {
                       </p>
                     </div>
                   </CardContent>
-                </Card>
-              ))}
+                </Card>)}
             </div>
           </div>
         </div>
@@ -379,11 +351,7 @@ export default function Index() {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button 
-                size="lg" 
-                className="text-lg px-10 py-7 glow-on-hover rounded-full bg-white text-primary hover:bg-white/90 group" 
-                asChild
-              >
+              <Button size="lg" className="text-lg px-10 py-7 glow-on-hover rounded-full bg-white text-primary hover:bg-white/90 group" asChild>
                 <Link to="/auth/signup">
                   <span className="flex items-center">
                     สมัครสมาชิกฟรี
@@ -392,12 +360,7 @@ export default function Index() {
                 </Link>
               </Button>
               
-              <Button 
-                size="lg" 
-                variant="outline"
-                className="text-lg px-10 py-7 glass-card border-white/20 text-white hover:bg-white/10 rounded-full backdrop-blur-xl" 
-                asChild
-              >
+              <Button size="lg" variant="outline" className="text-lg px-10 py-7 glass-card border-white/20 text-white hover:bg-white/10 rounded-full backdrop-blur-xl" asChild>
                 <Link to="/courses">
                   เรียกดูคอร์ส
                 </Link>
@@ -425,6 +388,5 @@ export default function Index() {
         {/* Bottom fade */}
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
       </section>
-    </div>
-  );
+    </div>;
 }

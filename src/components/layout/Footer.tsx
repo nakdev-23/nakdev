@@ -94,9 +94,7 @@ export const Footer = () => {
             <Button variant="ghost" size="sm">
               <Facebook className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="sm">
-              <Twitter className="h-4 w-4" />
-            </Button>
+            
             <Button variant="ghost" size="sm">
               <Youtube className="h-4 w-4" />
             </Button>
