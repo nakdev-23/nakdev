@@ -30,12 +30,6 @@ const footerSections = {
     }, {
       name: "รับปรึกษาโปรเจค",
       href: "/consultation"
-    }, {
-      name: "อาชีพ",
-      href: "/careers"
-    }, {
-      name: "พาร์ทเนอร์",
-      href: "/partners"
     }]
   },
   legal: {
