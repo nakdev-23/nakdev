@@ -243,9 +243,7 @@ export default function CourseDetail() {
                                       <span className={lessonIndex < 2 ? "text-primary" : "text-foreground"}>
                                         {lesson.title}
                                       </span>
-                                      {lessonIndex < 2 && <Badge variant="outline" className="badge-free text-xs">
-                                          ดูฟรี
-                                        </Badge>}
+                                      {lessonIndex < 2}
                                     </div>
                                     <span className="text-sm text-muted-foreground">
                                       {lesson.duration_text}
