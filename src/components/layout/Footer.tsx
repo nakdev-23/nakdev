@@ -28,6 +28,9 @@ const footerSections = {
       name: "ติดต่อเรา",
       href: "/contact"
     }, {
+      name: "รับปรึกษาโปรเจค",
+      href: "/consultation"
+    }, {
       name: "อาชีพ",
       href: "/careers"
     }, {
