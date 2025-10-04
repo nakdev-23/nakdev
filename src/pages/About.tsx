@@ -4,52 +4,50 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-
-const values = [
-  {
-    icon: Target,
-    title: "เป้าหมายชัดเจน",
-    description: "มุ่งมั่นสร้างนักพัฒนาที่มีคุณภาพและพร้อมสำหรับตลาดงาน"
-  },
-  {
-    icon: Heart,
-    title: "ใส่ใจคุณภาพ",
-    description: "คัดสรรเนื้อหาและผู้สอนที่มีประสบการณ์จริงในวงการ"
-  },
-  {
-    icon: Users,
-    title: "ชุมชนที่แข็งแกร่ง",
-    description: "สร้างเครือข่ายนักพัฒนาที่ช่วยเหลือและแบ่งปันกัน"
-  },
-  {
-    icon: Zap,
-    title: "เรียนรู้อย่างมีประสิทธิภาพ",
-    description: "วิธีการสอนที่ทันสมัยและเครื่องมือที่ช่วยเพิ่มประสิทธิภาพ"
-  }
-];
-
-const stats = [
-  { number: "10,000+", label: "นักเรียน" },
-  { number: "150+", label: "คอร์สเรียน" },
-  { number: "50+", label: "เครื่องมือ" },
-  { number: "95%", label: "ความพึงพอใจ" }
-];
-
+const values = [{
+  icon: Target,
+  title: "เป้าหมายชัดเจน",
+  description: "มุ่งมั่นสร้างนักพัฒนาที่มีคุณภาพและพร้อมสำหรับตลาดงาน"
+}, {
+  icon: Heart,
+  title: "ใส่ใจคุณภาพ",
+  description: "คัดสรรเนื้อหาและผู้สอนที่มีประสบการณ์จริงในวงการ"
+}, {
+  icon: Users,
+  title: "ชุมชนที่แข็งแกร่ง",
+  description: "สร้างเครือข่ายนักพัฒนาที่ช่วยเหลือและแบ่งปันกัน"
+}, {
+  icon: Zap,
+  title: "เรียนรู้อย่างมีประสิทธิภาพ",
+  description: "วิธีการสอนที่ทันสมัยและเครื่องมือที่ช่วยเพิ่มประสิทธิภาพ"
+}];
+const stats = [{
+  number: "10,000+",
+  label: "นักเรียน"
+}, {
+  number: "150+",
+  label: "คอร์สเรียน"
+}, {
+  number: "50+",
+  label: "เครื่องมือ"
+}, {
+  number: "95%",
+  label: "ความพึงพอใจ"
+}];
 export default function About() {
   const navigate = useNavigate();
-  
   useEffect(() => {
     const hash = window.location.hash;
     if (hash) {
       setTimeout(() => {
         const element = document.querySelector(hash);
-        element?.scrollIntoView({ behavior: 'smooth' });
+        element?.scrollIntoView({
+          behavior: 'smooth'
+        });
       }, 100);
     }
   }, []);
-  
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <section className="bg-hero-gradient py-20 relative overflow-hidden">
         <div className="absolute inset-0">
@@ -83,8 +81,7 @@ export default function About() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {values.map((value, index) => (
-                <Card key={value.title} className={`glass-card hover-lift animate-fade-in-delay-${index + 1}`}>
+              {values.map((value, index) => <Card key={value.title} className={`glass-card hover-lift animate-fade-in-delay-${index + 1}`}>
                   <CardContent className="p-8">
                     <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
                       <value.icon className="h-6 w-6 text-primary" />
@@ -92,8 +89,7 @@ export default function About() {
                     <h3 className="text-xl font-semibold mb-3">{value.title}</h3>
                     <p className="text-muted-foreground">{value.description}</p>
                   </CardContent>
-                </Card>
-              ))}
+                </Card>)}
             </div>
           </div>
         </div>
@@ -110,16 +106,14 @@ export default function About() {
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <div key={stat.label} className={`text-center animate-fade-in-delay-${index + 1}`}>
+            {stats.map((stat, index) => <div key={stat.label} className={`text-center animate-fade-in-delay-${index + 1}`}>
                 <div className="text-4xl md:text-5xl font-bold text-primary mb-2">
                   {stat.number}
                 </div>
                 <div className="text-muted-foreground font-medium">
                   {stat.label}
                 </div>
-              </div>
-            ))}
+              </div>)}
           </div>
         </div>
       </section>
@@ -270,12 +264,12 @@ export default function About() {
             <Card className="glass-card max-w-2xl mx-auto">
               <CardContent className="p-8">
                 <h3 className="text-2xl font-semibold mb-4">สนใจบริการปรึกษา?</h3>
-                <p className="text-muted-foreground mb-6">
-                  ติดต่อเราเพื่อขอคำปรึกษาและรับ quote ตามความต้องการของคุณ
-                </p>
+                <p className="text-muted-foreground mb-6">ติดต่อเราเพื่อขอคำปรึกษาและวิเคราะห์ตามความต้องการของคุณเบื้องต้น ฟรี !!</p>
                 <Button size="lg" className="glow-on-hover" onClick={() => {
-                  document.getElementById('contact-section')?.scrollIntoView({ behavior: 'smooth' });
-                }}>
+                document.getElementById('contact-section')?.scrollIntoView({
+                  behavior: 'smooth'
+                });
+              }}>
                   ติดต่อเรา
                 </Button>
               </CardContent>
@@ -305,21 +299,11 @@ export default function About() {
               </a>
             </div>
             <div className="flex items-center gap-4">
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="text-white border-white hover:bg-white hover:text-primary"
-                onClick={() => window.open('https://facebook.com', '_blank')}
-              >
+              <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-primary" onClick={() => window.open('https://facebook.com', '_blank')}>
                 <Facebook className="h-5 w-5 mr-2" />
                 Facebook
               </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="text-white border-white hover:bg-white hover:text-primary"
-                onClick={() => window.open('https://youtube.com', '_blank')}
-              >
+              <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-primary" onClick={() => window.open('https://youtube.com', '_blank')}>
                 <Youtube className="h-5 w-5 mr-2" />
                 YouTube
               </Button>
@@ -327,6 +311,5 @@ export default function About() {
           </div>
         </div>
       </section>
-    </div>
-  );
+    </div>;
 }
