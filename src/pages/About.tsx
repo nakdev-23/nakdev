@@ -262,7 +262,9 @@ export default function About() {
                 <p className="text-muted-foreground mb-6">
                   ติดต่อเราเพื่อขอคำปรึกษาและรับ quote ตามความต้องการของคุณ
                 </p>
-                <Button size="lg" className="glow-on-hover">
+                <Button size="lg" className="glow-on-hover" onClick={() => {
+                  document.getElementById('contact-section')?.scrollIntoView({ behavior: 'smooth' });
+                }}>
                   ติดต่อเรา
                 </Button>
               </CardContent>
@@ -272,7 +274,7 @@ export default function About() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-hero-gradient relative overflow-hidden">
+      <section id="contact-section" className="py-20 bg-hero-gradient relative overflow-hidden">
         <div className="absolute inset-0">
           <div className="gradient-blob"></div>
         </div>
