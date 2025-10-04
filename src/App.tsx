@@ -18,6 +18,9 @@ import Ebooks from "./pages/Ebooks";
 import EbookDetail from "./pages/EbookDetail";
 import About from "./pages/About";
 import FAQ from "./pages/FAQ";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
+import Cookies from "./pages/Cookies";
 import SignIn from "./pages/auth/SignIn";
 import SignUp from "./pages/auth/SignUp";
 import Checkout from "./pages/Checkout";
@@ -59,6 +62,9 @@ const App = () => (
               <Route path="ebooks/:slug" element={<EbookDetail />} />
               <Route path="about" element={<About />} />
               <Route path="faq" element={<FAQ />} />
+              <Route path="terms" element={<Terms />} />
+              <Route path="privacy" element={<Privacy />} />
+              <Route path="cookies" element={<Cookies />} />
               <Route path="checkout" element={<Checkout />} />
               <Route path="cart" element={<Cart />} />
             </Route>
