@@ -1,4 +1,4 @@
-import { Users, Target, Award, Heart, Code2, BookOpen, Zap } from "lucide-react";
+import { Users, Target, Award, Heart, Code2, BookOpen, Zap, Mail, Facebook, Youtube } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -284,9 +284,34 @@ export default function About() {
             ทีมงานของเราพร้อมให้คำปรึกษาและตอบคำถามทุกข้อสงสัย
             ติดต่อเราได้ทันที
           </p>
-          <Button size="lg" className="text-lg px-8 py-6 glow-on-hover" onClick={() => navigate('/contact')}>
-            ติดต่อเรา
-          </Button>
+          <div className="flex flex-col items-center gap-6">
+            <div className="flex items-center gap-3 text-white">
+              <Mail className="h-6 w-6" />
+              <a href="mailto:nakdev23@gmail.com" className="text-lg hover:text-primary transition-colors">
+                nakdev23@gmail.com
+              </a>
+            </div>
+            <div className="flex items-center gap-4">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="text-white border-white hover:bg-white hover:text-primary"
+                onClick={() => window.open('https://facebook.com', '_blank')}
+              >
+                <Facebook className="h-5 w-5 mr-2" />
+                Facebook
+              </Button>
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="text-white border-white hover:bg-white hover:text-primary"
+                onClick={() => window.open('https://youtube.com', '_blank')}
+              >
+                <Youtube className="h-5 w-5 mr-2" />
+                YouTube
+              </Button>
+            </div>
+          </div>
         </div>
       </section>
     </div>
