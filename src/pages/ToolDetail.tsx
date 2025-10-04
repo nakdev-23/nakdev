@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { Download, Wrench, Eye, ArrowLeft, ShoppingCart } from "lucide-react";
+import { Download, Wrench, Eye, ArrowLeft, ShoppingCart, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -64,6 +64,25 @@ export default function ToolDetail() {
 
     fetchTool();
   }, [slug]);
+
+  const handleCopyPrompt = async () => {
+    if (!tool?.prompt) return;
+    
+    try {
+      await navigator.clipboard.writeText(tool.prompt);
+      toast({
+        title: "คัดลอกสำเร็จ",
+        description: "คัดลอก Prompt ไปยังคลิปบอร์ดแล้ว",
+      });
+    } catch (error) {
+      console.error('Error copying prompt:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถคัดลอก Prompt ได้",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleDownload = async () => {
     if (!tool || isDownloading) return;
@@ -283,7 +302,19 @@ export default function ToolDetail() {
               <CardContent className="p-8">
                 {tool.content_type === 'prompt' ? (
                   <>
-                    <h2 className="text-2xl font-bold mb-6">Prompt</h2>
+                    <div className="flex items-center justify-between mb-6">
+                      <h2 className="text-2xl font-bold">Prompt</h2>
+                      {tool.prompt && (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={handleCopyPrompt}
+                        >
+                          <Copy className="mr-2 h-4 w-4" />
+                          คัดลอก Prompt
+                        </Button>
+                      )}
+                    </div>
                     {tool.prompt && (
                       <div className="mb-8 p-6 bg-muted/50 rounded-lg">
                         <pre className="whitespace-pre-wrap text-foreground font-mono text-sm leading-relaxed">
